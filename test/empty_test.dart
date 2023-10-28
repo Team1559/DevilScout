@@ -1,3 +1,7 @@
+// this file exists to testing doesn't fail
+
+import 'package:test/test.dart';
+
 void main() {
-  // this file exists to testing doesn't fail
+  test('NULL', () {});
 }
