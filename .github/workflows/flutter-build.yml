@@ -1,4 +1,4 @@
-name: Build & Test for iOS and Android
+name: Build & Test
 
 on: [push]
 
