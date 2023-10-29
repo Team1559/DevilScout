@@ -1,4 +1,4 @@
-// this file exists to testing doesn't fail
+// this file exists so testing doesn't fail
 
 import 'package:test/test.dart';
 
