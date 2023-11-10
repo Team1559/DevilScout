@@ -4,7 +4,7 @@ A mobile app for collecting scouting data at FRC competitions by Team 1559. Buil
 - Live data collection from matches and pits
 - Additional data powered by [The Blue Alliance](https://thebluealliance.com)
 - Analysis summaries for teams and matches
-- [Custom centralized server](https://github.com/Team1559/DevilScoutServer)
+- Custom centralized database server
 - Management by team admins
 - Secure authentication
 - And more to come in the future! See our [GitHub Project](https://github.com/orgs/Team1559/projects/5)
@@ -16,4 +16,3 @@ Requires Flutter SDK v3.1.5 or higher. Dart packages will be downloaded automati
 ## Usage
 
 See our [wiki](https://github.com/Team1559/DevilScout/wiki) for guides, instructions, and other assistance.
-
