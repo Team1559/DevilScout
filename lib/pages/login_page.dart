@@ -1,3 +1,4 @@
+import 'package:devil_scout/authentication.dart';
 import 'package:flutter/material.dart';
 import '../components/large_text_field.dart';
 
@@ -43,8 +44,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               TextButton(
-                onPressed: () {
-                  print("button pressed");
+                onPressed: () async {
+                  final LoginStatus? response = await login(
+                      int.parse(teamNumberController.text),
+                      usernameController.text);
+                  print(response);
+                  if (response != null) {
+                    final Session? session =
+                        await authenticate(response, 'password');
+                    print(session);
+                  }
                 },
                 child: const Text("Log In"),
               ),
