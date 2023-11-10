@@ -46,7 +46,6 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () {
                   print("button pressed");
                 },
-                style: const ButtonStyle(),
                 child: const Text("Log In"),
               ),
             ],
