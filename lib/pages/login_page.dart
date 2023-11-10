@@ -1,4 +1,4 @@
-import 'package:devil_scout/authentication.dart';
+import 'package:devil_scout/server/auth.dart';
 import 'package:flutter/material.dart';
 import '../components/large_text_field.dart';
 
