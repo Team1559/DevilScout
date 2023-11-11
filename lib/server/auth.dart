@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:hex/hex.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 // This file implements a custom client-server authentication protocol based on
@@ -15,7 +15,7 @@ import 'package:http/http.dart' as http;
 // This particular mechanism also has the added benefit of performing mutual
 // authentication, meaning not only does the server authenticate the client,
 // but the client authenticates the server. The transfer is split into four
-// base64-encoded messages:
+// JSON-encoded messages:
 // - Client Login Request
 // - Server Challenge
 // - Client Authentication
@@ -24,23 +24,19 @@ import 'package:http/http.dart' as http;
 // 1. Client Login Request
 // The client receives the team number and username from the user. In addition,
 // it randomly generates 8 bytes called the "client nonce". The client then
-// sends the following message in a POST request to /login:
-//
-// t={team},n={username},r={client nonce as hex}
+// sends the team, username, and client nonce in a POST request to /login.
 //
 // 2. Server Challenge
-// The server receives the Client Login Request, and parses the team number,
-// username, and client nonce. It verifies that the requested user exists, and
-// retrieves their password salt from a database. It then randomly generates
-// 8 bytes of its own, and joins the two together to form the whole 16-byte
-// "nonce". The server then responds with the following challenge:
-//
-// s={salt as hex},r={nonce as hex}
+// The server receives the Client Login Request, verifies that the requested
+// user exists, and retrieves their password salt from a database. It then
+// randomly generates 8 bytes of its own, and joins the two together to form
+// the whole 16-byte "nonce". The server then responds with a challenge
+// containing the salt and nonce.
 //
 // 3. Client Authentication
-// The client receives the Server Challenge, and parses the salt and nonce. It
-// verifies the nonce begins with the client nonce it transmitted, and begins
-// computing a proof of authentication. That process is as follows:
+// The client receives the Server Challenge, verifies the nonce begins with the
+// client nonce it transmitted, and begins computing a proof of authentication.
+// That process is as follows:
 //
 // passwordHash    = PBKDF2-SHA256(password, salt, 4096 iterations)
 // clientKey       = HMAC-SHA256(passwordHash, "Client Key")
@@ -48,15 +44,13 @@ import 'package:http/http.dart' as http;
 // clientSignature = HMAC-SHA256(storedKey, "{team number}{username}" + nonce)
 // clientProof     = clientKey XOR clientSignature
 //
-// The client then sends the following message in a POST request to /auth:
+// The client then sends team, username, nonce, and clientProof in a POST request to
+// /auth.
 //
-// t={team},n={username},r={nonce as hex},p={clientProof as hex}
-//
-// The server receives the Client Authentication, and parses the team,
-// username, nonce, and clientProof. It verifies the user against the database,
-// verifies the nonce that it transmitted, and retrieves the dbStoredKey from
-// the database. It then checks the clientProof by recomputing the storedKey
-// and comparing it:
+// The server receives the Client Authentication, verifies the user against the
+// database, verifies the nonce that it transmitted, and retrieves the
+// dbStoredKey from the database. It then checks the clientProof by recomputing
+// the storedKey and comparing it:
 //
 // clientSignature = HMAC-SHA256(dbStoredKey, "{team number}{username}" + nonce)
 // clientKey       = clientProof XOR clientSignature
@@ -73,13 +67,10 @@ import 'package:http/http.dart' as http;
 // serverSignature = HMAC-SHA256(serverKey, "{team number}{username}" + nonce)
 //
 // It also generates a session for the user, and responds to the client with the
-// following message:
+// server signature, sessionID, accessLevel, and fullName.
 //
-// v={serverSignature as hex},i={sessionID},p={accessLevel},n={fullName}
-//
-// The client receives the Server Verification, and parses the serverSignature,
-// sessionID, accessLevel, and fullName. It verifies the server signature by
-// recomputing it:
+// The client receives the Server Verification, and verifies the server
+// signature by recomputing it:
 //
 // serverKey       = HMAC-SHA256(passwordHash, "Server Key")
 // serverSignature = HMAC-SHA256(serverKey, "{team number}{username}" + nonce)
@@ -119,7 +110,7 @@ class Session {
   final UserAccessLevel accessLevel;
 
   /// The ID for the current session, which must be passed with every request
-  final String sessionID;
+  final int sessionID;
 
   Session._(this.team, this.username, this.fullName, this.accessLevel,
       this.sessionID);
@@ -172,105 +163,31 @@ enum UserAccessLevel {
 
 Future<LoginStatus?> login(int team, String username) async {
   try {
-    final List<int> clientNonce =
-        List.generate(8, (index) => _random.nextInt(0x100), growable: false);
-    final String clientNonceHex = _hexEncoder.convert(clientNonce);
-    final String requestBody = 't=$team,n=$username,r=$clientNonceHex';
-    final String requestBodyBase64 = base64.encode(utf8.encode(requestBody));
-
-    final http.Response response =
-        await http.post(_loginURI, body: requestBodyBase64);
-    if (response.statusCode != 200) return null;
-
-    final String responseBody = utf8.decode(base64.decode(response.body));
-    if (responseBody.length != 53 ||
-        !responseBody.startsWith('s=') ||
-        responseBody.indexOf(',r=') != 18) {
-      // invalid response format
-      return null;
-    }
-
-    // ensure nonce has not been tampered with
-    final String nonceHex = responseBody.substring(21);
-    if (!nonceHex.startsWith(clientNonceHex)) return null;
-
-    final List<int> salt = _hexDecoder.convert(responseBody.substring(2, 18));
-    final List<int> nonce = _hexDecoder.convert(nonceHex);
-    return LoginStatus._(team, username, salt, nonce);
-  } catch (_) {
+    return await _login(team, username);
+  } catch (e) {
+    print(e);
     return null;
   }
 }
 
 Future<Session?> authenticate(LoginStatus login, String password) async {
   try {
-    final SecretKey saltedPassword =
-        await _hashPassword(password: password, salt: login.salt);
-    final List<int> clientKey = await _computeClientKey(saltedPassword);
-    final List<int> storedKey = await _computeStoredKey(clientKey);
-    final List<int> clientSignature = await _computeSignature(
-        storedKey, login.team, login.username, login.nonce);
-    final List<int> clientProof =
-        _computeClientProof(clientKey, clientSignature);
-
-    final String clientProofHex = _hexEncoder.convert(clientProof);
-    final String nonceHex = _hexEncoder.convert(login.nonce);
-
-    final String requestBody =
-        't=${login.team},n=${login.username},r=$nonceHex,p=$clientProofHex';
-    final String requestBodyBase64 = base64.encode(utf8.encode(requestBody));
-    final Future<http.Response> serverRequest =
-        http.post(_authURI, body: requestBodyBase64);
-
-    final List<int> serverKey = await _computeServerKey(saltedPassword);
-    final List<int> serverSignature = await _computeSignature(
-        serverKey, login.team, login.username, login.nonce);
-    final String serverSignatureHex = _hexEncoder.convert(serverSignature);
-
-    final http.Response response = await serverRequest;
-    if (response.statusCode != 200) return null;
-
-    final String responseBody = utf8.decode(base64.decode(response.body));
-    if (responseBody.length < 86 ||
-        responseBody.length > 200 ||
-        !responseBody.startsWith('v=') ||
-        responseBody.indexOf(',i=') != 66 ||
-        responseBody.indexOf(',p=') != 85 ||
-        responseBody.indexOf(',n=') < 89) {
-      // invalid response format
-      return null;
-    }
-
-    // verify server's identity
-    if (responseBody.substring(2, 66) != serverSignatureHex) return null;
-
-    // parse information
-    final String sessionID = responseBody.substring(69, 85);
-    final String accessLevelStr =
-        'UserAccessLevel.${responseBody.substring(88, responseBody.indexOf(',n='))}';
-    final UserAccessLevel accessLevel = UserAccessLevel.values
-        .firstWhere((l) => l.toString() == accessLevelStr);
-    final String fullName =
-        responseBody.substring(responseBody.indexOf(',n=') + 3);
-
-    return Session._(
-        login.team, login.username, fullName, accessLevel, sessionID);
-  } catch (_) {
+    return await _authenticate(login, password);
+  } catch (e) {
+    print(e);
     return null;
   }
 }
 
 // End exposed API, begin internal implementation
 
-const _hexEncoder = HexEncoder();
-const _hexDecoder = HexDecoder();
-final _random = Random.secure();
-
 final Uri _loginURI = Uri.parse('http://10.0.2.2:80/login');
 final Uri _authURI = Uri.parse('http://10.0.2.2:80/auth');
 
 final List<int> _clientKeyBytes = utf8.encode('Client Key');
 final List<int> _serverKeyBytes = utf8.encode('Server Key');
+
+final Random _random = Random.secure();
 
 final Sha256 _sha256 = Sha256();
 final Hmac _hmacSha256 = Hmac(_sha256);
@@ -279,6 +196,63 @@ final Pbkdf2 _pbkdf2Sha256 = Pbkdf2(
   iterations: 4096,
   bits: 256,
 );
+
+Future<LoginStatus?> _login(int team, String username) async {
+  final List<int> clientNonce =
+      List.generate(8, (index) => _random.nextInt(0x100), growable: false);
+  final String clientNonceBase64 = base64.encode(clientNonce);
+  final String requestBody =
+      '{"team":$team,"username":"$username","clientNonce":"$clientNonceBase64"}';
+
+  final http.Response response = await http.post(_loginURI, body: requestBody);
+  if (response.statusCode != 200) return null;
+  final Map<String, dynamic> responseJson = json.decode(response.body);
+
+  // ensure nonce has not been tampered with
+  final List<int> nonce = base64.decode(responseJson['nonce']);
+  if (!listEquals(clientNonce, nonce.sublist(0, 8))) return null;
+
+  final List<int> salt = base64.decode(responseJson['salt']);
+  return LoginStatus._(team, username, salt, nonce);
+}
+
+Future<Session?> _authenticate(LoginStatus login, String password) async {
+  final SecretKey saltedPassword =
+      await _hashPassword(password: password, salt: login.salt);
+  final List<int> clientKey = await _computeClientKey(saltedPassword);
+  final List<int> storedKey = await _computeStoredKey(clientKey);
+  final List<int> clientSignature = await _computeSignature(
+      storedKey, login.team, login.username, login.nonce);
+  final List<int> clientProof = _computeClientProof(clientKey, clientSignature);
+
+  final Future<http.Response> serverRequest = http.post(
+    _authURI,
+    body:
+        '{"team":${login.team},"username":"${login.username}","nonce":"${base64.encode(login.nonce)}","clientProof":"${base64.encode(clientProof)}"}',
+  );
+
+  final List<int> serverKey = await _computeServerKey(saltedPassword);
+  final List<int> serverSignature = await _computeSignature(
+      serverKey, login.team, login.username, login.nonce);
+
+  final http.Response response = await serverRequest;
+  if (response.statusCode != 200) return null;
+  final Map<String, dynamic> responseJson = json.decode(response.body);
+
+  // verify server's identity
+  final List<int> serverSignatureResponse =
+      base64.decode(responseJson['serverSignature']);
+  if (!listEquals(serverSignature, serverSignatureResponse)) return null;
+
+  // parse information
+  final String accessLevelStr =
+      'UserAccessLevel.${responseJson['accessLevel'].toLowerCase()}';
+  final UserAccessLevel accessLevel =
+      UserAccessLevel.values.firstWhere((l) => l.toString() == accessLevelStr);
+
+  return Session._(login.team, login.username, responseJson['fullName'],
+      accessLevel, responseJson['sessionID']);
+}
 
 Future<SecretKey> _hashPassword(
         {required String password, required List<int> salt}) async =>
