@@ -15,7 +15,7 @@ import 'package:http/http.dart' as http;
 // This particular mechanism also has the added benefit of performing mutual
 // authentication, meaning not only does the server authenticate the client,
 // but the client authenticates the server. The transfer is split into four
-// base64-encoded messages:
+// JSON-encoded messages:
 // - Client Login Request
 // - Server Challenge
 // - Client Authentication
@@ -24,23 +24,19 @@ import 'package:http/http.dart' as http;
 // 1. Client Login Request
 // The client receives the team number and username from the user. In addition,
 // it randomly generates 8 bytes called the "client nonce". The client then
-// sends the following message in a POST request to /login:
-//
-// t={team},n={username},r={client nonce as hex}
+// sends the team, username, and client nonce in a POST request to /login.
 //
 // 2. Server Challenge
-// The server receives the Client Login Request, and parses the team number,
-// username, and client nonce. It verifies that the requested user exists, and
-// retrieves their password salt from a database. It then randomly generates
-// 8 bytes of its own, and joins the two together to form the whole 16-byte
-// "nonce". The server then responds with the following challenge:
-//
-// s={salt as hex},r={nonce as hex}
+// The server receives the Client Login Request, verifies that the requested
+// user exists, and retrieves their password salt from a database. It then
+// randomly generates 8 bytes of its own, and joins the two together to form
+// the whole 16-byte "nonce". The server then responds with a challenge
+// containing the salt and nonce.
 //
 // 3. Client Authentication
-// The client receives the Server Challenge, and parses the salt and nonce. It
-// verifies the nonce begins with the client nonce it transmitted, and begins
-// computing a proof of authentication. That process is as follows:
+// The client receives the Server Challenge, verifies the nonce begins with the
+// client nonce it transmitted, and begins computing a proof of authentication.
+// That process is as follows:
 //
 // passwordHash    = PBKDF2-SHA256(password, salt, 4096 iterations)
 // clientKey       = HMAC-SHA256(passwordHash, "Client Key")
@@ -48,15 +44,13 @@ import 'package:http/http.dart' as http;
 // clientSignature = HMAC-SHA256(storedKey, "{team number}{username}" + nonce)
 // clientProof     = clientKey XOR clientSignature
 //
-// The client then sends the following message in a POST request to /auth:
+// The client then sends team, username, nonce, and clientProof in a POST request to
+// /auth.
 //
-// t={team},n={username},r={nonce as hex},p={clientProof as hex}
-//
-// The server receives the Client Authentication, and parses the team,
-// username, nonce, and clientProof. It verifies the user against the database,
-// verifies the nonce that it transmitted, and retrieves the dbStoredKey from
-// the database. It then checks the clientProof by recomputing the storedKey
-// and comparing it:
+// The server receives the Client Authentication, verifies the user against the
+// database, verifies the nonce that it transmitted, and retrieves the
+// dbStoredKey from the database. It then checks the clientProof by recomputing
+// the storedKey and comparing it:
 //
 // clientSignature = HMAC-SHA256(dbStoredKey, "{team number}{username}" + nonce)
 // clientKey       = clientProof XOR clientSignature
@@ -73,13 +67,10 @@ import 'package:http/http.dart' as http;
 // serverSignature = HMAC-SHA256(serverKey, "{team number}{username}" + nonce)
 //
 // It also generates a session for the user, and responds to the client with the
-// following message:
+// server signature, sessionID, accessLevel, and fullName.
 //
-// v={serverSignature as hex},i={sessionID},p={accessLevel},n={fullName}
-//
-// The client receives the Server Verification, and parses the serverSignature,
-// sessionID, accessLevel, and fullName. It verifies the server signature by
-// recomputing it:
+// The client receives the Server Verification, and verifies the server
+// signature by recomputing it:
 //
 // serverKey       = HMAC-SHA256(passwordHash, "Server Key")
 // serverSignature = HMAC-SHA256(serverKey, "{team number}{username}" + nonce)
