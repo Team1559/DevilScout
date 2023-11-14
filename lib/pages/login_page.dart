@@ -20,17 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: const Text("DevilScout"),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            actions: [
-              Switch(
-                value: themeManager.themeMode == ThemeMode.dark,
-                onChanged: (newValue) {
-                  widget.themeManager.toggleTheme(newValue);
-                },
-              )
-            ]),
+        appBar: AppBar(title: const Text("DevilScout"), actions: [
+          Switch(
+            value: themeManager.themeMode == ThemeMode.dark,
+            onChanged: (newValue) {
+              widget.themeManager.toggleTheme(newValue);
+            },
+          )
+        ]),
         backgroundColor: Theme.of(context).colorScheme.background,
         body: SafeArea(
             child: Center(

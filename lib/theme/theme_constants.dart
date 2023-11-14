@@ -8,8 +8,12 @@ const tertiaryColor = Color(0xFFFFD900);
 const onTertiaryColor = Colors.black;
 const errorColor = Colors.red;
 const onErrorColor = Colors.white;
-const surfaceColor = secondaryColor;
-const onSurfaceColor = onSecondaryColor;
+
+const surfaceColorLight = Color(0xFFD3D3D3);
+const onSurfaceColorLight = Colors.black;
+
+const surfaceColorDark = Color(0xFFA9A9A9);
+const onSurfaceColorDark = Colors.white;
 
 const backgroundColorLight = Color(0xFFFAFAFA);
 const onBackgroundColorLight = Colors.black;
@@ -30,8 +34,8 @@ ThemeData lightTheme = ThemeData(
     onError: onErrorColor,
     background: backgroundColorLight,
     onBackground: onBackgroundColorLight,
-    surface: surfaceColor,
-    onSurface: onSurfaceColor,
+    surface: surfaceColorLight,
+    onSurface: onSurfaceColorLight,
   ),
 );
 
@@ -48,7 +52,7 @@ ThemeData darkTheme = ThemeData(
     onError: onErrorColor,
     background: backgroundColorDark,
     onBackground: onBackgroundColorDark,
-    surface: surfaceColor,
-    onSurface: onSurfaceColor,
+    surface: surfaceColorDark,
+    onSurface: onSurfaceColorDark,
   ),
 );
