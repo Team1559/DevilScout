@@ -1,9 +1,13 @@
+import 'package:devil_scout/main.dart';
 import 'package:devil_scout/server/auth.dart';
+import 'package:devil_scout/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
-import '../components/large_text_field.dart';
+import 'package:devil_scout/components/large_text_field.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final ThemeManager themeManager;
+
+  const LoginPage({Key? key, required this.themeManager}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -16,7 +20,15 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        appBar: AppBar(title: const Text("DevilScout"), actions: [
+          Switch(
+            value: themeManager.themeMode == ThemeMode.dark,
+            onChanged: (newValue) {
+              widget.themeManager.toggleTheme(newValue);
+            },
+          )
+        ]),
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: SafeArea(
             child: Center(
           child: Column(
@@ -43,7 +55,11 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: false,
               ),
 
-              TextButton(
+              const SizedBox(
+                height: 25,
+              ),
+
+              FilledButton(
                 onPressed: () async {
                   final LoginStatus? response = await login(
                       int.parse(teamNumberController.text),
