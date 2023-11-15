@@ -110,7 +110,7 @@ class Session {
   final UserAccessLevel accessLevel;
 
   /// The ID for the current session, which must be passed with every request
-  final int sessionID;
+  final String sessionID;
 
   Session._(this.team, this.username, this.fullName, this.accessLevel,
       this.sessionID);
