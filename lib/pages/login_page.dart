@@ -62,12 +62,12 @@ class _LoginPageState extends State<LoginPage> {
               FilledButton(
                 onPressed: () async {
                   final LoginStatus? response = await login(
-                      int.parse(teamNumberController.text),
-                      usernameController.text);
+                      team: int.parse(teamNumberController.text),
+                      username: usernameController.text);
                   print(response);
                   if (response != null) {
-                    final Session? session =
-                        await authenticate(response, 'password');
+                    final Session? session = await authenticate(
+                        login: response, password: 'password');
                     print(session);
                   }
                 },
