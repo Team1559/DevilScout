@@ -189,10 +189,10 @@ Future<bool> logout(Session session) async {
 }
 
 // End exposed API, begin internal implementation
-const String _sessionsURI = 'http://10.0.2.2:80/sessions';
-final Uri _logoutURI = Uri.parse(_sessionsURI);
-final Uri _loginURI = Uri.parse('$_sessionsURI/login');
-final Uri _authURI = Uri.parse('$_sessionsURI/auth');
+const String _baseURI = 'http://10.0.2.2:8000';
+final Uri _logoutURI = Uri.parse(_baseURI);
+final Uri _loginURI = Uri.parse('$_baseURI/login');
+final Uri _authURI = Uri.parse('$_baseURI/auth');
 
 final List<int> _clientKeyBytes = utf8.encode('Client Key');
 final List<int> _serverKeyBytes = utf8.encode('Server Key');
