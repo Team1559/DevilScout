@@ -161,7 +161,7 @@ enum UserAccessLevel {
   }
 }
 
-Future<LoginStatus?> login(int team, String username) async {
+Future<LoginStatus?> login({required int team, required String username}) async {
   try {
     return await _login(team, username);
   } catch (e) {
@@ -170,7 +170,7 @@ Future<LoginStatus?> login(int team, String username) async {
   }
 }
 
-Future<Session?> authenticate(LoginStatus login, String password) async {
+Future<Session?> authenticate({required LoginStatus login, required String password}) async {
   try {
     return await _authenticate(login, password);
   } catch (e) {
@@ -179,10 +179,20 @@ Future<Session?> authenticate(LoginStatus login, String password) async {
   }
 }
 
-// End exposed API, begin internal implementation
+Future<bool> logout(Session session) async {
+  try {
+    return await _logout(session);
+  } catch (e) {
+    print(e);
+    return false;
+  }
+}
 
-final Uri _loginURI = Uri.parse('http://10.0.2.2:80/login');
-final Uri _authURI = Uri.parse('http://10.0.2.2:80/auth');
+// End exposed API, begin internal implementation
+const String _sessionsURI = 'http://10.0.2.2:80/sessions';
+final Uri _logoutURI = Uri.parse(_sessionsURI);
+final Uri _loginURI = Uri.parse('$_sessionsURI/login');
+final Uri _authURI = Uri.parse('$_sessionsURI/auth');
 
 final List<int> _clientKeyBytes = utf8.encode('Client Key');
 final List<int> _serverKeyBytes = utf8.encode('Server Key');
@@ -217,19 +227,16 @@ Future<LoginStatus?> _login(int team, String username) async {
 }
 
 Future<Session?> _authenticate(LoginStatus login, String password) async {
-  final SecretKey saltedPassword =
-      await _hashPassword(password: password, salt: login.salt);
+  final SecretKey saltedPassword = await _hashPassword(password, login.salt);
   final List<int> clientKey = await _computeClientKey(saltedPassword);
   final List<int> storedKey = await _computeStoredKey(clientKey);
   final List<int> clientSignature = await _computeSignature(
       storedKey, login.team, login.username, login.nonce);
   final List<int> clientProof = _computeClientProof(clientKey, clientSignature);
 
-  final Future<http.Response> serverRequest = http.post(
-    _authURI,
-    body:
-        '{"team":${login.team},"username":"${login.username}","nonce":"${base64.encode(login.nonce)}","clientProof":"${base64.encode(clientProof)}"}',
-  );
+  final Future<http.Response> serverRequest = http.post(_authURI,
+      body:
+          '{"team":${login.team},"username":"${login.username}","nonce":"${base64.encode(login.nonce)}","clientProof":"${base64.encode(clientProof)}"}');
 
   final List<int> serverKey = await _computeServerKey(saltedPassword);
   final List<int> serverSignature = await _computeSignature(
@@ -254,8 +261,13 @@ Future<Session?> _authenticate(LoginStatus login, String password) async {
       accessLevel, responseJson['sessionID']);
 }
 
-Future<SecretKey> _hashPassword(
-        {required String password, required List<int> salt}) async =>
+Future<bool> _logout(Session session) async {
+  final http.Response response = await http
+      .delete(_logoutURI, headers: {'X_DS_SESSION_KEY': session.sessionID});
+  return response.statusCode == 200;
+}
+
+Future<SecretKey> _hashPassword(String password, List<int> salt) async =>
     _pbkdf2Sha256.deriveKeyFromPassword(password: password, nonce: salt);
 
 Future<List<int>> _computeKey(
@@ -278,4 +290,4 @@ Future<List<int>> _computeSignature(
         .bytes;
 
 List<int> _computeClientProof(List<int> clientKey, List<int> clientSignature) =>
-    List.generate(32, (index) => clientKey[index] ^ clientSignature[index]);
+    List.generate(32, (index) => clientKey[index] ^ clientSignature[index], growable: false);
