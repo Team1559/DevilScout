@@ -2,7 +2,7 @@ import 'package:devil_scout/theme/theme_constants.dart';
 import 'package:devil_scout/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
 
-import 'pages/login_page.dart';
+import 'pages/match_select_page.dart';
 
 void main() {
   runApp(const MainApp());
@@ -39,7 +39,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginPage(themeManager: themeManager),
+      home: const MatchSelectPage(),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeManager.themeMode,
