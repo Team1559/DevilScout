@@ -21,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  fonts:
+  - family: Montserrat
+    fonts:
+      - asset: assets/fonts/Montserrat-VariableFont_wght.ttf
