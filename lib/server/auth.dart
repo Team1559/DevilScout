@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+import 'server.dart';
+import 'session.dart';
+import 'users.dart';
+
+part 'auth.g.dart';
 
 // This file implements a custom client-server authentication protocol based on
 // SCRAM, or Salted Challenge Response Authentication Mechanism. The purpose of
@@ -78,124 +84,48 @@ import 'package:http/http.dart' as http;
 // If the two are equal, this proves the server is in possession of serverKey,
 // which could only have been obtained from passwordHash upon registration.
 
-/// Maintains the state of the login between entering team, username and password
-class LoginStatus {
-  /// A randomly generated 16-byte value (8 bytes from the client, 8 bytes from the server)
-  final List<int> nonce;
+class _LoginStatus {
+  static _LoginStatus? current;
 
-  /// An 8-byte salt stored on the server, used for securely hashing users' passwords
+  final int team;
+  final String username;
+  final _LoginChallenge challenge;
+
+  _LoginStatus(this.team, this.username, this.challenge);
+}
+
+@JsonSerializable()
+class _LoginChallenge {
+  final List<int> nonce;
   final List<int> salt;
 
-  /// The user's team number, in the range [1,9999]
-  final int team;
+  _LoginChallenge(String nonce, String salt)
+      : nonce = base64.decode(nonce),
+        salt = base64.decode(salt);
 
-  /// The user's username, up to 32 characters
-  final String username;
+  // ignore: unused_element
+  factory _LoginChallenge.fromJson(Map<String, dynamic> json) =>
+      _$LoginChallengeFromJson(json);
 
-  LoginStatus._(this.team, this.username, this.salt, this.nonce);
+  Map<String, dynamic> toJson() => _$LoginChallengeToJson(this);
 }
 
-/// An authorized user session, containing user info as well as permissions
-class Session {
-  /// The user's team number (e.g. 1559)
-  final int team;
+@JsonSerializable()
+// ignore: unused_element
+class _AuthResponse {
+  final User user;
+  final Session session;
+  final List<int> serverSignature;
 
-  /// The user's informal username (e.g. xander)
-  final String username;
+  _AuthResponse(this.user, this.session, String serverSignature)
+      : serverSignature = base64.decode(serverSignature);
 
-  /// The user's full registered name (e.g. Xander Bhalla)
-  final String fullName;
+  // ignore: unused_element
+  factory _AuthResponse.fromJson(Map<String, dynamic> json) =>
+      _$AuthResponseFromJson(json);
 
-  /// The level of access the server granted the user
-  final UserAccessLevel accessLevel;
-
-  /// The ID for the current session, which must be passed with every request
-  final String sessionID;
-
-  Session._(this.team, this.username, this.fullName, this.accessLevel,
-      this.sessionID);
+  Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 }
-
-/// A user's permission to access resources on the server. If a client attempts
-/// to exceed their access level, the server will reject their request. The
-/// three access levels are as follows:
-///
-/// **standard** - Granted to all authenticated members. Abilities include:
-/// - submitting match & pit scouting data to the server
-/// - accessing the various data analysis pages
-/// - modifying their account information, preferences, password, etc.
-///
-/// **admin** - Granted to team administrators, which may include coaches,
-/// mentors, team captains, or drive team members. Registered teams must have
-/// at least one admin, but no more than 6. In addition to standard access,
-/// abilities include:
-/// - setting the team's current competition
-/// - submitting drive team post-match feedback
-/// - adding, removing, and disabling team members
-/// - resetting team members' passwords
-///
-/// **sudo** - Reserved for server managers on Team 1559. In addition to admin
-/// access, superuser abilities include:
-/// - managing registered teams
-/// - changing any standard or admin users' passwords
-/// - halting all network access to the server
-enum UserAccessLevel {
-  standard,
-  admin,
-  sudo;
-
-  bool operator >(other) {
-    return index > other.index;
-  }
-
-  bool operator <(other) {
-    return index < other.index;
-  }
-
-  bool operator >=(other) {
-    return index >= other.index;
-  }
-
-  bool operator <=(other) {
-    return index <= other.index;
-  }
-}
-
-Future<LoginStatus?> login({required int team, required String username}) async {
-  try {
-    return await _login(team, username);
-  } catch (e) {
-    print(e);
-    return null;
-  }
-}
-
-Future<Session?> authenticate({required LoginStatus login, required String password}) async {
-  try {
-    return await _authenticate(login, password);
-  } catch (e) {
-    print(e);
-    return null;
-  }
-}
-
-Future<bool> logout(Session session) async {
-  try {
-    return await _logout(session);
-  } catch (e) {
-    print(e);
-    return false;
-  }
-}
-
-// End exposed API, begin internal implementation
-const String _baseURI = 'http://10.0.2.2:8000';
-final Uri _logoutURI = Uri.parse(_baseURI);
-final Uri _loginURI = Uri.parse('$_baseURI/login');
-final Uri _authURI = Uri.parse('$_baseURI/auth');
-
-final List<int> _clientKeyBytes = utf8.encode('Client Key');
-final List<int> _serverKeyBytes = utf8.encode('Server Key');
 
 final Random _random = Random.secure();
 
@@ -207,87 +137,128 @@ final Pbkdf2 _pbkdf2Sha256 = Pbkdf2(
   bits: 256,
 );
 
-Future<LoginStatus?> _login(int team, String username) async {
-  final List<int> clientNonce =
+/// Attempt to initiate a login to the server for the given user. Returns null
+/// if successful, else an error message for the user.
+Future<ServerResponse<void>> login(
+    {required int team, required String username}) async {
+  List<int> clientNonce =
       List.generate(8, (index) => _random.nextInt(0x100), growable: false);
-  final String clientNonceBase64 = base64.encode(clientNonce);
-  final String requestBody =
-      '{"team":$team,"username":"$username","clientNonce":"$clientNonceBase64"}';
 
-  final http.Response response = await http.post(_loginURI, body: requestBody);
-  if (response.statusCode != 200) return null;
-  final Map<String, dynamic> responseJson = json.decode(response.body);
+  Request request = Request('POST', serverURI.resolve('/login'))
+    ..body = json.encode({
+      'team': team,
+      'username': username,
+      'clientNonce': base64.encode(clientNonce)
+    });
 
-  // ensure nonce has not been tampered with
-  final List<int> nonce = base64.decode(responseJson['nonce']);
-  if (!listEquals(clientNonce, nonce.sublist(0, 8))) return null;
+  StreamedResponse response = await request.send();
+  Map<String, dynamic> body =
+      json.decode(await response.stream.bytesToString());
+  if (response.statusCode != 200) {
+    return ServerResponse.errorFromJson(body);
+  }
 
-  final List<int> salt = base64.decode(responseJson['salt']);
-  return LoginStatus._(team, username, salt, nonce);
+  _LoginChallenge challenge = _LoginChallenge.fromJson(body);
+  for (int i = 0; i < 8; i++) {
+    if (clientNonce[i] != challenge.nonce[i]) {
+      return ServerResponse.error('Server modified nonce');
+    }
+  }
+
+  _LoginStatus.current = _LoginStatus(team, username, challenge);
+  return ServerResponse.success();
 }
 
-Future<Session?> _authenticate(LoginStatus login, String password) async {
-  final SecretKey saltedPassword = await _hashPassword(password, login.salt);
-  final List<int> clientKey = await _computeClientKey(saltedPassword);
-  final List<int> storedKey = await _computeStoredKey(clientKey);
-  final List<int> clientSignature = await _computeSignature(
-      storedKey, login.team, login.username, login.nonce);
-  final List<int> clientProof = _computeClientProof(clientKey, clientSignature);
+/// After receiving the login challenge, attempt to authenticate the user by
+/// completing the challenge with the given password. Returns null if
+/// successful, else an error message for the user.
+Future<ServerResponse<void>> authenticate({required String password}) async {
+  if (_LoginStatus.current == null) {
+    return ServerResponse.error('No previous login attempt');
+  }
+  _LoginStatus login = _LoginStatus.current!;
 
-  final Future<http.Response> serverRequest = http.post(_authURI,
-      body:
-          '{"team":${login.team},"username":"${login.username}","nonce":"${base64.encode(login.nonce)}","clientProof":"${base64.encode(clientProof)}"}');
+  SecretKey saltedPassword = await _pbkdf2Sha256.deriveKeyFromPassword(
+    password: password,
+    nonce: login.challenge.salt,
+  );
+  List<int> clientKey = await _computeKey(saltedPassword, 'Client Key');
+  List<int> storedKey = (await _sha256.hash(clientKey)).bytes;
 
-  final List<int> serverKey = await _computeServerKey(saltedPassword);
-  final List<int> serverSignature = await _computeSignature(
-      serverKey, login.team, login.username, login.nonce);
+  List<int> clientSignature = await _computeSignature(
+    storedKey,
+    login.team,
+    login.username,
+    login.challenge.nonce,
+  );
+  List<int> clientProof = [
+    for (int i = 0; i < 32; i++) clientKey[i] ^ clientSignature[i]
+  ];
 
-  final http.Response response = await serverRequest;
-  if (response.statusCode != 200) return null;
-  final Map<String, dynamic> responseJson = json.decode(response.body);
+  Request request = Request('POST', serverURI.resolve('/auth'))
+    ..body = json.encode({
+      'team': login.team,
+      'username': login.username,
+      'nonce': base64.encode(login.challenge.nonce),
+      'clientProof': base64.encode(clientProof)
+    });
+  Future<StreamedResponse> serverRequest = request.send();
 
-  // verify server's identity
-  final List<int> serverSignatureResponse =
-      base64.decode(responseJson['serverSignature']);
-  if (!listEquals(serverSignature, serverSignatureResponse)) return null;
+  List<int> serverKey = await _computeKey(saltedPassword, 'Server Key');
+  List<int> serverSignature = await _computeSignature(
+      serverKey, login.team, login.username, login.challenge.nonce);
 
-  // parse information
-  final String accessLevelStr =
-      'UserAccessLevel.${responseJson['accessLevel'].toLowerCase()}';
-  final UserAccessLevel accessLevel =
-      UserAccessLevel.values.firstWhere((l) => l.toString() == accessLevelStr);
+  StreamedResponse response = await serverRequest;
+  Map<String, dynamic> body =
+      json.decode(await response.stream.bytesToString());
+  if (response.statusCode != 200) {
+    return ServerResponse.errorFromJson(body);
+  }
 
-  return Session._(login.team, login.username, responseJson['fullName'],
-      accessLevel, responseJson['sessionID']);
+  _AuthResponse auth = _AuthResponse.fromJson(body);
+  for (int i = 0; i < 32; i++) {
+    if (serverSignature[i] != auth.serverSignature[i]) {
+      return ServerResponse.error('Failed to authenticate server');
+    }
+  }
+
+  _LoginStatus.current = null;
+
+  Session.current = auth.session;
+  User.current = auth.user;
+  return ServerResponse.success();
 }
 
-Future<bool> _logout(Session session) async {
-  final http.Response response = await http
-      .delete(_logoutURI, headers: {'X_DS_SESSION_KEY': session.sessionID});
-  return response.statusCode == 200;
+/// Log out the current session, if it exists.
+Future<ServerResponse<void>> logout() async {
+  if (Session.current == null) {
+    return ServerResponse.error('No session to log out');
+  }
+
+  Request request = Request('GET', serverURI.resolve('/logout'))
+    ..headers.addAll(Session.current!.headers);
+
+  StreamedResponse response = await request.send();
+  if (response.statusCode == 204) {
+    return ServerResponse.success();
+  }
+
+  return ServerResponse.error(await response.stream.bytesToString());
 }
 
-Future<SecretKey> _hashPassword(String password, List<int> salt) async =>
-    _pbkdf2Sha256.deriveKeyFromPassword(password: password, nonce: salt);
-
-Future<List<int>> _computeKey(
-        SecretKey saltedPassword, List<int> keyBytes) async =>
-    (await _hmacSha256.calculateMac(keyBytes, secretKey: saltedPassword)).bytes;
-
-Future<List<int>> _computeClientKey(SecretKey saltedPassword) async =>
-    await _computeKey(saltedPassword, _clientKeyBytes);
-
-Future<List<int>> _computeStoredKey(List<int> clientKey) async =>
-    (await _sha256.hash(clientKey)).bytes;
-
-Future<List<int>> _computeServerKey(SecretKey saltedPassword) async =>
-    await _computeKey(saltedPassword, _serverKeyBytes);
+Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
+    _hmacSha256
+        .calculateMac(
+          utf8.encode(name),
+          secretKey: saltedPassword,
+        )
+        .then((key) => key.bytes);
 
 Future<List<int>> _computeSignature(
-        List<int> key, int team, String username, List<int> nonce) async =>
-    (await _hmacSha256.calculateMac(utf8.encode('$team$username') + nonce,
-            secretKey: SecretKey(key)))
-        .bytes;
-
-List<int> _computeClientProof(List<int> clientKey, List<int> clientSignature) =>
-    List.generate(32, (index) => clientKey[index] ^ clientSignature[index], growable: false);
+        List<int> key, int team, String username, List<int> nonce) =>
+    _hmacSha256
+        .calculateMac(
+          utf8.encode('$team$username') + nonce,
+          secretKey: SecretKey(key),
+        )
+        .then((signature) => signature.bytes);

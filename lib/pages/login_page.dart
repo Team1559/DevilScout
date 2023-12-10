@@ -1,8 +1,9 @@
-import 'package:devil_scout/main.dart';
-import 'package:devil_scout/server/auth.dart';
-import 'package:devil_scout/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:devil_scout/components/large_text_field.dart';
+
+import '/components/large_text_field.dart';
+import '/main.dart';
+import '/server/auth.dart';
+import '/theme/theme_manager.dart';
 
 class LoginPage extends StatefulWidget {
   final ThemeManager themeManager;
@@ -20,24 +21,24 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("DevilScout"), actions: [
-          Switch(
-            value: themeManager.themeMode == ThemeMode.dark,
-            onChanged: (newValue) {
-              widget.themeManager.toggleTheme(newValue);
-            },
-          )
-        ]),
-        backgroundColor: Theme.of(context).colorScheme.background,
-        body: SafeArea(
-            child: Center(
+      appBar: AppBar(title: const Text("DevilScout"), actions: [
+        Switch(
+          value: themeManager.themeMode == ThemeMode.dark,
+          onChanged: (newValue) {
+            widget.themeManager.toggleTheme(newValue);
+          },
+        )
+      ]),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
+        child: Center(
           child: Column(
             children: [
               const SizedBox(height: 65),
-              const Text("Log In",
-                  style: TextStyle(
-                    fontSize: 50,
-                  )),
+              const Text(
+                "Log In",
+                style: TextStyle(fontSize: 50),
+              ),
               const SizedBox(height: 75),
 
               // Team Number Input Field
@@ -55,26 +56,22 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: false,
               ),
 
-              const SizedBox(
-                height: 25,
-              ),
+              const SizedBox(height: 25),
 
               FilledButton(
                 onPressed: () async {
-                  final LoginStatus? response = await login(
-                      team: int.parse(teamNumberController.text),
-                      username: usernameController.text);
-                  print(response);
-                  if (response != null) {
-                    final Session? session = await authenticate(
-                        login: response, password: 'password');
-                    print(session);
-                  }
+                  await login(
+                    team: int.parse(teamNumberController.text),
+                    username: usernameController.text,
+                  );
+                  await authenticate(password: 'password');
                 },
                 child: const Text("Log In"),
               ),
             ],
           ),
-        )));
+        ),
+      ),
+    );
   }
 }
