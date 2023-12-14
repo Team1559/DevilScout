@@ -1,20 +1,16 @@
-import 'dart:convert';
-
-import 'package:http/http.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
-import 'session.dart';
 
 part 'events.g.dart';
 
-@JsonSerializable()
-class EventInfo {
-  static List<EventInfo> list = List.empty();
-  static final Etag _listEtag = Etag();
+@JsonSerializable(createToJson: false)
+class Event {
+  static Event? currentEvent;
+  static final Etag _currentEventEtag = Etag();
 
-  static EventInfo? current;
-  static final Etag _currentEtag = Etag();
+  static List<Event>? allEvents;
+  static final Etag _allEventsEtag = Etag();
 
   final String key;
   final String name;
@@ -23,46 +19,50 @@ class EventInfo {
   final DateTime start;
   final DateTime end;
 
-  EventInfo(this.key, this.name, this.location, this.start, this.end);
+  Event({
+    required this.key,
+    required this.name,
+    required this.location,
+    required this.start,
+    required this.end,
+  });
 
-  factory EventInfo.fromJson(Map<String, dynamic> json) =>
+  factory Event.fromJson(Map<String, dynamic> json) =>
       _$EventInfoFromJson(json);
-
-  @override
-  String toString() => json.encode(_$EventInfoToJson(this));
 }
 
-@JsonSerializable()
-class TeamInfo {
-  static List<TeamInfo>? currentList;
-  static final Etag _etag = Etag();
+@JsonSerializable(createToJson: false)
+class FrcTeam {
+  static List<FrcTeam>? currentEventTeams;
+  static final Etag _currentEventTeamsEtag = Etag();
 
   final int number;
   final String name;
   final String location;
 
-  TeamInfo(this.number, this.name, this.location);
+  FrcTeam({
+    required this.number,
+    required this.name,
+    required this.location,
+  });
 
-  factory TeamInfo.fromJson(Map<String, dynamic> json) =>
-      _$TeamInfoFromJson(json);
-
-  Map<String, dynamic> toJson() => _$TeamInfoToJson(this);
-
-  @override
-  String toString() => json.encode(this);
+  factory FrcTeam.fromJson(Map<String, dynamic> json) =>
+      _$EventTeamFromJson(json);
 }
 
-@JsonSerializable()
-class MatchInfo {
-  static List<MatchInfo>? _schedule;
-  static final Etag _scheduleEtag = Etag();
-  static List<MatchInfo> get schedule => _schedule!;
-  static void clearCurrent() => _schedule = null;
+@JsonSerializable(createToJson: false)
+class EventMatch {
+  static List<EventMatch>? currentEventSchedule;
+  static final Etag _currentEventScheduleEtag = Etag();
 
   final String key;
   final MatchLevel level;
   final int set;
-  final int match;
+  final DateTime time;
+  final bool completed;
+
+  @JsonKey(name: 'match')
+  final int number;
 
   @JsonKey(name: 'blue')
   final List<int> blueAlliance;
@@ -70,16 +70,19 @@ class MatchInfo {
   @JsonKey(name: 'red')
   final List<int> redAlliance;
 
-  MatchInfo(this.key, this.level, this.set, this.match, this.blueAlliance,
-      this.redAlliance);
+  EventMatch({
+    required this.key,
+    required this.level,
+    required this.set,
+    required this.number,
+    required int time,
+    required this.completed,
+    required this.blueAlliance,
+    required this.redAlliance,
+  }) : time = DateTime.fromMillisecondsSinceEpoch(time);
 
-  factory MatchInfo.fromJson(Map<String, dynamic> json) =>
-      _$MatchInfoFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MatchInfoToJson(this);
-
-  @override
-  String toString() => json.encode(this);
+  factory EventMatch.fromJson(Map<String, dynamic> json) =>
+      _$EventMatchFromJson(json);
 }
 
 @JsonEnum(valueField: 'value')
@@ -95,193 +98,73 @@ enum MatchLevel {
   const MatchLevel(this.value);
 }
 
-Future<ServerResponse<EventInfo>> downloadCurrentEvent(
-    [String? eventKey]) async {
-  if (eventKey == null) {
-    eventKey = EventInfo.current!.key;
-  } else {
-    EventInfo._currentEtag.clear();
-  }
+Future<ServerResponse<List<Event>>> serverGetAllEvents() =>
+    serverRequestList(
+      endpoint: '/events',
+      method: 'GET',
+      decoder: Event.fromJson,
+      etag: Event._allEventsEtag,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        Event.allEvents = response.value;
+      }
+      return response;
+    });
 
-  ServerResponse<EventInfo> response =
-      await downloadEvent(eventKey, EventInfo._currentEtag);
+Future<ServerResponse<Event>> serverGetEvent(
+        {required String eventKey, Etag? etag}) =>
+    serverRequest(
+      endpoint: '/events/$eventKey',
+      method: 'GET',
+      decoder: Event.fromJson,
+      etag: etag,
+    );
 
-  if (!response.success) return response;
-  if (response.value == null) {
-    return ServerResponse.success(EventInfo.current);
-  }
+Future<ServerResponse<List<EventMatch>>> serverGetEventSchedule(
+        {required String eventKey, Etag? etag}) =>
+    serverRequestList(
+      endpoint: '/events/$eventKey/match-schedule',
+      method: 'GET',
+      decoder: EventMatch.fromJson,
+      etag: etag,
+    );
 
-  EventInfo.current = response.value;
-  return response;
-}
+Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList(
+        {required String eventKey, Etag? etag}) =>
+    serverRequestList(
+      endpoint: '/events/$eventKey/teams',
+      method: 'GET',
+      decoder: FrcTeam.fromJson,
+    );
 
-Future<ServerResponse<List<MatchInfo>>> downloadCurrentMatchSchedule(
-    [String? eventKey]) async {
-  if (eventKey == null) {
-    eventKey = EventInfo.current!.key;
-  } else {
-    MatchInfo._scheduleEtag.clear();
-  }
+Future<ServerResponse<Event>> serverGetCurrentEvent() => serverGetEvent(
+      eventKey: Event.currentEvent!.key,
+      etag: Event._currentEventEtag,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        Event.currentEvent = response.value;
+      }
+      return response;
+    });
 
-  ServerResponse<List<MatchInfo>> response =
-      await downloadMatchSchedule(eventKey, MatchInfo._scheduleEtag);
+Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() =>
+    serverGetEventSchedule(
+      eventKey: Event.currentEvent!.key,
+      etag: EventMatch._currentEventScheduleEtag,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        EventMatch.currentEventSchedule = response.value;
+      }
+      return response;
+    });
 
-  if (!response.success) return response;
-  if (response.value == null) {
-    return ServerResponse.success(MatchInfo.schedule);
-  }
-
-  MatchInfo._schedule = response.value;
-  return response;
-}
-
-Future<ServerResponse<List<TeamInfo>>> downloadCurrentTeamList(
-    [String? eventKey]) async {
-  if (eventKey == null) {
-    eventKey = EventInfo.current!.key;
-  } else {
-    TeamInfo._etag.clear();
-  }
-
-  ServerResponse<List<TeamInfo>> response =
-      await downloadTeamList(eventKey, TeamInfo._etag);
-
-  if (!response.success) return response;
-  if (response.value == null) {
-    return ServerResponse.success(TeamInfo.currentList);
-  }
-
-  TeamInfo.currentList = response.value;
-  return response;
-}
-
-Future<ServerResponse<EventInfo>> downloadEvent(String eventKey,
-    [Etag? etag]) async {
-  if (!RegExp(r'20\d{2}[a-z]{3,5}').hasMatch(eventKey)) {
-    return ServerResponse.error('Invalid event key format');
-  }
-
-  Request request = Request('GET', serverURI.resolve('/events/$eventKey'))
-    ..headers.addAll(Session.current!.headers);
-
-  if (etag != null) {
-    request.headers.addAll(etag.headers);
-  }
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success();
-  }
-
-  Map<String, dynamic> body =
-      json.decode(await response.stream.bytesToString());
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(body);
-  }
-
-  EventInfo event = EventInfo.fromJson(body);
-  assert(event.key == eventKey);
-
-  if (etag != null) {
-    etag.update(response.headers);
-  }
-
-  return ServerResponse.success(event);
-}
-
-Future<ServerResponse<List<MatchInfo>>> downloadMatchSchedule(String eventKey,
-    [Etag? etag]) async {
-  if (!RegExp(r'20\d{2}[a-z]{3,5}').hasMatch(eventKey)) {
-    return ServerResponse.error('Invalid event key format');
-  }
-
-  Request request =
-      Request('GET', serverURI.resolve('/events/$eventKey/match-schedule'))
-        ..headers.addAll(Session.current!.headers);
-
-  if (etag != null) {
-    request.headers.addAll(etag.headers);
-  }
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success();
-  }
-
-  String bodyStr = await response.stream.bytesToString();
-  if (response.statusCode != 200) {
-    Map<String, dynamic> body =
-        json.decode(await response.stream.bytesToString());
-    return ServerResponse.errorFromJson(body);
-  }
-
-  List<MatchInfo> matches = (json.decode(bodyStr) as List<dynamic>)
-      .map((e) => e as Map<String, dynamic>)
-      .map(MatchInfo.fromJson)
-      .toList(growable: false);
-
-  if (etag != null) {
-    etag.update(response.headers);
-  }
-
-  return ServerResponse.success(matches);
-}
-
-Future<ServerResponse<List<TeamInfo>>> downloadTeamList(String eventKey,
-    [Etag? etag]) async {
-  if (!RegExp(r'20\d{2}[a-z]{3,5}').hasMatch(eventKey)) {
-    return ServerResponse.error('Invalid event key format');
-  }
-
-  Request request = Request('GET', serverURI.resolve('/events/$eventKey/teams'))
-    ..headers.addAll(Session.current!.headers);
-
-  if (etag != null) {
-    request.headers.addAll(etag.headers);
-  }
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success();
-  }
-
-  String bodyStr = await response.stream.bytesToString();
-  if (response.statusCode != 200) {
-    Map<String, dynamic> body =
-        json.decode(await response.stream.bytesToString());
-    return ServerResponse.errorFromJson(body);
-  }
-
-  List<TeamInfo> teams = (json.decode(bodyStr) as List<dynamic>)
-      .map((e) => TeamInfo.fromJson(e as Map<String, dynamic>))
-      .toList(growable: false);
-
-  if (etag != null) {
-    etag.update(response.headers);
-  }
-
-  return ServerResponse.success(teams);
-}
-
-Future<ServerResponse<List<EventInfo>>> downloadEventList() async {
-  Request request = Request('GET', serverURI.resolve('/events'))
-    ..headers.addAll(Session.current!.headers)
-    ..headers.addAll(EventInfo._listEtag.headers);
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success(EventInfo.list);
-  }
-
-  String body = await response.stream.bytesToString();
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(json.decode(body));
-  }
-
-  EventInfo.list = (json.decode(body) as List<dynamic>)
-      .map((e) => EventInfo.fromJson(e as Map<String, dynamic>))
-      .toList(growable: false);
-  EventInfo._listEtag.update(response.headers);
-
-  return ServerResponse.success(EventInfo.list);
-}
+Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() =>
+    serverGetEventTeamList(
+      eventKey: Event.currentEvent!.key,
+      etag: FrcTeam._currentEventTeamsEtag,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        FrcTeam.currentEventTeams = response.value;
+      }
+      return response;
+    });

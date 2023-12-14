@@ -1,32 +1,32 @@
-import 'dart:convert';
-
-import 'package:http/http.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
-import 'session.dart';
 
 part 'users.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class User {
-  static User? current;
-  static final Etag _currentEtag = Etag();
+  static User? currentUser;
+  static final Etag _currentUserEtag = Etag();
+
+  static List<User>? allUsers;
+  static final Etag _allUsersEtag = Etag();
 
   final int id;
   final int team;
   final String username;
   final String fullName;
-  final UserAccessLevel accessLevel;
+  final AccessLevel accessLevel;
 
-  User(this.id, this.team, this.username, this.fullName, this.accessLevel);
+  User({
+    required this.id,
+    required this.team,
+    required this.username,
+    required this.fullName,
+    required this.accessLevel,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UserToJson(this);
-
-  @override
-  String toString() => json.encode(this);
 }
 
 /// A user's permission to access resources on the server. If a client attempts
@@ -47,17 +47,20 @@ class User {
 /// - adding, removing, or disabling team members
 /// - resetting team members' passwords
 ///
-/// **sudo** - Unhindered server management reserved for Team 1559. Abilities
-/// not listed here.
+/// **sudo** - Unhindered server management reserved for Team 1559 developers.
+/// Abilities are quite extensive and not listed here.
 @JsonEnum(valueField: 'value')
-enum UserAccessLevel {
+enum AccessLevel {
   user('USER'),
   admin('ADMIN'),
   sudo('SUDO');
 
   final String value;
 
-  const UserAccessLevel(this.value);
+  const AccessLevel(this.value);
+
+  @override
+  String toString() => value;
 
   bool operator >(other) {
     return index > other.index;
@@ -76,59 +79,111 @@ enum UserAccessLevel {
   }
 }
 
-Future<ServerResponse<User>> downloadCurrentUser() async {
-  ServerResponse<User> response =
-      await downloadUser(User.current!.id, User._currentEtag);
+Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequestList(
+      endpoint: '/users',
+      method: 'GET',
+      decoder: User.fromJson,
+      etag: User._allUsersEtag,
+    );
 
-  if (!response.success) return response;
-  if (response.value == null) return ServerResponse.success(User.current);
+Future<ServerResponse<List<User>>> serverGetUsersOnTeam({required int team}) =>
+    serverRequestList(
+      endpoint: '/team/$team/users',
+      method: 'GET',
+      decoder: User.fromJson,
+    );
 
-  User.current = response.value!;
-  return response;
+Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
+    serverRequest(
+      endpoint: '/users/$id',
+      method: 'GET',
+      decoder: User.fromJson,
+    );
+
+Future<ServerResponse<User>> serverCreateUser({
+  required String username,
+  required String fullName,
+  required int team,
+  required AccessLevel accesslevel,
+  required String password,
+}) =>
+    serverRequest(
+      endpoint: '/users',
+      method: 'POST',
+      decoder: User.fromJson,
+      payload: {
+        'username': username,
+        'fullName': fullName,
+        'team': team,
+        'accessLevel': accesslevel,
+        'password': password,
+      },
+    );
+
+Future<ServerResponse<User>> serverEditUser({
+  required int id,
+  String? username,
+  String? fullName,
+  AccessLevel? accessLevel,
+  String? password,
+}) {
+  Map<String, dynamic> edits = {};
+
+  if (username != null) {
+    edits['username'] = username;
+  }
+
+  if (fullName != null) {
+    edits['fullName'] = fullName;
+  }
+
+  if (accessLevel != null) {
+    edits['accessLevel'] = accessLevel.value;
+  }
+
+  if (password != null) {
+    edits['password'] = password;
+  }
+
+  return serverRequest(
+    endpoint: '/users/$id',
+    method: 'PATCH',
+    decoder: User.fromJson,
+    payload: edits,
+  );
 }
 
-Future<ServerResponse<User>> downloadUser(int id, [Etag? etag]) async {
-  Request request = Request('GET', serverURI.resolve('/users/$id'))
-    ..headers.addAll(Session.current!.headers);
+Future<ServerResponse<void>> serverDeleteUser({required int id}) =>
+    serverRequest(endpoint: '/users/$id', method: 'DELETE');
 
-  if (etag != null) {
-    request.headers.addAll(etag.headers);
-  }
+Future<ServerResponse<User>> serverGetCurrentUser() => serverGetUser(
+      id: User.currentUser!.id,
+      etag: User._currentUserEtag,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        User.currentUser = response.value;
+      }
+      return response;
+    });
 
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success();
-  }
+Future<ServerResponse<User>> serverEditCurrentUser({
+  String? username,
+  String? fullName,
+  AccessLevel? accessLevel,
+  String? password,
+}) =>
+    serverEditUser(
+      id: User.currentUser!.id,
+      username: username,
+      fullName: fullName,
+      accessLevel: accessLevel,
+      password: password,
+    ).then((response) {
+      if (response.success && response.value != null) {
+        User.currentUser = response.value;
+      }
+      return response;
+    });
 
-  Map<String, dynamic> body =
-      json.decode(await response.stream.bytesToString());
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(body);
-  }
-
-  User user = User.fromJson(body);
-
-  if (etag != null) {
-    etag.update(response.headers);
-  }
-
-  return ServerResponse.success(user);
-}
-
-Future<ServerResponse<List<User>>> downloadAllUsers() async {
-  Request request = Request('GET', serverURI.resolve('/users'))
-    ..headers.addAll(Session.current!.headers);
-
-  StreamedResponse response = await request.send();
-  String body = await response.stream.bytesToString();
-
-  if (response.statusCode == 200) {
-    return ServerResponse.error(body);
-  }
-
-  List<User> users = (json.decode(body) as List<dynamic>)
-      .map((e) => User.fromJson(e as Map<String, dynamic>))
-      .toList(growable: false);
-
-  return ServerResponse.success(users);
-}
+Future<ServerResponse<void>> serverDeleteCurrentUser() =>
+    serverDeleteUser(id: User.currentUser!.id);

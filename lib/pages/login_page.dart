@@ -60,11 +60,11 @@ class _LoginPageState extends State<LoginPage> {
 
               FilledButton(
                 onPressed: () async {
-                  await login(
+                  await serverLogin(
                     team: int.parse(teamNumberController.text),
                     username: usernameController.text,
                   );
-                  await authenticate(password: 'password');
+                  await serverAuthenticate(password: 'password');
                 },
                 child: const Text("Log In"),
               ),

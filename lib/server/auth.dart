@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:http/http.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
 import 'session.dart';
+import 'teams.dart';
 import 'users.dart';
 
 part 'auth.g.dart';
@@ -91,40 +91,45 @@ class _LoginStatus {
   final String username;
   final _LoginChallenge challenge;
 
-  _LoginStatus(this.team, this.username, this.challenge);
+  _LoginStatus({
+    required this.team,
+    required this.username,
+    required this.challenge,
+  });
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class _LoginChallenge {
   final List<int> nonce;
   final List<int> salt;
 
-  _LoginChallenge(String nonce, String salt)
-      : nonce = base64.decode(nonce),
+  _LoginChallenge({
+    required String nonce,
+    required String salt,
+  })  : nonce = base64.decode(nonce),
         salt = base64.decode(salt);
 
   // ignore: unused_element
   factory _LoginChallenge.fromJson(Map<String, dynamic> json) =>
       _$LoginChallengeFromJson(json);
-
-  Map<String, dynamic> toJson() => _$LoginChallengeToJson(this);
 }
 
-@JsonSerializable()
-// ignore: unused_element
+@JsonSerializable(createToJson: false)
 class _AuthResponse {
   final User user;
+  final Team team;
   final Session session;
   final List<int> serverSignature;
 
-  _AuthResponse(this.user, this.session, String serverSignature)
-      : serverSignature = base64.decode(serverSignature);
+  _AuthResponse({
+    required this.user,
+    required this.team,
+    required this.session,
+    required String serverSignature,
+  }) : serverSignature = base64.decode(serverSignature);
 
-  // ignore: unused_element
   factory _AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 }
 
 final Random _random = Random.secure();
@@ -139,40 +144,49 @@ final Pbkdf2 _pbkdf2Sha256 = Pbkdf2(
 
 /// Attempt to initiate a login to the server for the given user. Returns null
 /// if successful, else an error message for the user.
-Future<ServerResponse<void>> login(
-    {required int team, required String username}) async {
+Future<ServerResponse<void>> serverLogin({
+  required int team,
+  required String username,
+}) async {
   List<int> clientNonce =
       List.generate(8, (index) => _random.nextInt(0x100), growable: false);
 
-  Request request = Request('POST', serverURI.resolve('/login'))
-    ..body = json.encode({
+  ServerResponse<_LoginChallenge> response = await serverRequest(
+    endpoint: '/login',
+    method: 'POST',
+    decoder: _LoginChallenge.fromJson,
+    payload: {
       'team': team,
       'username': username,
       'clientNonce': base64.encode(clientNonce)
-    });
+    },
+  );
 
-  StreamedResponse response = await request.send();
-  Map<String, dynamic> body =
-      json.decode(await response.stream.bytesToString());
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(body);
+  if (!response.success) {
+    return response;
   }
 
-  _LoginChallenge challenge = _LoginChallenge.fromJson(body);
+  _LoginChallenge challenge = response.value!;
   for (int i = 0; i < 8; i++) {
     if (clientNonce[i] != challenge.nonce[i]) {
       return ServerResponse.error('Server modified nonce');
     }
   }
 
-  _LoginStatus.current = _LoginStatus(team, username, challenge);
+  _LoginStatus.current = _LoginStatus(
+    team: team,
+    username: username,
+    challenge: challenge,
+  );
   return ServerResponse.success();
 }
 
 /// After receiving the login challenge, attempt to authenticate the user by
 /// completing the challenge with the given password. Returns null if
 /// successful, else an error message for the user.
-Future<ServerResponse<void>> authenticate({required String password}) async {
+Future<ServerResponse<void>> serverAuthenticate({
+  required String password,
+}) async {
   if (_LoginStatus.current == null) {
     return ServerResponse.error('No previous login attempt');
   }
@@ -195,27 +209,32 @@ Future<ServerResponse<void>> authenticate({required String password}) async {
     for (int i = 0; i < 32; i++) clientKey[i] ^ clientSignature[i]
   ];
 
-  Request request = Request('POST', serverURI.resolve('/auth'))
-    ..body = json.encode({
+  Future<ServerResponse<_AuthResponse>> request = serverRequest(
+    endpoint: '/auth',
+    method: 'POST',
+    decoder: _AuthResponse.fromJson,
+    payload: {
       'team': login.team,
       'username': login.username,
       'nonce': base64.encode(login.challenge.nonce),
       'clientProof': base64.encode(clientProof)
-    });
-  Future<StreamedResponse> serverRequest = request.send();
+    },
+  );
 
   List<int> serverKey = await _computeKey(saltedPassword, 'Server Key');
   List<int> serverSignature = await _computeSignature(
-      serverKey, login.team, login.username, login.challenge.nonce);
+    serverKey,
+    login.team,
+    login.username,
+    login.challenge.nonce,
+  );
 
-  StreamedResponse response = await serverRequest;
-  Map<String, dynamic> body =
-      json.decode(await response.stream.bytesToString());
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(body);
+  ServerResponse<_AuthResponse> response = await request;
+  if (!response.success) {
+    return response;
   }
 
-  _AuthResponse auth = _AuthResponse.fromJson(body);
+  _AuthResponse auth = response.value!;
   for (int i = 0; i < 32; i++) {
     if (serverSignature[i] != auth.serverSignature[i]) {
       return ServerResponse.error('Failed to authenticate server');
@@ -223,28 +242,16 @@ Future<ServerResponse<void>> authenticate({required String password}) async {
   }
 
   _LoginStatus.current = null;
-
   Session.current = auth.session;
-  User.current = auth.user;
+  User.currentUser = auth.user;
+  Team.currentTeam = auth.team;
+
   return ServerResponse.success();
 }
 
 /// Log out the current session, if it exists.
-Future<ServerResponse<void>> logout() async {
-  if (Session.current == null) {
-    return ServerResponse.error('No session to log out');
-  }
-
-  Request request = Request('GET', serverURI.resolve('/logout'))
-    ..headers.addAll(Session.current!.headers);
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 204) {
-    return ServerResponse.success();
-  }
-
-  return ServerResponse.error(await response.stream.bytesToString());
-}
+Future<ServerResponse<void>> serverLogout() =>
+    serverRequest(endpoint: '/logout', method: 'DELETE');
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256
@@ -255,7 +262,11 @@ Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
         .then((key) => key.bytes);
 
 Future<List<int>> _computeSignature(
-        List<int> key, int team, String username, List<int> nonce) =>
+  List<int> key,
+  int team,
+  String username,
+  List<int> nonce,
+) =>
     _hmacSha256
         .calculateMac(
           utf8.encode('$team$username') + nonce,

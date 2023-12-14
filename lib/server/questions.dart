@@ -1,11 +1,6 @@
-import 'dart:convert';
-
-import 'package:http/http.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
-import 'session.dart';
-import 'users.dart';
 
 part 'questions.g.dart';
 
@@ -21,24 +16,23 @@ enum QuestionType {
   single;
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class Question {
   final String prompt;
   final QuestionType type;
   final Map<String, Object>? config;
 
-  Question(this.prompt, this.type, this.config);
+  Question({
+    required this.prompt,
+    required this.type,
+    required this.config,
+  });
 
   factory Question.fromJson(Map<String, dynamic> json) =>
       _$QuestionFromJson(json);
-
-  Map<String, dynamic> toJson() => _$QuestionToJson(this);
-
-  @override
-  String toString() => json.encode(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class MatchQuestions {
   static MatchQuestions? _current;
   static final Etag _etag = Etag();
@@ -51,19 +45,19 @@ class MatchQuestions {
   final List<Question> general;
   final List<Question> human;
 
-  MatchQuestions(
-      this.auto, this.teleop, this.endgame, this.general, this.human);
+  MatchQuestions({
+    required this.auto,
+    required this.teleop,
+    required this.endgame,
+    required this.general,
+    required this.human,
+  });
 
   factory MatchQuestions.fromJson(Map<String, dynamic> json) =>
       _$MatchQuestionsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MatchQuestionsToJson(this);
-
-  @override
-  String toString() => json.encode(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class PitQuestions {
   static PitQuestions? _current;
   static final Etag _etag = Etag();
@@ -76,18 +70,19 @@ class PitQuestions {
   final List<Question> endgame;
   final List<Question> general;
 
-  PitQuestions(this.specs, this.auto, this.teleop, this.endgame, this.general);
+  PitQuestions({
+    required this.specs,
+    required this.auto,
+    required this.teleop,
+    required this.endgame,
+    required this.general,
+  });
 
   factory PitQuestions.fromJson(Map<String, dynamic> json) =>
       _$PitQuestionsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$PitQuestionsToJson(this);
-
-  @override
-  String toString() => json.encode(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class DriveTeamQuestions {
   static DriveTeamQuestions? _current;
   static final Etag _etag = Etag();
@@ -96,86 +91,31 @@ class DriveTeamQuestions {
 
   final List<Question> questions;
 
-  DriveTeamQuestions(this.questions);
+  DriveTeamQuestions({required this.questions});
 
   factory DriveTeamQuestions.fromJson(Map<String, dynamic> json) =>
       _$DriveTeamQuestionsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$DriveTeamQuestionsToJson(this);
-
-  @override
-  String toString() => json.encode(this);
 }
 
-Future<ServerResponse<MatchQuestions>> downloadMatchQuestions() async {
-  ServerResponse<Map<String, dynamic>> response = await _downloadQuestions(
-      serverURI.resolve('/questions/match'), MatchQuestions._etag);
+Future<ServerResponse<MatchQuestions>> serverGetMatchQuestions() =>
+    serverRequest(
+      endpoint: '/questions/match',
+      method: 'GET',
+      decoder: MatchQuestions.fromJson,
+      etag: MatchQuestions._etag,
+    );
 
-  if (!response.success) {
-    return ServerResponse.error(response.message);
-  }
+Future<ServerResponse<PitQuestions>> serverGetPitQuestions() => serverRequest(
+      endpoint: '/questions/pit',
+      method: 'GET',
+      decoder: PitQuestions.fromJson,
+      etag: PitQuestions._etag,
+    );
 
-  if (response.value == null) {
-    return ServerResponse.success();
-  }
-
-  MatchQuestions._current = MatchQuestions.fromJson(response.value!);
-  return ServerResponse.success(MatchQuestions.current);
-}
-
-Future<ServerResponse<PitQuestions>> downloadPitQuestions() async {
-  ServerResponse<Map<String, dynamic>> response = await _downloadQuestions(
-      serverURI.resolve('/questions/pit'), PitQuestions._etag);
-
-  if (!response.success) {
-    return ServerResponse.error(response.message);
-  }
-
-  if (response.value == null) {
-    return ServerResponse.success();
-  }
-
-  PitQuestions._current = PitQuestions.fromJson(response.value!);
-  return ServerResponse.success(PitQuestions.current);
-}
-
-Future<ServerResponse<DriveTeamQuestions>> downloadDriveTeamQuestions() async {
-  if (User.current!.accessLevel < UserAccessLevel.admin) {
-    return ServerResponse.error('Insufficient permissions');
-  }
-
-  ServerResponse<Map<String, dynamic>> response = await _downloadQuestions(
-      serverURI.resolve('/questions/drive-team'), DriveTeamQuestions._etag);
-
-  if (!response.success) {
-    return ServerResponse.error(response.message);
-  }
-
-  if (response.value == null) {
-    return ServerResponse.success();
-  }
-
-  DriveTeamQuestions._current = DriveTeamQuestions.fromJson(response.value!);
-  return ServerResponse.success(DriveTeamQuestions.current);
-}
-
-Future<ServerResponse<Map<String, dynamic>>> _downloadQuestions(
-    Uri uri, Etag etag) async {
-  Request request = Request('GET', uri)
-    ..headers.addAll(Session.current!.headers)
-    ..headers.addAll(etag.headers);
-
-  StreamedResponse response = await request.send();
-  if (response.statusCode == 304) {
-    return ServerResponse.success();
-  }
-
-  Map<String, dynamic> body =
-      json.decode(await response.stream.bytesToString());
-  if (response.statusCode != 200) {
-    return ServerResponse.errorFromJson(body);
-  }
-
-  etag.update(response.headers);
-  return ServerResponse.success(body);
-}
+Future<ServerResponse<DriveTeamQuestions>> serverGetDriveTeamQuestions() =>
+    serverRequest(
+      endpoint: '/questions/drive-team',
+      method: 'GET',
+      decoder: DriveTeamQuestions.fromJson,
+      etag: DriveTeamQuestions._etag,
+    );

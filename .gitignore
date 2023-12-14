@@ -139,3 +139,4 @@ app.*.symbols
 
 # CUSTOM ADDITIONS
 *.g.dart
+lib/server/test.dart
