@@ -43,10 +43,10 @@ class TeamEdits {
   Map<String, dynamic> toJson() => _$TeamEditsToJson(this);
 }
 
-Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequestList(
+Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequest(
       endpoint: '/teams',
       method: 'GET',
-      decoder: Team.fromJson,
+      decoder: listOf(Team.fromJson),
       etag: Team._allTeamsEtag,
     );
 
@@ -75,6 +75,7 @@ Future<ServerResponse<Team>> serverEditTeam({
   required int number,
   String? name,
   String? eventKey,
+  Etag? etag,
 }) {
   Map<String, dynamic> edits = {};
 
@@ -91,21 +92,20 @@ Future<ServerResponse<Team>> serverEditTeam({
     method: 'PATCH',
     decoder: Team.fromJson,
     payload: edits,
+    etag: etag,
   );
 }
 
 Future<ServerResponse<void>> serverDeleteTeam({required int number}) =>
     serverRequest(endpoint: '/teams/$number', method: 'DELETE');
 
-Future<ServerResponse<Team>> serverGetCurrentTeam() => serverGetTeam(
-      number: Team.currentTeam!.number,
+Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(
+      endpoint: '/teams/${Team.currentTeam!.number}',
+      method: 'GET',
+      decoder: Team.fromJson,
+      callback: (team) => Team.currentTeam = team,
       etag: Team._currentTeamEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        Team.currentTeam = response.value;
-      }
-      return response;
-    });
+    );
 
 Future<ServerResponse<Team>> serverEditCurrentTeam({
   String? name,
@@ -115,6 +115,7 @@ Future<ServerResponse<Team>> serverEditCurrentTeam({
       number: Team.currentTeam!.number,
       name: name,
       eventKey: eventKey,
+      etag: Team._currentTeamEtag,
     ).then((response) {
       if (response.success && response.value != null) {
         Team.currentTeam = response.value;

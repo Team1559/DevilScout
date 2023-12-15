@@ -31,9 +31,5 @@ Future<ServerResponse<Session>> serverGetSession() => serverRequest(
       endpoint: '/session',
       method: 'GET',
       decoder: Session.fromJson,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        Session.current = response.value!;
-      }
-      return response;
-    });
+      callback: (session) => Session.current = session,
+    );

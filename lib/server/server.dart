@@ -23,9 +23,9 @@ class ServerResponse<T> {
   @override
   String toString() {
     if (success) {
-      return value?.toString() ?? 'null';
+      return value?.toString() ?? '[Success, no value]';
     } else {
-      return message ?? 'Error';
+      return message ?? '[Error, no message]';
     }
   }
 }
@@ -47,6 +47,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   required String endpoint,
   required String method,
   R Function(T)? decoder,
+  void Function(R)? callback,
   Object? payload,
   Etag? etag,
 }) async {
@@ -73,21 +74,14 @@ Future<ServerResponse<R>> serverRequest<R, T>({
 
   dynamic body = jsonDecode(bodyStr);
   R result = decoder.call(body);
+
+  if (callback != null) {
+    callback.call(result);
+  }
+
   return ServerResponse.success(result);
 }
 
-Future<ServerResponse<List<R>>> serverRequestList<R, T>({
-  required String endpoint,
-  required String method,
-  required R Function(T) decoder,
-  Object? payload,
-  Etag? etag,
-}) =>
-    serverRequest(
-      endpoint: endpoint,
-      method: method,
-      decoder: (List<dynamic> list) =>
-          list.map((e) => e as T).map(decoder).toList(growable: false),
-      payload: payload,
-      etag: etag,
-    );
+List<R> Function(List<dynamic>) listOf<R, T>(R Function(T) decoder) =>
+    (List<dynamic> list) =>
+        list.map((e) => e as T).map(decoder).toList(growable: false);

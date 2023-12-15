@@ -79,18 +79,18 @@ enum AccessLevel {
   }
 }
 
-Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequestList(
+Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequest(
       endpoint: '/users',
       method: 'GET',
-      decoder: User.fromJson,
+      decoder: listOf(User.fromJson),
       etag: User._allUsersEtag,
     );
 
 Future<ServerResponse<List<User>>> serverGetUsersOnTeam({required int team}) =>
-    serverRequestList(
+    serverRequest(
       endpoint: '/team/$team/users',
       method: 'GET',
-      decoder: User.fromJson,
+      decoder: listOf(User.fromJson),
     );
 
 Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
@@ -156,15 +156,13 @@ Future<ServerResponse<User>> serverEditUser({
 Future<ServerResponse<void>> serverDeleteUser({required int id}) =>
     serverRequest(endpoint: '/users/$id', method: 'DELETE');
 
-Future<ServerResponse<User>> serverGetCurrentUser() => serverGetUser(
-      id: User.currentUser!.id,
+Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
+      endpoint: '/users/${User.currentUser!.id}',
+      method: 'GET',
+      decoder: User.fromJson,
+      callback: (user) => User.currentUser = user,
       etag: User._currentUserEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        User.currentUser = response.value;
-      }
-      return response;
-    });
+    );
 
 Future<ServerResponse<User>> serverEditCurrentUser({
   String? username,

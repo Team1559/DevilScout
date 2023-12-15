@@ -98,21 +98,18 @@ enum MatchLevel {
   const MatchLevel(this.value);
 }
 
-Future<ServerResponse<List<Event>>> serverGetAllEvents() =>
-    serverRequestList(
+Future<ServerResponse<List<Event>>> serverGetAllEvents() => serverRequest(
       endpoint: '/events',
       method: 'GET',
-      decoder: Event.fromJson,
+      decoder: listOf(Event.fromJson),
       etag: Event._allEventsEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        Event.allEvents = response.value;
-      }
-      return response;
-    });
+      callback: (events) => Event.allEvents = events,
+    );
 
-Future<ServerResponse<Event>> serverGetEvent(
-        {required String eventKey, Etag? etag}) =>
+Future<ServerResponse<Event>> serverGetEvent({
+  required String eventKey,
+  Etag? etag,
+}) =>
     serverRequest(
       endpoint: '/events/$eventKey',
       method: 'GET',
@@ -120,51 +117,49 @@ Future<ServerResponse<Event>> serverGetEvent(
       etag: etag,
     );
 
-Future<ServerResponse<List<EventMatch>>> serverGetEventSchedule(
-        {required String eventKey, Etag? etag}) =>
-    serverRequestList(
+Future<ServerResponse<List<EventMatch>>> serverGetEventSchedule({
+  required String eventKey,
+  Etag? etag,
+}) =>
+    serverRequest(
       endpoint: '/events/$eventKey/match-schedule',
       method: 'GET',
-      decoder: EventMatch.fromJson,
+      decoder: listOf(EventMatch.fromJson),
       etag: etag,
     );
 
-Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList(
-        {required String eventKey, Etag? etag}) =>
-    serverRequestList(
+Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
+  required String eventKey,
+  Etag? etag,
+}) =>
+    serverRequest(
       endpoint: '/events/$eventKey/teams',
       method: 'GET',
-      decoder: FrcTeam.fromJson,
+      decoder: listOf(FrcTeam.fromJson),
     );
 
-Future<ServerResponse<Event>> serverGetCurrentEvent() => serverGetEvent(
-      eventKey: Event.currentEvent!.key,
+Future<ServerResponse<Event>> serverGetCurrentEvent() => serverRequest(
+      endpoint: '/events/${Event.currentEvent!.key}',
+      method: 'GET',
+      decoder: Event.fromJson,
+      callback: (event) => Event.currentEvent = event,
       etag: Event._currentEventEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        Event.currentEvent = response.value;
-      }
-      return response;
-    });
+    );
 
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() =>
-    serverGetEventSchedule(
-      eventKey: Event.currentEvent!.key,
+    serverRequest(
+      endpoint: '/events/${Event.currentEvent!.key}/match-schedule',
+      method: 'GET',
+      decoder: listOf(EventMatch.fromJson),
+      callback: (schedule) => EventMatch.currentEventSchedule = schedule,
       etag: EventMatch._currentEventScheduleEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        EventMatch.currentEventSchedule = response.value;
-      }
-      return response;
-    });
+    );
 
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() =>
-    serverGetEventTeamList(
-      eventKey: Event.currentEvent!.key,
-      etag: FrcTeam._currentEventTeamsEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        FrcTeam.currentEventTeams = response.value;
-      }
-      return response;
-    });
+    serverRequest(
+      endpoint: '/events/${Event.currentEvent!.key}/teams',
+      method: 'GET',
+      decoder: listOf(FrcTeam.fromJson),
+      callback: (teams) => FrcTeam.currentEventTeams = teams,
+      etag: FrcTeam._currentEventTeamsEtag
+    );
