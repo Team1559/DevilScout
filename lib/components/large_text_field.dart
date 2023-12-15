@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class LargeTextField extends StatefulWidget {
-  final dynamic controller;
+  final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final List<TextInputFormatter>? inputFormatters;
 
   const LargeTextField({
     super.key,
     required this.controller,
     required this.hintText,
-    required this.obscureText,
+    this.obscureText = false,
+    this.inputFormatters,
   });
 
   @override
@@ -24,14 +27,17 @@ class _LargeTextFieldState extends State<LargeTextField> {
       child: TextField(
         controller: widget.controller,
         obscureText: widget.obscureText,
+        inputFormatters: widget.inputFormatters,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.background),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.background,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.background),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.background,
+            ),
           ),
           fillColor: Theme.of(context).colorScheme.surface,
           filled: true,
