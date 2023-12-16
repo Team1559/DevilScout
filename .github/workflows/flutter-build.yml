@@ -16,6 +16,8 @@ jobs:
         cache: true
     - name: Download dart packages
       run: flutter pub get
+    - name: Generate source files
+      run: dart run build_runner build --delete-conflicting-outputs
     - name: Run unit tests
       run: flutter test
 
@@ -31,6 +33,8 @@ jobs:
         cache: true
     - name: Download dart packages
       run: flutter pub get
+    - name: Generate source files
+      run: dart run build_runner build --delete-conflicting-outputs
     - name: Build for iOS
       run: flutter build ios --release --no-codesign
 
@@ -51,5 +55,7 @@ jobs:
         cache: true
     - name: Download dart packages
       run: flutter pub get
+    - name: Generate source files
+      run: dart run build_runner build --delete-conflicting-outputs
     - name: Build for Android
       run: flutter build appbundle --release
