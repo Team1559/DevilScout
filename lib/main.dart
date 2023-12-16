@@ -1,4 +1,3 @@
-import 'package:devil_scout/pages/match_select_page.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login_page.dart';
@@ -25,15 +24,11 @@ class MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      home: const LoginPage(),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login',
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/scouting/match/select': (context) => const MatchSelectPage(),
-      },
     );
   }
 

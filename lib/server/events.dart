@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
+import 'teams.dart';
 
 part 'events.g.dart';
 
@@ -27,13 +28,12 @@ class Event {
     required this.end,
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) =>
-      _$EventInfoFromJson(json);
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
 class FrcTeam {
-  static List<FrcTeam>? currentEventTeams;
+  static Map<int, FrcTeam>? currentEventTeams;
   static final Etag _currentEventTeamsEtag = Etag();
 
   final int number;
@@ -47,55 +47,61 @@ class FrcTeam {
   });
 
   factory FrcTeam.fromJson(Map<String, dynamic> json) =>
-      _$EventTeamFromJson(json);
+      _$FrcTeamFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
 class EventMatch {
-  static List<EventMatch>? currentEventSchedule;
+  static List<EventMatch> currentEventSchedule = List.empty();
   static final Etag _currentEventScheduleEtag = Etag();
 
   final String key;
+  final String name;
   final MatchLevel level;
   final int set;
+  final int number;
   final DateTime time;
   final bool completed;
-
-  @JsonKey(name: 'match')
-  final int number;
-
-  @JsonKey(name: 'blue')
-  final List<int> blueAlliance;
-
-  @JsonKey(name: 'red')
-  final List<int> redAlliance;
+  final List<int> blue;
+  final List<int> red;
 
   EventMatch({
     required this.key,
+    required this.name,
     required this.level,
     required this.set,
     required this.number,
     required int time,
     required this.completed,
-    required this.blueAlliance,
-    required this.redAlliance,
+    required this.blue,
+    required this.red,
   }) : time = DateTime.fromMillisecondsSinceEpoch(time);
+
+  bool containsCurrentTeam() {
+    int team = Team.currentTeam!.number;
+    return blue.contains(team) || red.contains(team);
+  }
 
   factory EventMatch.fromJson(Map<String, dynamic> json) =>
       _$EventMatchFromJson(json);
 }
 
-@JsonEnum(valueField: 'value')
+@JsonEnum(valueField: '_json')
 enum MatchLevel {
-  qualification('QUAL'),
-  quarterfinals('QUARTER'),
-  semifinals('SEMI'),
-  finals('FINAL'),
-  unknown('UNKNOWN');
+  qualification('QUAL', 'Qualification'),
+  quarterfinals('QUARTER', 'Quarterfinal'),
+  semifinals('SEMI', 'Semifinal'),
+  finals('FINAL', 'Final'),
+  unknown('UNKNOWN', 'Custom');
 
-  final String value;
+  // ignore: unused_field
+  final String _json;
+  final String _toString;
 
-  const MatchLevel(this.value);
+  const MatchLevel(this._json, this._toString);
+
+  @override
+  String toString() => _toString;
 }
 
 Future<ServerResponse<List<Event>>> serverGetAllEvents() => serverRequest(
@@ -139,7 +145,7 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
     );
 
 Future<ServerResponse<Event>> serverGetCurrentEvent() => serverRequest(
-      endpoint: '/events/${Event.currentEvent!.key}',
+      endpoint: '/events/${Team.currentTeam!.eventKey}',
       method: 'GET',
       decoder: Event.fromJson,
       callback: (event) => Event.currentEvent = event,
@@ -148,7 +154,7 @@ Future<ServerResponse<Event>> serverGetCurrentEvent() => serverRequest(
 
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() =>
     serverRequest(
-      endpoint: '/events/${Event.currentEvent!.key}/match-schedule',
+      endpoint: '/events/${Team.currentTeam!.eventKey}/match-schedule',
       method: 'GET',
       decoder: listOf(EventMatch.fromJson),
       callback: (schedule) => EventMatch.currentEventSchedule = schedule,
@@ -157,9 +163,10 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() =>
 
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() =>
     serverRequest(
-      endpoint: '/events/${Event.currentEvent!.key}/teams',
+      endpoint: '/events/${Team.currentTeam!.eventKey}/teams',
       method: 'GET',
       decoder: listOf(FrcTeam.fromJson),
-      callback: (teams) => FrcTeam.currentEventTeams = teams,
-      etag: FrcTeam._currentEventTeamsEtag
+      callback: (teams) => FrcTeam.currentEventTeams =
+          Map.fromIterable(teams, key: (team) => team.number),
+      etag: FrcTeam._currentEventTeamsEtag,
     );

@@ -16,6 +16,8 @@ class Team {
   final String name;
   final String eventKey;
 
+  bool get hasEventKey => eventKey != '';
+
   Team({
     required this.number,
     required this.name,

@@ -1,4 +1,5 @@
 import 'package:devil_scout/components/large_text_field.dart';
+import 'package:devil_scout/pages/match_select_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -26,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 32),
+        minimum: const EdgeInsets.all(32),
         child: Center(
           child: Column(
             children: [
@@ -40,24 +41,15 @@ class _LoginPageState extends State<LoginPage> {
                 Icons.image,
                 size: 200,
               ),
-              const SizedBox(height: 75),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) {
-                  final inAnimation = Tween(
-                    begin: const Offset(2, 0),
+                transitionBuilder: (child, animation) => SlideTransition(
+                  position: Tween(
+                    begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
                     end: Offset.zero,
-                  ).animate(animation);
-                  final outAnimation = Tween(
-                    begin: const Offset(-2, 0),
-                    end: Offset.zero,
-                  ).animate(animation);
-                  return SlideTransition(
-                    position:
-                        child.key == _passwordKey ? inAnimation : outAnimation,
-                    child: child,
-                  );
-                },
+                  ).animate(animation),
+                  child: child,
+                ),
                 child:
                     _showingPassword ? _passwordInput() : _userAndTeamInput(),
               ),
@@ -75,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
         LargeTextField(
           controller: _username,
           hintText: 'Username',
-          obscureText: false,
           inputFormatters: [
             LengthLimitingTextInputFormatter(32),
           ],
@@ -83,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
         LargeTextField(
           controller: _teamNumber,
           hintText: 'Team Number',
-          obscureText: false,
           inputFormatters: [
             LengthLimitingTextInputFormatter(4),
             FilteringTextInputFormatter.digitsOnly,
@@ -104,10 +94,7 @@ class _LoginPageState extends State<LoginPage> {
         LargeTextField(
           controller: _password,
           hintText: 'Password',
-          obscureText: false,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(32),
-          ],
+          obscureText: true,
         ),
         FilledButton(
           onPressed: _onLoginPressed,
@@ -146,7 +133,11 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (response.success) {
-      await Navigator.pushNamed(context, '/scouting/match/select');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MatchSelectPage()),
+        (route) => false,
+      );
     } else {
       // display error message
     }
