@@ -11,8 +11,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-        body: Center(
-      child: Text('This is the Settings Page'),
-    ));
+      body: Center(
+        child: Text('This is the Settings Page'),
+      ),
+    );
   }
 }

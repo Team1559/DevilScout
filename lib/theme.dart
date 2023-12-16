@@ -19,7 +19,7 @@ const _onDarkSurface = Colors.white;
 const _darkBackground = Color(0xFF262626);
 const _onDarkBackground = Colors.white;
 
-ThemeData lightTheme = ThemeData(
+final lightTheme = ThemeData(
   colorScheme: const ColorScheme(
     brightness: Brightness.light,
     primary: _primary,
@@ -35,9 +35,15 @@ ThemeData lightTheme = ThemeData(
     surface: _lightSurface,
     onSurface: _onLightSurface,
   ),
+  dividerColor: Colors.transparent,
+  cardTheme: CardTheme(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+  ),
 );
 
-ThemeData darkTheme = ThemeData(
+final darkTheme = ThemeData(
   colorScheme: const ColorScheme(
     brightness: Brightness.dark,
     primary: _primary,
@@ -53,4 +59,5 @@ ThemeData darkTheme = ThemeData(
     surface: _darkSurface,
     onSurface: _onDarkSurface,
   ),
+  dividerColor: Colors.transparent,
 );
