@@ -12,6 +12,14 @@ class Team {
   static List<Team> allTeams = List.empty();
   static final Etag _allTeamsEtag = Etag();
 
+  static void clear() {
+    currentTeam = null;
+    _currentTeamEtag.clear();
+
+    allTeams = List.empty();
+    _allTeamsEtag.clear();
+  }
+
   final int number;
   final String name;
   final String eventKey;
@@ -25,24 +33,6 @@ class Team {
   });
 
   factory Team.fromJson(Map<String, dynamic> json) => _$TeamFromJson(json);
-}
-
-@JsonSerializable(
-  includeIfNull: false,
-  createFactory: false,
-)
-class TeamEdits {
-  final int number;
-  final String? name;
-  final String? eventKey;
-
-  TeamEdits({
-    required this.number,
-    required this.name,
-    required this.eventKey,
-  });
-
-  Map<String, dynamic> toJson() => _$TeamEditsToJson(this);
 }
 
 Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequest(

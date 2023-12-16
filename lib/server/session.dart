@@ -12,6 +12,8 @@ class Session {
   static Map<String, String> get headers =>
       current == null ? {} : {'X-DS-SESSION-KEY': '${current!.id}'};
 
+  static void clear() => current = null;
+
   /// The ID for the current session, which must be passed with every request
   final int id;
 

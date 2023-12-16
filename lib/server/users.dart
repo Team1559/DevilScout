@@ -9,8 +9,16 @@ class User {
   static User? currentUser;
   static final Etag _currentUserEtag = Etag();
 
-  static List<User>? allUsers;
+  static List<User> allUsers = List.empty();
   static final Etag _allUsersEtag = Etag();
+
+  static void clear() {
+    currentUser = null;
+    _currentUserEtag.clear();
+
+    allUsers = List.empty();
+    _allUsersEtag.clear();
+  }
 
   final int id;
   final int team;

@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'events.dart';
+import 'questions.dart';
 import 'server.dart';
 import 'session.dart';
 import 'teams.dart';
@@ -250,8 +252,24 @@ Future<ServerResponse<void>> serverAuthenticate({
 }
 
 /// Log out the current session, if it exists.
-Future<ServerResponse<void>> serverLogout() =>
-    serverRequest(endpoint: '/logout', method: 'DELETE');
+Future<ServerResponse<void>> serverLogout() {
+  Future<ServerResponse<void>> request = serverRequest(
+    endpoint: '/logout',
+    method: 'DELETE',
+  );
+
+  Session.clear();
+  User.clear();
+  Team.clear();
+  Event.clear();
+  FrcTeam.clear();
+  EventMatch.clear();
+  MatchQuestions.clear();
+  PitQuestions.clear();
+  DriveTeamQuestions.clear();
+
+  return request;
+}
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256

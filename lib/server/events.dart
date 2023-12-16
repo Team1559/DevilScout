@@ -10,8 +10,16 @@ class Event {
   static Event? currentEvent;
   static final Etag _currentEventEtag = Etag();
 
-  static List<Event>? allEvents;
+  static List<Event> allEvents = List.empty();
   static final Etag _allEventsEtag = Etag();
+
+  static void clear() {
+    currentEvent = null;
+    _currentEventEtag.clear();
+
+    allEvents = List.empty();
+    _allEventsEtag.clear();
+  }
 
   final String key;
   final String name;
@@ -33,8 +41,13 @@ class Event {
 
 @JsonSerializable(createToJson: false)
 class FrcTeam {
-  static Map<int, FrcTeam>? currentEventTeams;
+  static Map<int, FrcTeam> currentEventTeams = Map.unmodifiable({});
   static final Etag _currentEventTeamsEtag = Etag();
+
+  static void clear() {
+    currentEventTeams = Map.unmodifiable({});
+    _currentEventTeamsEtag.clear();
+  }
 
   final int number;
   final String name;
@@ -54,6 +67,11 @@ class FrcTeam {
 class EventMatch {
   static List<EventMatch> currentEventSchedule = List.empty();
   static final Etag _currentEventScheduleEtag = Etag();
+
+  static void clear() {
+    currentEventSchedule = List.empty();
+    _currentEventScheduleEtag.clear();
+  }
 
   final String key;
   final String name;
@@ -76,11 +94,6 @@ class EventMatch {
     required this.blue,
     required this.red,
   }) : time = DateTime.fromMillisecondsSinceEpoch(time);
-
-  bool containsCurrentTeam() {
-    int team = Team.currentTeam!.number;
-    return blue.contains(team) || red.contains(team);
-  }
 
   factory EventMatch.fromJson(Map<String, dynamic> json) =>
       _$EventMatchFromJson(json);

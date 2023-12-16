@@ -34,10 +34,13 @@ class Question {
 
 @JsonSerializable(createToJson: false)
 class MatchQuestions {
-  static MatchQuestions? _current;
+  static MatchQuestions? current;
   static final Etag _etag = Etag();
 
-  static MatchQuestions get current => _current!;
+  static void clear() {
+    current = null;
+    _etag.clear();
+  }
 
   final List<Question> auto;
   final List<Question> teleop;
@@ -59,10 +62,13 @@ class MatchQuestions {
 
 @JsonSerializable(createToJson: false)
 class PitQuestions {
-  static PitQuestions? _current;
+  static PitQuestions? current;
   static final Etag _etag = Etag();
 
-  static PitQuestions get current => _current!;
+  static void clear() {
+    current = null;
+    _etag.clear();
+  }
 
   final List<Question> specs;
   final List<Question> auto;
@@ -84,10 +90,13 @@ class PitQuestions {
 
 @JsonSerializable(createToJson: false)
 class DriveTeamQuestions {
-  static DriveTeamQuestions? _current;
+  static DriveTeamQuestions? current;
   static final Etag _etag = Etag();
 
-  static DriveTeamQuestions get current => _current!;
+  static void clear() {
+    current = null;
+    _etag.clear();
+  }
 
   final List<Question> questions;
 
