@@ -1,10 +1,12 @@
-import 'package:devil_scout/components/large_text_field.dart';
-import 'package:devil_scout/pages/match_select_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '/components/large_text_field.dart';
+import '/components/loading_overlay.dart';
+import '/components/snackbar.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
+import 'match_select_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -14,49 +16,64 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LoadingOverlay(
+        child: SafeArea(
+          minimum: const EdgeInsets.all(32),
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 65),
+                Text(
+                  'Welcome',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 75),
+                const Icon(
+                  Icons.image,
+                  size: 200,
+                ),
+                const _LoginFields(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginFields extends StatefulWidget {
+  const _LoginFields();
+
+  @override
+  State<_LoginFields> createState() => _LoginFieldsState();
+}
+
+class _LoginFieldsState extends State<_LoginFields> {
+  static const Key _usernameKey = Key('username');
+  static const Key _passwordKey = Key('password');
+
   final _teamNumber = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
-
-  final Key _usernameKey = const Key('username');
-  final Key _passwordKey = const Key('password');
 
   bool _showingPassword = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        minimum: const EdgeInsets.all(32),
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 65),
-              Text(
-                'Welcome',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 75),
-              const Icon(
-                Icons.image,
-                size: 200,
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) => SlideTransition(
-                  position: Tween(
-                    begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-                child:
-                    _showingPassword ? _passwordInput() : _userAndTeamInput(),
-              ),
-            ],
-          ),
-        ),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      transitionBuilder: (child, animation) => SlideTransition(
+        position: Tween(
+          begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
       ),
+      child: _showingPassword ? _passwordInput() : _userAndTeamInput(),
     );
   }
 
@@ -80,7 +97,31 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
         FilledButton(
-          onPressed: _onNextPressed,
+          onPressed: () async {
+            if (_username.text.isEmpty) {
+              displaySnackbar(context, 'Enter your username');
+              return;
+            } else if (_teamNumber.text.isEmpty) {
+              displaySnackbar(context, 'Enter your team number');
+              return;
+            }
+
+            ServerResponse<void> response = await serverLogin(
+              team: int.parse(_teamNumber.text),
+              username: _username.text,
+            );
+            if (!context.mounted) return;
+
+            if (!response.success) {
+              displaySnackbar(context, response.toString());
+              return;
+            }
+
+            setState(() {
+              _password.clear();
+              _showingPassword = true;
+            });
+          },
           child: const Text('Next'),
         ),
       ],
@@ -97,49 +138,38 @@ class _LoginPageState extends State<LoginPage> {
           obscureText: true,
         ),
         FilledButton(
-          onPressed: _onLoginPressed,
+          onPressed: () {
+            if (_password.text.isEmpty) {
+              displaySnackbar(context, 'Enter your password');
+              return;
+            }
+
+            LoadingOverlay.of(context).show();
+
+            serverAuthenticate(
+              password: _password.text,
+            ).then((response) {
+              LoadingOverlay.of(context).hide();
+
+              if (!response.success) {
+                displaySnackbar(context, response.toString());
+                return;
+              }
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const MatchSelectPage()),
+              );
+            });
+          },
           child: const Text('Log In'),
         ),
         TextButton(
-          onPressed: () async {
-            setState(() {
-              _showingPassword = false;
-            });
-          },
+          onPressed: () => setState(() => _showingPassword = false),
           child: const Text('Back'),
         ),
       ],
     );
-  }
-
-  Future<void> _onNextPressed() async {
-    ServerResponse<void> response = await serverLogin(
-      team: int.parse(_teamNumber.text),
-      username: _username.text,
-    );
-
-    if (response.success) {
-      setState(() {
-        _showingPassword = true;
-      });
-    } else {
-      // display error message
-    }
-  }
-
-  Future<void> _onLoginPressed() async {
-    ServerResponse<void> response = await serverAuthenticate(
-      password: _password.text,
-    );
-
-    if (response.success) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MatchSelectPage()),
-        (route) => false,
-      );
-    } else {
-      // display error message
-    }
   }
 }
