@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
+import 'users.dart';
 
 part 'teams.g.dart';
 
@@ -91,26 +92,41 @@ Future<ServerResponse<Team>> serverEditTeam({
 Future<ServerResponse<void>> serverDeleteTeam({required int number}) =>
     serverRequest(endpoint: '/teams/$number', method: 'DELETE');
 
-Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(
-      endpoint: '/teams/${Team.currentTeam!.number}',
-      method: 'GET',
-      decoder: Team.fromJson,
-      callback: (team) => Team.currentTeam = team,
-      etag: Team._currentTeamEtag,
+Future<ServerResponse<Team>> serverGetCurrentTeam() {
+  if (User.currentUser == null) {
+    return Future.value(
+      ServerResponse.error('Missing user'),
     );
+  }
+
+  return serverRequest(
+    endpoint: '/teams/${User.currentUser!.team}',
+    method: 'GET',
+    decoder: Team.fromJson,
+    callback: (team) => Team.currentTeam = team,
+    etag: Team._currentTeamEtag,
+  );
+}
 
 Future<ServerResponse<Team>> serverEditCurrentTeam({
   String? name,
   String? eventKey,
-}) =>
-    serverEditTeam(
-      number: Team.currentTeam!.number,
-      name: name,
-      eventKey: eventKey,
-      etag: Team._currentTeamEtag,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        Team.currentTeam = response.value;
-      }
-      return response;
-    });
+}) {
+  if (User.currentUser == null) {
+    return Future.value(
+      ServerResponse.error('Missing user'),
+    );
+  }
+
+  return serverEditTeam(
+    number: User.currentUser!.team,
+    name: name,
+    eventKey: eventKey,
+    etag: Team._currentTeamEtag,
+  ).then((response) {
+    if (response.success && response.value != null) {
+      Team.currentTeam = response.value;
+    }
+    return response;
+  });
+}

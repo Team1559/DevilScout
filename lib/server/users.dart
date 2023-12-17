@@ -164,32 +164,54 @@ Future<ServerResponse<User>> serverEditUser({
 Future<ServerResponse<void>> serverDeleteUser({required int id}) =>
     serverRequest(endpoint: '/users/$id', method: 'DELETE');
 
-Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      endpoint: '/users/${User.currentUser!.id}',
-      method: 'GET',
-      decoder: User.fromJson,
-      callback: (user) => User.currentUser = user,
-      etag: User._currentUserEtag,
+Future<ServerResponse<User>> serverGetCurrentUser() {
+  if (User.currentUser == null) {
+    return Future.value(
+      ServerResponse.error('Missing user'),
     );
+  }
+
+  return serverRequest(
+    endpoint: '/users/${User.currentUser!.id}',
+    method: 'GET',
+    decoder: User.fromJson,
+    callback: (user) => User.currentUser = user,
+    etag: User._currentUserEtag,
+  );
+}
 
 Future<ServerResponse<User>> serverEditCurrentUser({
   String? username,
   String? fullName,
   AccessLevel? accessLevel,
   String? password,
-}) =>
-    serverEditUser(
-      id: User.currentUser!.id,
-      username: username,
-      fullName: fullName,
-      accessLevel: accessLevel,
-      password: password,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        User.currentUser = response.value;
-      }
-      return response;
-    });
+}) {
+  if (User.currentUser == null) {
+    return Future.value(
+      ServerResponse.error('Missing user'),
+    );
+  }
 
-Future<ServerResponse<void>> serverDeleteCurrentUser() =>
-    serverDeleteUser(id: User.currentUser!.id);
+  return serverEditUser(
+    id: User.currentUser!.id,
+    username: username,
+    fullName: fullName,
+    accessLevel: accessLevel,
+    password: password,
+  ).then((response) {
+    if (response.success && response.value != null) {
+      User.currentUser = response.value;
+    }
+    return response;
+  });
+}
+
+Future<ServerResponse<void>> serverDeleteCurrentUser() {
+  if (User.currentUser == null) {
+    return Future.value(
+      ServerResponse.error('Missing user'),
+    );
+  }
+
+  return serverDeleteUser(id: User.currentUser!.id);
+}

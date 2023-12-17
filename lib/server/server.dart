@@ -42,6 +42,7 @@ class Etag {
 }
 
 final Uri _serverURI = Uri.parse('http://localhost:8000');
+final Client _client = Client();
 
 Future<ServerResponse<R>> serverRequest<R, T>({
   required String endpoint,
@@ -62,18 +63,22 @@ Future<ServerResponse<R>> serverRequest<R, T>({
     request.body = jsonEncode(payload);
   }
 
-  StreamedResponse response = await request.send();
-  String bodyStr = await response.stream.bytesToString();
-  if (response.statusCode >= 400) {
-    return ServerResponse.errorFromJson(bodyStr);
+  StreamedResponse response;
+  try {
+    response = await _client.send(request);
+  } on ClientException {
+    return ServerResponse.error('Error contacting server, try again');
   }
 
-  if (decoder == null) {
+  if (response.statusCode >= 400) {
+    String body = await response.stream.bytesToString();
+    return ServerResponse.errorFromJson(body);
+  } else if (decoder == null || response.statusCode == 304) {
     return ServerResponse.success();
   }
 
-  dynamic body = jsonDecode(bodyStr);
-  R result = decoder.call(body);
+  String body = await response.stream.bytesToString();
+  R result = decoder.call(jsonDecode(body));
 
   if (callback != null) {
     callback.call(result);
