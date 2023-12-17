@@ -21,22 +21,22 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: LoadingOverlay(
         child: SafeArea(
-          minimum: const EdgeInsets.all(32),
-          child: Center(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Text(
-                  'Welcome',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const Icon(
-                  Icons.image,
-                  size: 200,
-                ),
-                const _LoginFields(),
-              ],
-            ),
+          minimum: const EdgeInsets.symmetric(vertical: 0, horizontal: 25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome,\nlet\'s get you logged in.',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.left,
+              ),
+              const Icon(
+                Icons.image,
+                size: 200,
+              ),
+              const _LoginFields(),
+            ],
           ),
         ),
       ),

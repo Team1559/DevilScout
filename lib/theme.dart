@@ -9,7 +9,7 @@ const _onTertiary = Colors.black;
 const _error = Colors.red;
 const _onError = Colors.white;
 
-const _lightSurface = Color(0xFFD3D3D3);
+const _lightSurface = Color(0xFFE4E4E4);
 const _onLightSurface = Colors.black;
 const _lightBackground = Color(0xFFFAFAFA);
 const _onLightBackground = Colors.black;
@@ -39,6 +39,13 @@ final lightTheme = ThemeData(
   cardTheme: CardTheme(
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
+    ),
+  ),
+  textTheme: const TextTheme(
+    titleLarge: TextStyle(
+      fontFamily: 'Montserrat',
+      fontSize: 24.0,
+      fontWeight: FontWeight.bold,
     ),
   ),
 );

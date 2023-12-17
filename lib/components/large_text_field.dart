@@ -24,7 +24,7 @@ class LargeTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.only(bottom: 15.0),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
@@ -34,17 +34,20 @@ class LargeTextField extends StatelessWidget {
         inputFormatters: inputFormatters,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.background,
-            ),
-          ),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2.0,
+              )),
           fillColor: Theme.of(context).colorScheme.surface,
           filled: true,
+          contentPadding: const EdgeInsets.all(22.0),
           hintText: hintText,
         ),
       ),
