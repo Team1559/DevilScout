@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '/components/navigation_drawer.dart';
+
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -10,10 +12,12 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('This is the Settings Page'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
       ),
+      body: const Text('This is the Settings Page'),
+      drawer: const NavDrawer(),
     );
   }
 }

@@ -5,14 +5,20 @@ class LargeTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? hintText;
   final bool obscureText;
+  final bool autocorrect;
   final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
 
   const LargeTextField({
     super.key,
     required this.controller,
     this.hintText,
     this.obscureText = false,
+    this.autocorrect = false,
+    this.textInputAction,
     this.inputFormatters,
+    this.keyboardType,
   });
 
   @override
@@ -22,6 +28,9 @@ class LargeTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        autocorrect: autocorrect,
+        textInputAction: textInputAction,
+        keyboardType: keyboardType,
         inputFormatters: inputFormatters,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(

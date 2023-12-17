@@ -9,7 +9,7 @@ import '/server/server.dart';
 import 'match_select_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -25,12 +25,11 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             child: Column(
               children: [
-                const SizedBox(height: 65),
+                const SizedBox(height: 20),
                 Text(
                   'Welcome',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 75),
                 const Icon(
                   Icons.image,
                   size: 200,
@@ -87,6 +86,7 @@ class _LoginFieldsState extends State<_LoginFields> {
           inputFormatters: [
             LengthLimitingTextInputFormatter(32),
           ],
+          textInputAction: TextInputAction.next,
         ),
         LargeTextField(
           controller: _teamNumber,
@@ -95,6 +95,8 @@ class _LoginFieldsState extends State<_LoginFields> {
             LengthLimitingTextInputFormatter(4),
             FilteringTextInputFormatter.digitsOnly,
           ],
+          textInputAction: TextInputAction.done,
+          keyboardType: TextInputType.number,
         ),
         FilledButton(
           onPressed: () async {
