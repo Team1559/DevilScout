@@ -51,9 +51,15 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   void Function(R)? callback,
   Object? payload,
   Etag? etag,
+  String? sessionKey,
 }) async {
-  Request request = Request(method, _serverURI.resolve(endpoint))
-    ..headers.addAll(Session.headers);
+  sessionKey ??= Session.current?.key;
+
+  Request request = Request(method, _serverURI.resolve(endpoint));
+
+  if (sessionKey != null) {
+    request.headers.addAll({'X-DS-SESSION-KEY': sessionKey});
+  }
 
   if (etag != null) {
     request.headers.addAll(etag.headers);

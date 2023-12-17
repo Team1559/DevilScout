@@ -1,6 +1,9 @@
+import 'package:devil_scout/components/loading_overlay.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login_page.dart';
+import '/pages/match_select_page.dart';
+import '/server/session.dart';
 
 part 'theme.dart';
 
@@ -24,7 +27,20 @@ class MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const LoginPage(),
+      home: FutureBuilder(
+          future: Session.loadFromFile(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return snapshot.data!
+                  ? const MatchSelectPage()
+                  : const LoginPage();
+            } else {
+              return const LoadingOverlay(
+                showByDefault: true,
+                child: LoginPage(),
+              );
+            }
+          }),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: _themeMode,

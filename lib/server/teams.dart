@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
-import 'users.dart';
+import 'session.dart';
 
 part 'teams.g.dart';
 
@@ -93,14 +93,8 @@ Future<ServerResponse<void>> serverDeleteTeam({required int number}) =>
     serverRequest(endpoint: '/teams/$number', method: 'DELETE');
 
 Future<ServerResponse<Team>> serverGetCurrentTeam() {
-  if (User.currentUser == null) {
-    return Future.value(
-      ServerResponse.error('Missing user'),
-    );
-  }
-
   return serverRequest(
-    endpoint: '/teams/${User.currentUser!.team}',
+    endpoint: '/teams/${Session.current!.team}',
     method: 'GET',
     decoder: Team.fromJson,
     callback: (team) => Team.currentTeam = team,
@@ -112,14 +106,8 @@ Future<ServerResponse<Team>> serverEditCurrentTeam({
   String? name,
   String? eventKey,
 }) {
-  if (User.currentUser == null) {
-    return Future.value(
-      ServerResponse.error('Missing user'),
-    );
-  }
-
   return serverEditTeam(
-    number: User.currentUser!.team,
+    number: Session.current!.team,
     name: name,
     eventKey: eventKey,
     etag: Team._currentTeamEtag,

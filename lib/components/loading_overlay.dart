@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class LoadingOverlay extends StatefulWidget {
   final Widget child;
+  final bool showByDefault;
 
-  const LoadingOverlay({super.key, required this.child});
+  const LoadingOverlay(
+      {super.key, required this.child, this.showByDefault = false});
 
   @override
   State<LoadingOverlay> createState() => LoadingOverlayState();
@@ -14,7 +16,7 @@ class LoadingOverlay extends StatefulWidget {
 }
 
 class LoadingOverlayState extends State<LoadingOverlay> {
-  bool _loading = false;
+  late bool _loading = widget.showByDefault;
 
   void show() {
     setState(() {
