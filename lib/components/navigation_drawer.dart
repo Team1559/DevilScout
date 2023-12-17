@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '/pages/login_page.dart';
 import '/pages/match_select_page.dart';
 import '/pages/settings_page.dart';
+import '/pages/team_select_page.dart';
 import '/server/auth.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
 
-class MyNavigationDrawer extends StatelessWidget {
-  const MyNavigationDrawer({super.key});
+class NavDrawer extends StatelessWidget {
+  const NavDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,22 @@ class MyNavigationDrawer extends StatelessWidget {
                       ListTile(
                         title: const Text('Pits'),
                         leading: const Icon(Icons.abc),
-                        onTap: () {},
+                        onTap: () {
+                          EventTeamSelectPageState? parent =
+                              context.findAncestorStateOfType<
+                                  EventTeamSelectPageState>();
+                          if (parent == null) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const EventTeamSelectPage(),
+                              ),
+                            );
+                          } else {
+                            Navigator.pop(context);
+                          }
+                        },
                       ),
                       if (User.currentUser!.accessLevel >= AccessLevel.admin)
                         ListTile(
@@ -84,26 +100,20 @@ class MyNavigationDrawer extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (User.currentUser!.accessLevel >= AccessLevel.user)
-                  ExpansionPanelRadio(
-                    value: 'Manage',
-                    canTapOnHeader: true,
-                    headerBuilder: (context, isExpanded) => const ListTile(
-                      title: Text('Manage'),
-                      leading: Icon(Icons.image),
-                    ),
-                    body: Column(
-                      children: [
-                        ListTile(
-                          onTap: () {},
-                          title: const Text('Test'),
-                          leading: const Icon(Icons.abc),
-                        )
-                      ],
-                    ),
-                  ),
               ],
             ),
+            if (User.currentUser!.accessLevel >= AccessLevel.user)
+              ListTile(
+                title: Text('Manage Team ${Team.currentTeam!.number}'),
+                leading: const Icon(Icons.image),
+                onTap: () {},
+              ),
+            if (User.currentUser!.accessLevel >= AccessLevel.user)
+              ListTile(
+                title: const Text('SUDO Panel'),
+                leading: const Icon(Icons.image),
+                onTap: () {},
+              ),
             const Spacer(),
             Text(
               User.currentUser!.fullName,
@@ -132,12 +142,11 @@ class MyNavigationDrawer extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: () {
                     serverLogout();
-                    Navigator.pushAndRemoveUntil(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const LoginPage(),
                       ),
-                      (route) => false,
                     );
                   },
                   icon: const Icon(Icons.logout),

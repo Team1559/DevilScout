@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PitScoutPage extends StatefulWidget {
-  const PitScoutPage({Key? key}) : super(key: key);
+  final int team;
+
+  const PitScoutPage({Key? key, required this.team}) : super(key: key);
 
   @override
   State<PitScoutPage> createState() => _PitScoutPageState();
