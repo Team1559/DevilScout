@@ -1,10 +1,10 @@
-import 'package:devil_scout/pages/drive_team_feedback_select.dart';
 import 'package:flutter/material.dart';
 
-import '/pages/login_page.dart';
-import '/pages/match_scout_select_page.dart';
-import '/pages/settings_page.dart';
-import '/pages/team_select_page.dart';
+import '/pages/drive_team_feedback_select.dart';
+import '/pages/login.dart';
+import '/pages/match_scout_select.dart';
+import '/pages/settings.dart';
+import '/pages/team_select.dart';
 import '/server/auth.dart';
 import '/server/teams.dart';
 import '/server/users.dart';

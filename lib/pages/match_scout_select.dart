@@ -5,7 +5,7 @@ import '/components/navigation_drawer.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
-import 'match_scout_page.dart';
+import 'match_scout.dart';
 
 class MatchSelectPage extends StatefulWidget {
   const MatchSelectPage({Key? key}) : super(key: key);

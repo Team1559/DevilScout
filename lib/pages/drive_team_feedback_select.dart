@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/components/navigation_drawer.dart';
-import '/pages/drive_team_feedback_page.dart';
+import '/pages/drive_team_feedback.dart';
 import '/server/events.dart';
 import '/server/session.dart';
 import '/server/teams.dart';

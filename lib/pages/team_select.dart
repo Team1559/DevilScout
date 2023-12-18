@@ -4,7 +4,7 @@ import '/components/navigation_drawer.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
-import 'pit_scout_page.dart';
+import 'pit_scout.dart';
 
 class EventTeamSelectPage extends StatefulWidget {
   const EventTeamSelectPage({Key? key}) : super(key: key);
