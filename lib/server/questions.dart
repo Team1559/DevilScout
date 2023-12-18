@@ -180,6 +180,7 @@ Future<ServerResponse<MatchQuestions>> serverGetMatchQuestions() =>
       endpoint: '/questions/match',
       method: 'GET',
       decoder: MatchQuestions.fromJson,
+      callback: (questions) => MatchQuestions.current = questions,
       etag: MatchQuestions._etag,
     );
 
@@ -187,6 +188,7 @@ Future<ServerResponse<PitQuestions>> serverGetPitQuestions() => serverRequest(
       endpoint: '/questions/pit',
       method: 'GET',
       decoder: PitQuestions.fromJson,
+      callback: (questions) => PitQuestions.current = questions,
       etag: PitQuestions._etag,
     );
 
@@ -195,5 +197,6 @@ Future<ServerResponse<DriveTeamQuestions>> serverGetDriveTeamQuestions() =>
       endpoint: '/questions/drive-team',
       method: 'GET',
       decoder: DriveTeamQuestions.fromJson,
+      callback: (questions) => DriveTeamQuestions.current = questions,
       etag: DriveTeamQuestions._etag,
     );
