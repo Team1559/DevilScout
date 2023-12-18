@@ -18,25 +18,28 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LoadingOverlay(
-        child: SafeArea(
-          minimum: const EdgeInsets.symmetric(vertical: 0, horizontal: 25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome,\nlet\'s get you logged in.',
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.left,
-              ),
-              const Icon(
-                Icons.image,
-                size: 200,
-              ),
-              const _LoginFields(),
-            ],
+    return GestureDetector(
+      onTap: FocusScope.of(context).unfocus,
+      child: Scaffold(
+        body: LoadingOverlay(
+          child: SafeArea(
+            minimum: const EdgeInsets.symmetric(horizontal: 25),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Welcome,\nlet's get you logged in.",
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.left,
+                ),
+                const Icon(
+                  Icons.image,
+                  size: 200,
+                ),
+                const _LoginFields(),
+              ],
+            ),
           ),
         ),
       ),
@@ -63,16 +66,19 @@ class _LoginFieldsState extends State<_LoginFields> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      transitionBuilder: (child, animation) => SlideTransition(
-        position: Tween(
-          begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
-          end: Offset.zero,
-        ).animate(animation),
-        child: child,
+    return SizedBox(
+      height: 240,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder: (child, animation) => SlideTransition(
+          position: Tween(
+            begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+        child: _showingPassword ? _passwordInput() : _userAndTeamInput(),
       ),
-      child: _showingPassword ? _passwordInput() : _userAndTeamInput(),
     );
   }
 
@@ -95,10 +101,10 @@ class _LoginFieldsState extends State<_LoginFields> {
             LengthLimitingTextInputFormatter(4),
             FilteringTextInputFormatter.digitsOnly,
           ],
-          textInputAction: TextInputAction.done,
           keyboardType: TextInputType.number,
         ),
         FilledButton(
+          child: const Text('Next'),
           onPressed: () async {
             if (_username.text.isEmpty) {
               displaySnackbar(context, 'Enter your username');
@@ -119,12 +125,12 @@ class _LoginFieldsState extends State<_LoginFields> {
               return;
             }
 
+            hideSnackbar(context);
             setState(() {
               _password.clear();
               _showingPassword = true;
             });
           },
-          child: const Text('Next'),
         ),
       ],
     );
@@ -158,6 +164,7 @@ class _LoginFieldsState extends State<_LoginFields> {
                 return;
               }
 
+              hideSnackbar(context);
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
