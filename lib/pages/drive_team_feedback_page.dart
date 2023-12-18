@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '/components/navigation_drawer.dart';
@@ -5,38 +7,46 @@ import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
 
-class MatchScoutPage extends StatefulWidget {
+class DriveTeamFeedbackPage extends StatefulWidget {
   final EventMatch match;
   final int team;
 
-  const MatchScoutPage({super.key, required this.match, required this.team});
+  const DriveTeamFeedbackPage({
+    super.key,
+    required this.match,
+    required this.team,
+  });
 
   @override
-  State<MatchScoutPage> createState() => _MatchScoutPageState();
+  State<DriveTeamFeedbackPage> createState() => _DriveTeamFeedbackPageState();
 }
 
-class _MatchScoutPageState extends State<MatchScoutPage> {
+class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
+  late final int _partner1;
+  late final int _partner2;
+
   @override
   void initState() {
-    serverGetMatchQuestions().then((response) {
+    super.initState();
+    serverGetDriveTeamQuestions().then((response) {
       if (response.value != null) {
         setState(() {});
       }
     });
-    super.initState();
+
+    List<int> alliance = List.of(widget.match.blue.contains(widget.team)
+        ? widget.match.blue
+        : widget.match.red);
+    alliance.remove(widget.team);
+    _partner1 = alliance.reduce((team1, team2) => min(team1, team2));
+    _partner2 = alliance.reduce((team1, team2) => max(team1, team2));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(children: [
-          Text('Team ${widget.team}'),
-          Text(
-            widget.match.name,
-            style: Theme.of(context).textTheme.labelSmall,
-          )
-        ]),
+        title: Text(widget.match.name),
         leadingWidth: 120,
         leading: Builder(builder: (context) {
           return Row(children: [
@@ -54,11 +64,9 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
       drawer: const NavDrawer(),
       body: QuestionDisplay(
         questions: [
-          ('Autonomous', MatchQuestions.current?.auto),
-          ('Teleop', MatchQuestions.current?.teleop),
-          ('Endgame', MatchQuestions.current?.endgame),
-          ('General', MatchQuestions.current?.general),
-          ('Humans', MatchQuestions.current?.human),
+          // one set of questions per partner
+          ('Team $_partner1', DriveTeamQuestions.current?.questions),
+          ('Team $_partner2', DriveTeamQuestions.current?.questions),
         ],
         submitAction: (data) {},
       ),

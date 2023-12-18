@@ -2,7 +2,7 @@ import 'package:devil_scout/components/loading_overlay.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login_page.dart';
-import '/pages/match_select_page.dart';
+import '/pages/match_scout_select_page.dart';
 import '/server/session.dart';
 
 part 'theme.dart';

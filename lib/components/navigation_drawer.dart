@@ -1,7 +1,8 @@
+import 'package:devil_scout/pages/drive_team_feedback_select.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login_page.dart';
-import '/pages/match_select_page.dart';
+import '/pages/match_scout_select_page.dart';
 import '/pages/settings_page.dart';
 import '/pages/team_select_page.dart';
 import '/server/auth.dart';
@@ -78,7 +79,22 @@ class NavDrawer extends StatelessWidget {
                         ListTile(
                           title: const Text('Drive Team'),
                           leading: const Icon(Icons.abc),
-                          onTap: () {},
+                          onTap: () {
+                            DriveTeamFeedbackSelectPageState? parent =
+                                context.findAncestorStateOfType<
+                                    DriveTeamFeedbackSelectPageState>();
+                            if (parent == null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const DriveTeamFeedbackSelectPage(),
+                                ),
+                              );
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
                         ),
                     ],
                   ),

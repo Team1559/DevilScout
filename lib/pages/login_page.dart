@@ -6,7 +6,7 @@ import '/components/loading_overlay.dart';
 import '/components/snackbar.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
-import 'match_select_page.dart';
+import 'match_scout_select_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

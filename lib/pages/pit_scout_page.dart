@@ -15,6 +15,16 @@ class PitScoutPage extends StatefulWidget {
 
 class _PitScoutPageState extends State<PitScoutPage> {
   @override
+  void initState() {
+    serverGetPitQuestions().then((response) {
+      if (response.value != null) {
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
