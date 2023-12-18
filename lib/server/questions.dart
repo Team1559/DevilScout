@@ -6,20 +6,24 @@ part 'questions.g.dart';
 
 @JsonEnum(fieldRename: FieldRename.screamingSnake, alwaysCreate: true)
 enum QuestionType {
-  boolean,
-  counter,
-  grid,
-  multiple,
-  number,
-  range,
-  sequence,
-  single;
+  boolean(_$BooleanConfigFromJson),
+  counter(_$CounterConfigFromJson),
+  grid(_$GridConfigFromJson),
+  multiple(_$MultipleChoiceConfigFromJson),
+  number(_$NumberInputConfigFromJson),
+  range(_$NumberRangeConfigFromJson),
+  sequence(_$SequenceConfigFromJson),
+  single(_$SingleChoiceConfigFromJson);
+
+  final QuestionConfig Function(Map<String, dynamic>) configParser;
+
+  const QuestionType(this.configParser);
 }
 
 class Question {
   final String prompt;
   final QuestionType type;
-  final Object config;
+  final QuestionConfig config;
 
   const Question({
     required this.prompt,
@@ -30,35 +34,25 @@ class Question {
   factory Question.fromJson(Map<String, dynamic> json) {
     String prompt = json['prompt'];
     QuestionType type = $enumDecode(_$QuestionTypeEnumMap, json['type']);
-
-    Map<String, dynamic> configJson = json['config'] ?? {};
-    Object? config = switch (type) {
-      QuestionType.boolean => _$BooleanConfigFromJson(configJson),
-      QuestionType.counter => _$CounterConfigFromJson(configJson),
-      QuestionType.grid => _$GridConfigFromJson(configJson),
-      QuestionType.multiple => _$MultipleChoiceConfigFromJson(configJson),
-      QuestionType.number => _$NumberInputConfigFromJson(configJson),
-      QuestionType.range => _$NumberRangeConfigFromJson(configJson),
-      QuestionType.sequence => _$SequenceConfigFromJson(configJson),
-      QuestionType.single => _$SingleChoiceConfigFromJson(configJson),
-    };
-
+    QuestionConfig config = type.configParser.call(json['config'] ?? {});
     return Question(prompt: prompt, type: type, config: config);
   }
 }
 
+abstract class QuestionConfig {}
+
 @JsonSerializable(createToJson: false)
-class BooleanConfig {
+class BooleanConfig implements QuestionConfig {
   const BooleanConfig();
 }
 
 @JsonSerializable(createToJson: false)
-class CounterConfig {
+class CounterConfig implements QuestionConfig {
   const CounterConfig();
 }
 
 @JsonSerializable(createToJson: false)
-class GridConfig {
+class GridConfig implements QuestionConfig {
   final List<String> options;
   final int height;
   final int width;
@@ -71,14 +65,14 @@ class GridConfig {
 }
 
 @JsonSerializable(createToJson: false)
-class MultipleChoiceConfig {
+class MultipleChoiceConfig implements QuestionConfig {
   final List<String> options;
 
   const MultipleChoiceConfig({required this.options});
 }
 
 @JsonSerializable(createToJson: false)
-class NumberInputConfig {
+class NumberInputConfig implements QuestionConfig {
   final int min;
   final int max;
 
@@ -86,7 +80,7 @@ class NumberInputConfig {
 }
 
 @JsonSerializable(createToJson: false)
-class NumberRangeConfig {
+class NumberRangeConfig implements QuestionConfig {
   final int min;
   final int max;
 
@@ -94,14 +88,14 @@ class NumberRangeConfig {
 }
 
 @JsonSerializable(createToJson: false)
-class SequenceConfig {
+class SequenceConfig implements QuestionConfig {
   final List<String> options;
 
   const SequenceConfig({required this.options});
 }
 
 @JsonSerializable(createToJson: false)
-class SingleChoiceConfig {
+class SingleChoiceConfig implements QuestionConfig {
   final List<String> options;
 
   const SingleChoiceConfig({required this.options});
