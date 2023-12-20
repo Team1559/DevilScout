@@ -18,7 +18,7 @@ class ServerResponse<T> {
         value = null;
 
   factory ServerResponse.errorFromJson(String json) =>
-      ServerResponse.error(jsonDecode(json)['error']);
+      ServerResponse.error(json.isEmpty ? null : jsonDecode(json)['error']);
 
   @override
   String toString() {

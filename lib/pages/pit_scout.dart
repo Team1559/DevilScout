@@ -16,12 +16,12 @@ class PitScoutPage extends StatefulWidget {
 class _PitScoutPageState extends State<PitScoutPage> {
   @override
   void initState() {
+    super.initState();
     serverGetPitQuestions().then((response) {
       if (response.value != null) {
         setState(() {});
       }
     });
-    super.initState();
   }
 
   @override

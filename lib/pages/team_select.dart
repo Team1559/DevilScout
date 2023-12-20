@@ -7,7 +7,7 @@ import '/server/users.dart';
 import 'pit_scout.dart';
 
 class EventTeamSelectPage extends StatefulWidget {
-  const EventTeamSelectPage({Key? key}) : super(key: key);
+  const EventTeamSelectPage({super.key});
 
   @override
   State<EventTeamSelectPage> createState() => EventTeamSelectPageState();

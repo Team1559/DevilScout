@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '/server/questions.dart';
+import 'large_text_field.dart';
 
 class QuestionDisplay extends StatefulWidget {
   final List<(String, List<Question>?)> questions;
@@ -17,78 +19,68 @@ class QuestionDisplay extends StatefulWidget {
 }
 
 class _QuestionDisplayState extends State<QuestionDisplay> {
-  late final List<List<dynamic>> _values;
+  final PageController controller = PageController();
+  late final List<List<dynamic>> values;
 
   @override
   void initState() {
-    _values = List.generate(
+    super.initState();
+    values = List.generate(
       widget.questions.length,
       (index) => List.empty(growable: true),
     );
-    super.initState();
   }
 
-  int _currentPage = 0;
-
-  void _nextButton() {
-    if (_currentPage < widget.questions.length - 1) {
-      setState(() => _currentPage++);
-    }
+  void nextPage() {
+    controller.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
   }
 
-  void _backButton() {
-    if (_currentPage > 0) {
-      setState(() => _currentPage--);
+  void previousPage() {
+    if (controller.page! > 0) {
+      controller.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Question> questions = widget.questions[_currentPage].$2 ?? [];
-    List<dynamic> responses = _values[_currentPage];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FilledButton(
-                onPressed: _backButton,
-                child: const Text('Back'),
-              ),
-              const Spacer(),
-              Text(
-                widget.questions[_currentPage].$1,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const Spacer(),
-              FilledButton(
-                onPressed: _nextButton,
-                child: Text(
-                  _currentPage == widget.questions.length - 1
-                      ? 'Submit'
-                      : 'Next',
-                ),
-              ),
-            ],
-          ),
+        PageView(
+          controller: controller,
+          children: List.generate(widget.questions.length, (index) {
+            String name = widget.questions[index].$1;
+            List<Question>? questions = widget.questions[index].$2 ?? [];
+            if (values[index].length < questions.length) {
+              values[index].length = questions.length;
+            }
+
+            return QuestionPage(
+              name: name,
+              questions: questions,
+              values: values[index],
+              previousPage: index == 0 ? null : previousPage,
+              nextPage: index == widget.questions.length - 1 ? null : nextPage,
+              setState: setState,
+            );
+          }),
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: questions.length,
-            itemBuilder: (context, index) => Center(
-              child: QuestionWidget.of(
-                question: questions[index],
-                responseSetter: (response) {
-                  if (responses.length <= index) {
-                    responses.length = index + 1;
-                  }
-                  responses[index] = response;
-                },
-              ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+            child: FilledButton(
+              onPressed: values.where((e) => e.contains(null)).isNotEmpty
+                  ? null
+                  : () {
+                      print(values.toString());
+                    },
+              child: const Text('Submit'),
             ),
           ),
         ),
@@ -97,92 +89,282 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   }
 }
 
+class QuestionPage extends StatefulWidget {
+  final String name;
+  final List<Question> questions;
+  final List<dynamic> values;
+
+  final void Function()? previousPage;
+  final void Function()? nextPage;
+  final void Function(void Function()) setState;
+
+  const QuestionPage({
+    super.key,
+    required this.name,
+    required this.questions,
+    required this.values,
+    required this.previousPage,
+    required this.nextPage,
+    required this.setState,
+  });
+
+  @override
+  State<QuestionPage> createState() => _QuestionPageState();
+}
+
+class _QuestionPageState extends State<QuestionPage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: widget.previousPage,
+                icon: const Icon(Icons.navigate_before),
+              ),
+              const Spacer(),
+              Text(
+                widget.name,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: widget.nextPage,
+                icon: const Icon(Icons.navigate_next),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ListView.builder(
+              itemCount: widget.questions.length,
+              itemBuilder: question,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget question(BuildContext context, int index) {
+    Question question = widget.questions[index];
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            question.prompt,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          QuestionWidget.of(
+            question: question,
+            setState: (void Function() callback) {
+              setState(callback);
+              widget.setState.call(() {});
+            },
+            valueSetter: (response) {
+              if (widget.values.length <= index) {
+                widget.values.length = index + 1;
+              }
+              if (widget.values[index] != response) {
+                widget.values[index] = response;
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 abstract class QuestionWidget extends StatefulWidget {
-  final Question question;
+  final QuestionConfig config;
   final void Function(dynamic) valueSetter;
+  final void Function(void Function()) setState;
 
   factory QuestionWidget.of({
     required Question question,
-    required void Function(dynamic) responseSetter,
+    required void Function(dynamic) valueSetter,
+    required void Function(void Function()) setState,
   }) =>
       switch (question.type) {
-        QuestionType.boolean =>
-          BooleanQuestion(question: question, valueSetter: responseSetter),
-        QuestionType.counter =>
-          CounterQuestion(question: question, valueSetter: responseSetter),
-        QuestionType.grid =>
-          GridQuestion(question: question, valueSetter: responseSetter),
+        QuestionType.boolean => BooleanQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.counter => CounterQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.grid => GridQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
         QuestionType.multiple => MultipleChoiceQuestion(
-            question: question, valueSetter: responseSetter),
-        QuestionType.number =>
-          NumberInputQuestion(question: question, valueSetter: responseSetter),
-        QuestionType.range =>
-          NumberRangeQuestion(question: question, valueSetter: responseSetter),
-        QuestionType.sequence =>
-          SequenceQuestion(question: question, valueSetter: responseSetter),
-        QuestionType.single =>
-          SingleChoiceQuestion(question: question, valueSetter: responseSetter),
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.number => NumberInputQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.range => NumberRangeQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.sequence => SequenceQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
+        QuestionType.single => SingleChoiceQuestion(
+            config: question.config,
+            valueSetter: valueSetter,
+            setState: setState,
+          ),
       };
 
   const QuestionWidget({
     super.key,
-    required this.question,
+    required this.config,
     required this.valueSetter,
+    required this.setState,
   });
 }
 
-abstract class QuestionWidgetState<T, W extends QuestionWidget>
-    extends State<W> {
-  T? response;
-  void setResponse(T? value) {
-    setState(() {
-      response = value;
-    });
-    widget.valueSetter.call(value);
+abstract class QuestionWidgetState<T, W extends QuestionWidget,
+    C extends QuestionConfig> extends State<W> {
+  late final C config;
+
+  T? value;
+
+  QuestionWidgetState({this.value});
+
+  @override
+  void initState() {
+    super.initState();
+    config = widget.config as C;
+    if (value != null) {
+      widget.valueSetter.call(value);
+    }
+  }
+
+  void setValue(T newValue) {
+    if (value != newValue) {
+      widget.setState.call(() {
+        value = newValue;
+        widget.valueSetter.call(newValue);
+      });
+    }
   }
 }
 
 class BooleanQuestion extends QuestionWidget {
   const BooleanQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
   State<BooleanQuestion> createState() => _BooleanQuestionState();
 }
 
-class _BooleanQuestionState extends QuestionWidgetState<bool, BooleanQuestion> {
+class _BooleanQuestionState
+    extends QuestionWidgetState<int?, BooleanQuestion, BooleanConfig> {
+  _BooleanQuestionState() : super(value: null);
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return SegmentedButton(
+      emptySelectionAllowed: true,
+      showSelectedIcon: false,
+      segments: const [
+        ButtonSegment(
+          value: true,
+          label: Text('Yes'),
+        ),
+        ButtonSegment(
+          value: false,
+          label: Text('No'),
+        ),
+      ],
+      selected: value == null ? {} : {value == 1},
+      onSelectionChanged: (set) {
+        if (set.isNotEmpty) {
+          setValue(set.first ? 1 : 0);
+        }
+      },
+    );
   }
 }
 
 class CounterQuestion extends QuestionWidget {
   const CounterQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
   State<CounterQuestion> createState() => _CounterQuestionState();
 }
 
-class _CounterQuestionState extends QuestionWidgetState<int, CounterQuestion> {
+class _CounterQuestionState
+    extends QuestionWidgetState<int, CounterQuestion, CounterConfig> {
+  _CounterQuestionState() : super(value: 0);
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: value == 0 ? null : () => setValue(value! - 1),
+          icon: const Icon(Icons.remove),
+        ),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 40),
+          child: Text(
+            '$value',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        IconButton(
+          onPressed: () => setValue(value! + 1),
+          icon: const Icon(Icons.add),
+        ),
+      ],
+    );
   }
 }
 
 class GridQuestion extends QuestionWidget {
   const GridQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
@@ -190,37 +372,77 @@ class GridQuestion extends QuestionWidget {
 }
 
 class _GridQuestionState
-    extends QuestionWidgetState<List<List<int>>, GridQuestion> {
+    extends QuestionWidgetState<List<List<int>>, GridQuestion, GridConfig> {
+  _GridQuestionState() : super(value: List.empty());
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return Container();
   }
 }
 
 class MultipleChoiceQuestion extends QuestionWidget {
   const MultipleChoiceQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
   State<MultipleChoiceQuestion> createState() => _MultipleChoiceQuestionState();
 }
 
-class _MultipleChoiceQuestionState
-    extends QuestionWidgetState<List<int>, MultipleChoiceQuestion> {
+class _MultipleChoiceQuestionState extends QuestionWidgetState<List<int>,
+    MultipleChoiceQuestion, MultipleChoiceConfig> {
+  late final List<bool> active;
+
+  _MultipleChoiceQuestionState() : super(value: []);
+
+  @override
+  void initState() {
+    super.initState();
+    active = List.filled(config.options.length, false);
+  }
+
+  void _set(index, selected) {
+    if (selected != active[index]) {
+      setState(() {
+        active[index] = selected;
+      });
+
+      widget.setState.call(() {
+        if (selected) {
+          value!.add(index);
+        } else {
+          value!.remove(index);
+        }
+        value!.sort();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return Column(
+      children: List.generate(
+        config.options.length,
+        (index) => CheckboxListTile(
+          title: Text(config.options[index]),
+          value: active[index],
+          onChanged: (value) => _set(index, value),
+        ),
+      ),
+    );
   }
 }
 
 class NumberInputQuestion extends QuestionWidget {
   const NumberInputQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
@@ -228,18 +450,54 @@ class NumberInputQuestion extends QuestionWidget {
 }
 
 class _NumberInputQuestionState
-    extends QuestionWidgetState<int, NumberInputQuestion> {
+    extends QuestionWidgetState<int?, NumberInputQuestion, NumberInputConfig> {
+  final TextEditingController controller = TextEditingController();
+
+  _NumberInputQuestionState() : super(value: null);
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return LargeTextField(
+      hintText: '${config.min}-${config.max}',
+      controller: controller,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        NumberTextInputFormatter(min: config.min, max: config.max)
+      ],
+      keyboardType: TextInputType.number,
+      onChanged: (text) => setValue(int.tryParse(text)),
+    );
+  }
+}
+
+class NumberTextInputFormatter extends TextInputFormatter {
+  final int min;
+  final int max;
+
+  const NumberTextInputFormatter({required this.min, required this.max});
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+
+    int num = int.parse(newValue.text);
+    if (num < min || num > max) {
+      return oldValue;
+    } else if (newValue.text.startsWith('0') && newValue.text.length > 1) {
+      return const TextEditingValue(text: '0');
+    } else {
+      return newValue;
+    }
   }
 }
 
 class NumberRangeQuestion extends QuestionWidget {
   const NumberRangeQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
@@ -247,18 +505,37 @@ class NumberRangeQuestion extends QuestionWidget {
 }
 
 class _NumberRangeQuestionState
-    extends QuestionWidgetState<int, NumberRangeQuestion> {
+    extends QuestionWidgetState<int?, NumberRangeQuestion, NumberRangeConfig> {
+  _NumberRangeQuestionState() : super(value: null);
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return SegmentedButton(
+      emptySelectionAllowed: true,
+      selected: value == null ? {} : {value},
+      onSelectionChanged: (set) {
+        if (set.isNotEmpty) {
+          setValue(set.first);
+        }
+      },
+      showSelectedIcon: false,
+      segments: List.generate(
+        config.max - config.min + 1,
+        (index) => ButtonSegment(
+          label: Text('${config.min + index}'),
+          value: config.min + index,
+        ),
+      ),
+    );
   }
 }
 
 class SequenceQuestion extends QuestionWidget {
   const SequenceQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
@@ -266,29 +543,43 @@ class SequenceQuestion extends QuestionWidget {
 }
 
 class _SequenceQuestionState
-    extends QuestionWidgetState<List<int>, SequenceQuestion> {
+    extends QuestionWidgetState<List<int>, SequenceQuestion, SequenceConfig> {
+  _SequenceQuestionState() : super(value: List.empty(growable: true));
+
   @override
   Widget build(BuildContext context) {
-    return Text(widget.question.prompt);
+    return Container();
   }
 }
 
 class SingleChoiceQuestion extends QuestionWidget {
   const SingleChoiceQuestion({
     super.key,
-    required super.question,
+    required super.config,
     required super.valueSetter,
+    required super.setState,
   });
 
   @override
   State<SingleChoiceQuestion> createState() => _SingleChoiceQuestionState();
 }
 
-class _SingleChoiceQuestionState
-    extends QuestionWidgetState<int, SingleChoiceQuestion> {
+class _SingleChoiceQuestionState extends QuestionWidgetState<int?,
+    SingleChoiceQuestion, SingleChoiceConfig> {
+  _SingleChoiceQuestionState() : super(value: null);
+
   @override
   Widget build(BuildContext context) {
-    widget.valueSetter.call(4);
-    return Text(widget.question.prompt);
+    return DropdownMenu<int>(
+      hintText: 'Select one',
+      dropdownMenuEntries: List.generate(
+        config.options.length,
+        (index) => DropdownMenuEntry(
+          value: index,
+          label: config.options[index],
+        ),
+      ),
+      onSelected: setValue,
+    );
   }
 }

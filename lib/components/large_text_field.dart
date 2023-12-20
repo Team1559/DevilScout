@@ -9,6 +9,7 @@ class LargeTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final void Function(String)? onChanged;
 
   const LargeTextField({
     super.key,
@@ -19,6 +20,7 @@ class LargeTextField extends StatelessWidget {
     this.textInputAction,
     this.inputFormatters,
     this.keyboardType,
+    this.onChanged,
   });
 
   @override
@@ -26,6 +28,7 @@ class LargeTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: TextField(
+        onChanged: onChanged,
         controller: controller,
         obscureText: obscureText,
         autocorrect: autocorrect,

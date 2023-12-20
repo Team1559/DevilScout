@@ -18,12 +18,12 @@ class MatchScoutPage extends StatefulWidget {
 class _MatchScoutPageState extends State<MatchScoutPage> {
   @override
   void initState() {
+    super.initState();
     serverGetMatchQuestions().then((response) {
       if (response.value != null) {
         setState(() {});
       }
     });
-    super.initState();
   }
 
   @override
