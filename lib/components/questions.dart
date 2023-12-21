@@ -5,7 +5,7 @@ import '/server/questions.dart';
 import 'large_text_field.dart';
 
 class QuestionDisplay extends StatefulWidget {
-  final List<(String, List<Question>?)> questions;
+  final List<(String, String, List<Question>?)> questions;
   final void Function(Map<String, List<dynamic>>) submitAction;
 
   const QuestionDisplay({
@@ -55,7 +55,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
           controller: controller,
           children: List.generate(widget.questions.length, (index) {
             String name = widget.questions[index].$1;
-            List<Question>? questions = widget.questions[index].$2 ?? [];
+            List<Question>? questions = widget.questions[index].$3 ?? [];
             if (values[index].length < questions.length) {
               values[index].length = questions.length;
             }
@@ -78,7 +78,9 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
               onPressed: values.where((e) => e.contains(null)).isNotEmpty
                   ? null
                   : () {
-                      print(values.toString());
+                      Map<String, List<dynamic>> data = Map.fromIterables(
+                          widget.questions.map((e) => e.$2), values);
+                      widget.submitAction.call(data);
                     },
               child: const Text('Submit'),
             ),
@@ -266,7 +268,7 @@ abstract class QuestionWidgetState<T, W extends QuestionWidget,
     }
   }
 
-  void setValue(T newValue) {
+  void setValue(T? newValue) {
     if (value != newValue) {
       widget.setState.call(() {
         value = newValue;
@@ -289,9 +291,7 @@ class BooleanQuestion extends QuestionWidget {
 }
 
 class _BooleanQuestionState
-    extends QuestionWidgetState<int?, BooleanQuestion, BooleanConfig> {
-  _BooleanQuestionState() : super(value: null);
-
+    extends QuestionWidgetState<int, BooleanQuestion, BooleanConfig> {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
@@ -377,7 +377,7 @@ class _GridQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Text("This is a GRID question. It doesn't work yet.");
   }
 }
 
@@ -450,10 +450,8 @@ class NumberInputQuestion extends QuestionWidget {
 }
 
 class _NumberInputQuestionState
-    extends QuestionWidgetState<int?, NumberInputQuestion, NumberInputConfig> {
+    extends QuestionWidgetState<int, NumberInputQuestion, NumberInputConfig> {
   final TextEditingController controller = TextEditingController();
-
-  _NumberInputQuestionState() : super(value: null);
 
   @override
   Widget build(BuildContext context) {
@@ -505,9 +503,7 @@ class NumberRangeQuestion extends QuestionWidget {
 }
 
 class _NumberRangeQuestionState
-    extends QuestionWidgetState<int?, NumberRangeQuestion, NumberRangeConfig> {
-  _NumberRangeQuestionState() : super(value: null);
-
+    extends QuestionWidgetState<int, NumberRangeQuestion, NumberRangeConfig> {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
@@ -543,12 +539,42 @@ class SequenceQuestion extends QuestionWidget {
 }
 
 class _SequenceQuestionState
-    extends QuestionWidgetState<List<int>, SequenceQuestion, SequenceConfig> {
-  _SequenceQuestionState() : super(value: List.empty(growable: true));
-
+    extends QuestionWidgetState<List<int?>, SequenceQuestion, SequenceConfig> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    List<DropdownMenuEntry> entries = List.generate(
+      config.options.length,
+      (index) => DropdownMenuEntry(
+        value: index,
+        label: config.options[index],
+      ),
+    );
+    entries.add(const DropdownMenuEntry(value: -1, label: 'End'));
+
+    return Column(
+      children: List.generate(
+        value?.length ?? 1,
+        (index) => DropdownMenu(
+          hintText: 'Select one',
+          dropdownMenuEntries: entries,
+          onSelected: (v) {
+            setState(() {
+              if (value == null) {
+                setValue(List.filled(1, null, growable: true));
+              }
+
+              if (v == -1) {
+                value!.length = index + 1;
+              } else if (value!.length == index + 1) {
+                value!.length = index + 2;
+              }
+
+              value![index] = v;
+            });
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -564,10 +590,8 @@ class SingleChoiceQuestion extends QuestionWidget {
   State<SingleChoiceQuestion> createState() => _SingleChoiceQuestionState();
 }
 
-class _SingleChoiceQuestionState extends QuestionWidgetState<int?,
-    SingleChoiceQuestion, SingleChoiceConfig> {
-  _SingleChoiceQuestionState() : super(value: null);
-
+class _SingleChoiceQuestionState
+    extends QuestionWidgetState<int, SingleChoiceQuestion, SingleChoiceConfig> {
   @override
   Widget build(BuildContext context) {
     return DropdownMenu<int>(

@@ -54,13 +54,13 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
       drawer: const NavDrawer(),
       body: QuestionDisplay(
         questions: [
-          ('Autonomous', MatchQuestions.current?.auto),
-          ('Teleop', MatchQuestions.current?.teleop),
-          ('Endgame', MatchQuestions.current?.endgame),
-          ('General', MatchQuestions.current?.general),
-          ('Humans', MatchQuestions.current?.human),
+          ('Autonomous', 'auto', MatchQuestions.current?.auto),
+          ('Teleop', 'teleop', MatchQuestions.current?.teleop),
+          ('Endgame', 'endgame', MatchQuestions.current?.endgame),
+          ('General', 'general', MatchQuestions.current?.general),
+          ('Humans', 'human', MatchQuestions.current?.human),
         ],
-        submitAction: (data) {},
+        submitAction: print,
       ),
     );
   }
