@@ -21,6 +21,24 @@ enum QuestionType {
 }
 
 class Question {
+  static List<QuestionPage> matchQuestions = List.empty();
+  static List<QuestionPage> pitQuestions = List.empty();
+  static List<Question> driveTeamQuestions = List.empty();
+
+  static final Etag _matchQuestionsEtag = Etag();
+  static final Etag _pitQuestionsEtag = Etag();
+  static final Etag _driveTeamQuestionsEtag = Etag();
+
+  static void clear() {
+    matchQuestions = List.empty();
+    pitQuestions = List.empty();
+    driveTeamQuestions = List.empty();
+
+    _matchQuestionsEtag.clear();
+    _pitQuestionsEtag.clear();
+    _driveTeamQuestionsEtag.clear();
+  }
+
   final String prompt;
   final QuestionType type;
   final QuestionConfig config;
@@ -102,101 +120,47 @@ class SingleChoiceConfig implements QuestionConfig {
 }
 
 @JsonSerializable(createToJson: false)
-class MatchQuestions {
-  static MatchQuestions? current;
-  static final Etag _etag = Etag();
-
-  static void clear() {
-    current = null;
-    _etag.clear();
-  }
-
-  final List<Question> auto;
-  final List<Question> teleop;
-  final List<Question> endgame;
-  final List<Question> general;
-  final List<Question> human;
-
-  MatchQuestions({
-    required this.auto,
-    required this.teleop,
-    required this.endgame,
-    required this.general,
-    required this.human,
-  });
-
-  factory MatchQuestions.fromJson(Map<String, dynamic> json) =>
-      _$MatchQuestionsFromJson(json);
-}
-
-@JsonSerializable(createToJson: false)
-class PitQuestions {
-  static PitQuestions? current;
-  static final Etag _etag = Etag();
-
-  static void clear() {
-    current = null;
-    _etag.clear();
-  }
-
-  final List<Question> specs;
-  final List<Question> auto;
-  final List<Question> teleop;
-  final List<Question> endgame;
-  final List<Question> general;
-
-  PitQuestions({
-    required this.specs,
-    required this.auto,
-    required this.teleop,
-    required this.endgame,
-    required this.general,
-  });
-
-  factory PitQuestions.fromJson(Map<String, dynamic> json) =>
-      _$PitQuestionsFromJson(json);
-}
-
-@JsonSerializable(createToJson: false)
-class DriveTeamQuestions {
-  static DriveTeamQuestions? current;
-  static final Etag _etag = Etag();
-
-  static void clear() {
-    current = null;
-    _etag.clear();
-  }
-
+class QuestionPage {
+  final String key;
+  final String title;
   final List<Question> questions;
 
-  DriveTeamQuestions({required this.questions});
+  QuestionPage({
+    required this.key,
+    required this.title,
+    required this.questions,
+  });
 
-  factory DriveTeamQuestions.fromJson(Map<String, dynamic> json) =>
-      _$DriveTeamQuestionsFromJson(json);
+  factory QuestionPage.fromJson(Map<String, dynamic> json) =>
+      _$QuestionPageFromJson(json);
+
+  QuestionPage driveTeam(String newKey, String newTitle) =>
+      QuestionPage(key: newKey, title: newTitle, questions: questions);
 }
 
-Future<ServerResponse<MatchQuestions>> serverGetMatchQuestions() =>
+Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
     serverRequest(
       endpoint: '/questions/match',
       method: 'GET',
-      decoder: MatchQuestions.fromJson,
-      callback: (questions) => MatchQuestions.current = questions,
-      etag: MatchQuestions._etag,
+      decoder: listOf(QuestionPage.fromJson),
+      callback: (questions) => Question.matchQuestions = questions,
+      etag: Question._matchQuestionsEtag,
     );
 
-Future<ServerResponse<PitQuestions>> serverGetPitQuestions() => serverRequest(
+Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
+    serverRequest(
       endpoint: '/questions/pit',
       method: 'GET',
-      decoder: PitQuestions.fromJson,
-      callback: (questions) => PitQuestions.current = questions,
-      etag: PitQuestions._etag,
+      decoder: listOf(QuestionPage.fromJson),
+      callback: (questions) => Question.pitQuestions = questions,
+      etag: Question._pitQuestionsEtag,
     );
 
-Future<ServerResponse<DriveTeamQuestions>> serverGetDriveTeamQuestions() =>
+Future<ServerResponse<List<Question>>> serverGetDriveTeamQuestions() =>
     serverRequest(
       endpoint: '/questions/drive-team',
       method: 'GET',
-      decoder: DriveTeamQuestions.fromJson,
-      callback: (questions) => DriveTeamQuestions.current = questions,
-      etag: DriveTeamQuestions._etag,
+      decoder: listOf(Question.fromJson),
+      callback: (questions) => Question.driveTeamQuestions = questions,
+      etag: Question._driveTeamQuestionsEtag,
     );

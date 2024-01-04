@@ -65,8 +65,16 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
       body: QuestionDisplay(
         questions: [
           // one set of questions per partner
-          ('Team $_partner1', '$_partner1', DriveTeamQuestions.current?.questions),
-          ('Team $_partner2', '$_partner2', DriveTeamQuestions.current?.questions),
+          QuestionPage(
+            key: '$_partner1',
+            title: 'Team $_partner1',
+            questions: Question.driveTeamQuestions,
+          ),
+          QuestionPage(
+            key: '$_partner2',
+            title: 'Team $_partner2',
+            questions: Question.driveTeamQuestions,
+          ),
         ],
         submitAction: print,
       ),

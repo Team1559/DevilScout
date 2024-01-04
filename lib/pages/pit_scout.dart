@@ -45,13 +45,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
       ),
       drawer: const NavDrawer(),
       body: QuestionDisplay(
-        questions: [
-          ('Robot Specs', 'specs', PitQuestions.current?.specs),
-          ('Autonomous', 'auto', PitQuestions.current?.auto),
-          ('Teleop', 'teleop', PitQuestions.current?.teleop),
-          ('Endgame', 'endgame', PitQuestions.current?.endgame),
-          ('General', 'general', PitQuestions.current?.general),
-        ],
+        questions: Question.pitQuestions,
         submitAction: print,
       ),
     );

@@ -5,7 +5,7 @@ import '/server/questions.dart';
 import 'large_text_field.dart';
 
 class QuestionDisplay extends StatefulWidget {
-  final List<(String, String, List<Question>?)> questions;
+  final List<QuestionPage> questions;
   final void Function(Map<String, List<dynamic>>) submitAction;
 
   const QuestionDisplay({
@@ -25,10 +25,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   @override
   void initState() {
     super.initState();
-    values = List.generate(
-      widget.questions.length,
-      (index) => List.empty(growable: true),
-    );
+    values = List.empty(growable: true);
   }
 
   void nextPage() {
@@ -54,13 +51,19 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
         PageView(
           controller: controller,
           children: List.generate(widget.questions.length, (index) {
-            String name = widget.questions[index].$1;
-            List<Question>? questions = widget.questions[index].$3 ?? [];
+            String name = widget.questions[index].title;
+            List<Question>? questions = widget.questions[index].questions;
+
+            if (values.length <= index) {
+              values.addAll(List.generate(index - values.length + 1,
+                  (index) => List.empty(growable: true)));
+            }
+            
             if (values[index].length < questions.length) {
               values[index].length = questions.length;
             }
 
-            return QuestionPage(
+            return _QuestionDisplayPage(
               name: name,
               questions: questions,
               values: values[index],
@@ -79,7 +82,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
                   ? null
                   : () {
                       Map<String, List<dynamic>> data = Map.fromIterables(
-                          widget.questions.map((e) => e.$2), values);
+                          widget.questions.map((e) => e.key), values);
                       widget.submitAction.call(data);
                     },
               child: const Text('Submit'),
@@ -91,7 +94,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   }
 }
 
-class QuestionPage extends StatefulWidget {
+class _QuestionDisplayPage extends StatefulWidget {
   final String name;
   final List<Question> questions;
   final List<dynamic> values;
@@ -100,8 +103,7 @@ class QuestionPage extends StatefulWidget {
   final void Function()? nextPage;
   final void Function(void Function()) setState;
 
-  const QuestionPage({
-    super.key,
+  const _QuestionDisplayPage({
     required this.name,
     required this.questions,
     required this.values,
@@ -111,10 +113,10 @@ class QuestionPage extends StatefulWidget {
   });
 
   @override
-  State<QuestionPage> createState() => _QuestionPageState();
+  State<_QuestionDisplayPage> createState() => _QuestionDisplayPageState();
 }
 
-class _QuestionPageState extends State<QuestionPage>
+class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;

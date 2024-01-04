@@ -264,9 +264,7 @@ Future<ServerResponse<void>> serverLogout() {
   Event.clear();
   FrcTeam.clear();
   EventMatch.clear();
-  MatchQuestions.clear();
-  PitQuestions.clear();
-  DriveTeamQuestions.clear();
+  Question.clear();
 
   return request;
 }
