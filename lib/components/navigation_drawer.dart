@@ -16,7 +16,7 @@ class NavDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: SafeArea(
-        minimum: const EdgeInsets.symmetric(vertical: 32),
+        minimum: const EdgeInsets.symmetric(vertical: 32, horizontal: 2.0),
         child: Column(
           children: [
             Text(

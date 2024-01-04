@@ -28,14 +28,13 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Welcome,\nlet's get you logged in.",
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.left,
-                ),
-                const Icon(
-                  Icons.image,
-                  size: 200,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    "Welcome,\nlet's get you logged in.",
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.left,
+                  ),
                 ),
                 const _LoginFields(),
               ],
@@ -69,7 +68,7 @@ class _LoginFieldsState extends State<_LoginFields> {
     return SizedBox(
       height: 240,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 175),
         transitionBuilder: (child, animation) => SlideTransition(
           position: Tween(
             begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
@@ -104,6 +103,11 @@ class _LoginFieldsState extends State<_LoginFields> {
           keyboardType: TextInputType.number,
         ),
         FilledButton(
+          style: const ButtonStyle(
+            minimumSize: MaterialStatePropertyAll(
+              Size(double.infinity, 48.0),
+            ),
+          ),
           child: const Text('Next'),
           onPressed: () async {
             if (_username.text.isEmpty) {
@@ -146,6 +150,11 @@ class _LoginFieldsState extends State<_LoginFields> {
           obscureText: true,
         ),
         FilledButton(
+          style: const ButtonStyle(
+            minimumSize: MaterialStatePropertyAll(
+              Size(double.infinity, 48.0),
+            ),
+          ),
           onPressed: () {
             if (_password.text.isEmpty) {
               displaySnackbar(context, 'Enter your password');

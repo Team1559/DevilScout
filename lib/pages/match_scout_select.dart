@@ -46,25 +46,28 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
         if (!Team.currentTeam!.hasEventKey) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'No event set',
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-                if (User.currentUser!.accessLevel >= AccessLevel.admin)
-                  FilledButton(
-                    onPressed: () {},
-                    child: const Text('Go to team management'),
-                  )
-                else
+          return SafeArea(
+            minimum: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Text(
-                    'Ask your team admins to configure',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  )
-              ],
+                    'No event set',
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
+                  if (User.currentUser!.accessLevel >= AccessLevel.admin)
+                    FilledButton(
+                      onPressed: () {},
+                      child: const Text('Go to team management'),
+                    )
+                  else
+                    Text(
+                      'Ask your team admins to configure',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    )
+                ],
+              ),
             ),
           );
         }

@@ -39,7 +39,7 @@ class LargeTextField extends StatelessWidget {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.onBackground,
             ),
           ),
           focusedBorder: OutlineInputBorder(
@@ -48,7 +48,7 @@ class LargeTextField extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
                 width: 2.0,
               )),
-          fillColor: Theme.of(context).colorScheme.surface,
+          fillColor: Theme.of(context).colorScheme.background,
           filled: true,
           contentPadding: const EdgeInsets.all(22.0),
           hintText: hintText,

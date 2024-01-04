@@ -12,7 +12,7 @@ const _onError = Colors.white;
 const _lightSurface = Color(0xFFE4E4E4);
 const _onLightSurface = Colors.black;
 const _lightBackground = Color(0xFFFAFAFA);
-const _onLightBackground = Colors.black;
+const _onLightBackground = Color(0xFF494949);
 
 const _darkSurface = Color(0xFFA9A9A9);
 const _onDarkSurface = Colors.white;
@@ -41,10 +41,30 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.circular(20),
     ),
   ),
+  filledButtonTheme: FilledButtonThemeData(
+    style: ButtonStyle(
+      minimumSize: const MaterialStatePropertyAll(
+        Size(120, 48.0),
+      ),
+      maximumSize: const MaterialStatePropertyAll(
+        Size(double.infinity, 48.0),
+      ),
+      shape: MaterialStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    ),
+  ),
   textTheme: const TextTheme(
     titleLarge: TextStyle(
       fontFamily: 'Montserrat',
       fontSize: 24.0,
+      fontWeight: FontWeight.bold,
+    ),
+    labelLarge: TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16.0,
       fontWeight: FontWeight.bold,
     ),
   ),
