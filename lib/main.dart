@@ -1,49 +1,42 @@
-import 'package:devil_scout/theme/theme_constants.dart';
-import 'package:devil_scout/theme/theme_manager.dart';
 import 'package:flutter/material.dart';
 
-import 'pages/login_page.dart';
+import '/pages/home.dart';
+
+part 'theme.dart';
 
 void main() {
   runApp(const MainApp());
 }
 
-ThemeManager themeManager = ThemeManager();
-
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
+  State<MainApp> createState() => MainAppState();
+
+  static MainAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<MainAppState>()!;
 }
 
-class _MainAppState extends State<MainApp> {
-  @override
-  void dispose() {
-    themeManager.removeListener(themeListener);
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    themeManager.addListener(themeListener);
-    super.initState();
-  }
-
-  void themeListener() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
+class MainAppState extends State<MainApp> {
+  ThemeMode _themeMode = ThemeMode.light;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoginPage(themeManager: themeManager),
+      home: const HomePage(),
       theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: themeManager.themeMode,
+      themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
     );
   }
+
+  void setThemeMode(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
+
+  bool isDarkTheme() => _themeMode == ThemeMode.dark;
 }
