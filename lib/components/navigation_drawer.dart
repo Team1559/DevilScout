@@ -5,6 +5,7 @@ import '/pages/login.dart';
 import '/pages/match_scout_select.dart';
 import '/pages/settings.dart';
 import '/pages/team_select.dart';
+import '/pages/management.dart';
 import '/server/auth.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
@@ -122,7 +123,20 @@ class NavDrawer extends StatelessWidget {
               ListTile(
                 title: Text('Manage Team ${Team.currentTeam!.number}'),
                 leading: const Icon(Icons.image),
-                onTap: () {},
+                onTap: () {
+                  ManagementPageState? parent =
+                      context.findAncestorStateOfType<ManagementPageState>();
+                  if (parent == null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ManagementPage(),
+                      ),
+                    );
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
               ),
             const Spacer(),
             Text(
