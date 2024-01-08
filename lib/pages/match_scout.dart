@@ -1,5 +1,9 @@
+import 'package:devil_scout/components/loading_overlay.dart';
+import 'package:devil_scout/components/snackbar.dart';
+import 'package:devil_scout/server/submissions.dart';
 import 'package:flutter/material.dart';
 
+import '../server/server.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
 import '/server/events.dart';
@@ -52,9 +56,34 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
         }),
       ),
       drawer: const NavDrawer(),
-      body: QuestionDisplay(
-        pages: QuestionConfig.matchQuestions,
-        submitAction: print,
+      body: LoadingOverlay(
+        child: Builder(builder: (context) {
+          return QuestionDisplay(
+            pages: QuestionConfig.matchQuestions,
+            submitAction: (data) async {
+              LoadingOverlay.of(context).show();
+
+              ServerResponse<void> response = await serverSubmitMatchData(
+                eventKey: Event.currentEvent!.key,
+                matchKey: widget.match.key,
+                team: widget.team,
+                data: data,
+              );
+              if (!context.mounted) return;
+
+              LoadingOverlay.of(context).hide();
+
+              if (!response.success) {
+                displaySnackbar(
+                    context,
+                    response.message ??
+                        'Something went wrong, please try again');
+              } else {
+                displaySnackbar(context, response.message ?? 'Success!');
+              }
+            },
+          );
+        }),
       ),
     );
   }

@@ -283,7 +283,8 @@ class BooleanQuestion extends QuestionWidget<BooleanConfig> {
   State<BooleanQuestion> createState() => _BooleanQuestionState();
 }
 
-class _BooleanQuestionState extends QuestionWidgetState<int?, BooleanQuestion> {
+class _BooleanQuestionState
+    extends QuestionWidgetState<bool?, BooleanQuestion> {
   _BooleanQuestionState() : super(value: null);
 
   @override
@@ -301,10 +302,10 @@ class _BooleanQuestionState extends QuestionWidgetState<int?, BooleanQuestion> {
           label: Text('No'),
         ),
       ],
-      selected: value == null ? {} : {value == 1},
+      selected: value == null ? {} : {value},
       onSelectionChanged: (set) {
         if (set.isNotEmpty) {
-          setValue(set.first ? 1 : 0);
+          setValue(set.first);
         }
       },
     );
@@ -515,7 +516,7 @@ class SequenceQuestion extends QuestionWidget<SequenceConfig> {
 
 class _SequenceQuestionState
     extends QuestionWidgetState<List<int?>, SequenceQuestion> {
-  _SequenceQuestionState() : super(value: [null]);
+  _SequenceQuestionState() : super(value: []);
 
   @override
   Widget build(BuildContext context) {
@@ -531,16 +532,15 @@ class _SequenceQuestionState
       children: [
         Column(
           children: List.generate(
-            value.length,
+            value.length + 1,
             (index) => DropdownButton(
               hint: const Text('End of sequence'),
               items: entries,
-              value: value[index],
+              value: index == value.length ? null : value[index],
               onChanged: (v) {
                 setState(() {
-                  value.length = index + 2;
+                  value.length = index + 1;
                   value[index] = v;
-                  value[index + 1] = null;
                 });
               },
             ),
@@ -548,8 +548,7 @@ class _SequenceQuestionState
         ),
         TextButton(
           onPressed: () => setState(() {
-            value.length = 1;
-            value[0] = null;
+            value.length = 0;
           }),
           child: const Text('Reset'),
         )
