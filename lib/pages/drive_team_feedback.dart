@@ -63,17 +63,17 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
       ),
       drawer: const NavDrawer(),
       body: QuestionDisplay(
-        questions: [
+        pages: [
           // one set of questions per partner
           QuestionPage(
             key: '$_partner1',
             title: 'Team $_partner1',
-            questions: Question.driveTeamQuestions,
+            questions: QuestionConfig.driveTeamQuestions,
           ),
           QuestionPage(
             key: '$_partner2',
             title: 'Team $_partner2',
-            questions: Question.driveTeamQuestions,
+            questions: QuestionConfig.driveTeamQuestions,
           ),
         ],
         submitAction: print,

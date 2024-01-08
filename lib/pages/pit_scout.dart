@@ -45,7 +45,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
       ),
       drawer: const NavDrawer(),
       body: QuestionDisplay(
-        questions: Question.pitQuestions,
+        pages: QuestionConfig.pitQuestions,
         submitAction: print,
       ),
     );

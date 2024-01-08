@@ -53,7 +53,7 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
       ),
       drawer: const NavDrawer(),
       body: QuestionDisplay(
-        questions: Question.matchQuestions,
+        pages: QuestionConfig.matchQuestions,
         submitAction: print,
       ),
     );
