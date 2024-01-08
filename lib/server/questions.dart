@@ -8,22 +8,21 @@ part 'questions.g.dart';
 enum QuestionType {
   boolean(_$BooleanConfigFromJson),
   counter(_$CounterConfigFromJson),
-  grid(_$GridConfigFromJson),
   multiple(_$MultipleChoiceConfigFromJson),
-  number(_$NumberInputConfigFromJson),
-  range(_$NumberRangeConfigFromJson),
+  number(_$NumberConfigFromJson),
+  range(_$RangeConfigFromJson),
   sequence(_$SequenceConfigFromJson),
   single(_$SingleChoiceConfigFromJson);
 
-  final QuestionConfig Function(Map<String, dynamic>) configParser;
+  final QuestionConfig Function(Map<String, dynamic>) parser;
 
-  const QuestionType(this.configParser);
+  const QuestionType(this.parser);
 }
 
-class Question {
+abstract class QuestionConfig {
   static List<QuestionPage> matchQuestions = List.empty();
   static List<QuestionPage> pitQuestions = List.empty();
-  static List<Question> driveTeamQuestions = List.empty();
+  static List<QuestionConfig> driveTeamQuestions = List.empty();
 
   static final Etag _matchQuestionsEtag = Etag();
   static final Etag _pitQuestionsEtag = Etag();
@@ -40,90 +39,99 @@ class Question {
   }
 
   final String prompt;
-  final QuestionType type;
-  final QuestionConfig config;
+  final String key;
 
-  const Question({
+  const QuestionConfig({
     required this.prompt,
-    required this.type,
-    required this.config,
+    required this.key,
   });
 
-  factory Question.fromJson(Map<String, dynamic> json) {
-    String prompt = json['prompt'];
-    QuestionType type = $enumDecode(_$QuestionTypeEnumMap, json['type']);
-    QuestionConfig config = type.configParser.call(json['config'] ?? {});
-    return Question(prompt: prompt, type: type, config: config);
-  }
-}
-
-abstract class QuestionConfig {}
-
-@JsonSerializable(createToJson: false)
-class BooleanConfig implements QuestionConfig {
-  const BooleanConfig();
+  factory QuestionConfig.fromJson(Map<String, dynamic> json) =>
+      $enumDecode(_$QuestionTypeEnumMap, json['type']).parser.call(json);
 }
 
 @JsonSerializable(createToJson: false)
-class CounterConfig implements QuestionConfig {
-  const CounterConfig();
+class BooleanConfig extends QuestionConfig {
+  BooleanConfig({
+    required super.prompt,
+    required super.key,
+  });
 }
 
 @JsonSerializable(createToJson: false)
-class GridConfig implements QuestionConfig {
+class CounterConfig extends QuestionConfig {
+  CounterConfig({
+    required super.prompt,
+    required super.key,
+  });
+}
+
+@JsonSerializable(createToJson: false)
+class MultipleChoiceConfig extends QuestionConfig {
   final List<String> options;
-  final int height;
-  final int width;
 
-  const GridConfig({
+  MultipleChoiceConfig({
+    required super.prompt,
+    required super.key,
     required this.options,
-    required this.height,
-    required this.width,
   });
 }
 
 @JsonSerializable(createToJson: false)
-class MultipleChoiceConfig implements QuestionConfig {
-  final List<String> options;
-
-  const MultipleChoiceConfig({required this.options});
-}
-
-@JsonSerializable(createToJson: false)
-class NumberInputConfig implements QuestionConfig {
+class NumberConfig extends QuestionConfig {
   final int min;
   final int max;
 
-  const NumberInputConfig({required this.min, required this.max});
+  NumberConfig({
+    required super.prompt,
+    required super.key,
+    required this.min,
+    required this.max,
+  });
 }
 
 @JsonSerializable(createToJson: false)
-class NumberRangeConfig implements QuestionConfig {
+class RangeConfig extends QuestionConfig {
   final int min;
   final int max;
+  final int increment;
 
-  const NumberRangeConfig({required this.min, required this.max});
+  RangeConfig({
+    required super.prompt,
+    required super.key,
+    required this.min,
+    required this.max,
+    this.increment = 1,
+  });
 }
 
 @JsonSerializable(createToJson: false)
-class SequenceConfig implements QuestionConfig {
+class SequenceConfig extends QuestionConfig {
   final List<String> options;
 
-  const SequenceConfig({required this.options});
+  SequenceConfig({
+    required super.prompt,
+    required super.key,
+    required this.options,
+  });
 }
 
 @JsonSerializable(createToJson: false)
-class SingleChoiceConfig implements QuestionConfig {
+class SingleChoiceConfig extends QuestionConfig {
   final List<String> options;
 
-  const SingleChoiceConfig({required this.options});
+  SingleChoiceConfig({
+    required super.prompt,
+    required super.key,
+    required this.options,
+  });
 }
 
 @JsonSerializable(createToJson: false)
 class QuestionPage {
   final String key;
   final String title;
-  final List<Question> questions;
+  final List<QuestionConfig> questions;
 
   QuestionPage({
     required this.key,
@@ -143,8 +151,8 @@ Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
       endpoint: '/questions/match',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
-      callback: (questions) => Question.matchQuestions = questions,
-      etag: Question._matchQuestionsEtag,
+      callback: (questions) => QuestionConfig.matchQuestions = questions,
+      etag: QuestionConfig._matchQuestionsEtag,
     );
 
 Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
@@ -152,15 +160,15 @@ Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
       endpoint: '/questions/pit',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
-      callback: (questions) => Question.pitQuestions = questions,
-      etag: Question._pitQuestionsEtag,
+      callback: (questions) => QuestionConfig.pitQuestions = questions,
+      etag: QuestionConfig._pitQuestionsEtag,
     );
 
-Future<ServerResponse<List<Question>>> serverGetDriveTeamQuestions() =>
+Future<ServerResponse<List<QuestionConfig>>> serverGetDriveTeamQuestions() =>
     serverRequest(
       endpoint: '/questions/drive-team',
       method: 'GET',
-      decoder: listOf(Question.fromJson),
-      callback: (questions) => Question.driveTeamQuestions = questions,
-      etag: Question._driveTeamQuestionsEtag,
+      decoder: listOf(QuestionConfig.fromJson),
+      callback: (questions) => QuestionConfig.driveTeamQuestions = questions,
+      etag: QuestionConfig._driveTeamQuestionsEtag,
     );
