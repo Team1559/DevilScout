@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
+import '/components/snackbar.dart';
+import '/server/events.dart';
 import '/server/questions.dart';
+import '/server/server.dart';
+import '/server/submissions.dart';
 
 class PitScoutPage extends StatefulWidget {
   final int team;
@@ -44,9 +49,33 @@ class _PitScoutPageState extends State<PitScoutPage> {
         }),
       ),
       drawer: const NavDrawer(),
-      body: QuestionDisplay(
-        pages: QuestionConfig.pitQuestions,
-        submitAction: print,
+      body: LoadingOverlay(
+        child: Builder(builder: (context) {
+          return QuestionDisplay(
+            pages: QuestionConfig.pitQuestions,
+            submitAction: (data) async {
+              LoadingOverlay.of(context).show();
+
+              ServerResponse<void> response = await serverSubmitPitData(
+                eventKey: Event.currentEvent!.key,
+                team: widget.team,
+                data: data,
+              );
+              if (!context.mounted) return;
+
+              LoadingOverlay.of(context).hide();
+
+              if (!response.success) {
+                displaySnackbar(
+                    context,
+                    response.message ??
+                        'Something went wrong, please try again');
+              } else {
+                displaySnackbar(context, response.message ?? 'Success!');
+              }
+            },
+          );
+        }),
       ),
     );
   }

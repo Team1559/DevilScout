@@ -1,11 +1,13 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
+import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
+import '/components/snackbar.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
+import '/server/server.dart';
+import '/server/submissions.dart';
 
 class DriveTeamFeedbackPage extends StatefulWidget {
   final EventMatch match;
@@ -22,8 +24,7 @@ class DriveTeamFeedbackPage extends StatefulWidget {
 }
 
 class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
-  late final int _partner1;
-  late final int _partner2;
+  late final List<int> partners;
 
   @override
   void initState() {
@@ -34,12 +35,10 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
       }
     });
 
-    List<int> alliance = List.of(widget.match.blue.contains(widget.team)
+    partners = List.of(widget.match.blue.contains(widget.team)
         ? widget.match.blue
         : widget.match.red);
-    alliance.remove(widget.team);
-    _partner1 = alliance.reduce((team1, team2) => min(team1, team2));
-    _partner2 = alliance.reduce((team1, team2) => max(team1, team2));
+    partners.remove(widget.team);
   }
 
   @override
@@ -62,21 +61,40 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
         }),
       ),
       drawer: const NavDrawer(),
-      body: QuestionDisplay(
-        pages: [
-          // one set of questions per partner
-          QuestionPage(
-            key: '$_partner1',
-            title: 'Team $_partner1',
-            questions: QuestionConfig.driveTeamQuestions,
-          ),
-          QuestionPage(
-            key: '$_partner2',
-            title: 'Team $_partner2',
-            questions: QuestionConfig.driveTeamQuestions,
-          ),
-        ],
-        submitAction: print,
+      body: LoadingOverlay(
+        child: Builder(builder: (context) {
+          return QuestionDisplay(
+            pages: [
+              for (int partner in partners)
+                QuestionPage(
+                  key: '$partner',
+                  title: 'Team $partner',
+                  questions: QuestionConfig.driveTeamQuestions,
+                ),
+            ],
+            submitAction: (data) async {
+              LoadingOverlay.of(context).show();
+
+              ServerResponse<void> response = await serverSubmitDriveTeamData(
+                eventKey: Event.currentEvent!.key,
+                matchKey: widget.match.key,
+                data: data,
+              );
+              if (!context.mounted) return;
+
+              LoadingOverlay.of(context).hide();
+
+              if (!response.success) {
+                displaySnackbar(
+                    context,
+                    response.message ??
+                        'Something went wrong, please try again');
+              } else {
+                displaySnackbar(context, response.message ?? 'Success!');
+              }
+            },
+          );
+        }),
       ),
     );
   }

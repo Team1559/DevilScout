@@ -1,13 +1,13 @@
-import 'package:devil_scout/components/loading_overlay.dart';
-import 'package:devil_scout/components/snackbar.dart';
-import 'package:devil_scout/server/submissions.dart';
 import 'package:flutter/material.dart';
 
-import '../server/server.dart';
+import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
+import '/components/snackbar.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
+import '/server/server.dart';
+import '/server/submissions.dart';
 
 class MatchScoutPage extends StatefulWidget {
   final EventMatch match;
