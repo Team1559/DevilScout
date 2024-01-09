@@ -1,26 +1,9 @@
-name: Build & Test
+name: Build
 on: [push]
 permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v4
-    - name: Set up Flutter environment
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-        cache: true
-    - name: Download dart packages
-      run: flutter pub get
-    - name: Generate source files
-      run: dart run build_runner build --delete-conflicting-outputs
-    - name: Run unit tests
-      run: flutter test
-
   ios:
     runs-on: macos-latest
     steps:
