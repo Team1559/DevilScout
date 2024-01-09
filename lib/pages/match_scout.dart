@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
+import '/components/snackbar.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
+import '/server/server.dart';
+import '/server/submissions.dart';
 
 class MatchScoutPage extends StatefulWidget {
   final EventMatch match;
@@ -52,9 +56,34 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
         }),
       ),
       drawer: const NavDrawer(),
-      body: QuestionDisplay(
-        questions: Question.matchQuestions,
-        submitAction: print,
+      body: LoadingOverlay(
+        child: Builder(builder: (context) {
+          return QuestionDisplay(
+            pages: QuestionConfig.matchQuestions,
+            submitAction: (data) async {
+              LoadingOverlay.of(context).show();
+
+              ServerResponse<void> response = await serverSubmitMatchData(
+                eventKey: Event.currentEvent!.key,
+                matchKey: widget.match.key,
+                team: widget.team,
+                data: data,
+              );
+              if (!context.mounted) return;
+
+              LoadingOverlay.of(context).hide();
+
+              if (!response.success) {
+                displaySnackbar(
+                    context,
+                    response.message ??
+                        'Something went wrong, please try again');
+              } else {
+                displaySnackbar(context, response.message ?? 'Success!');
+              }
+            },
+          );
+        }),
       ),
     );
   }
