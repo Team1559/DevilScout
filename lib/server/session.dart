@@ -56,7 +56,7 @@ class Session {
 
   /// The ID for the current session, which must be passed with every request
   final String key;
-  final int user;
+  final String user;
   final int team;
 
   /// The expiration time of this session
@@ -75,9 +75,8 @@ class Session {
 
 Future<ServerResponse<Session>> serverGetSession([String? sessionKey]) =>
     serverRequest(
-      endpoint: '/session',
+      path: '/sessions/$sessionKey',
       method: 'GET',
       decoder: Session.fromJson,
       callback: (session) => Session.current = session,
-      sessionKey: sessionKey,
     );

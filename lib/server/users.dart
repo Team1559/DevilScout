@@ -21,7 +21,7 @@ class User {
     _allUsersEtag.clear();
   }
 
-  final int id;
+  final String id;
   final int team;
   final String username;
   final String fullName;
@@ -89,7 +89,7 @@ enum AccessLevel {
 }
 
 Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequest(
-      endpoint: '/users',
+      path: '/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
       etag: User._allUsersEtag,
@@ -97,14 +97,14 @@ Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequest(
 
 Future<ServerResponse<List<User>>> serverGetUsersOnTeam({required int team}) =>
     serverRequest(
-      endpoint: '/team/$team/users',
+      path: '/team/$team/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
     );
 
 Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
     serverRequest(
-      endpoint: '/users/$id',
+      path: '/users/$id',
       method: 'GET',
       decoder: User.fromJson,
     );
@@ -117,7 +117,7 @@ Future<ServerResponse<User>> serverCreateUser({
   required String password,
 }) =>
     serverRequest(
-      endpoint: '/users',
+      path: '/users',
       method: 'POST',
       decoder: User.fromJson,
       payload: {
@@ -130,43 +130,29 @@ Future<ServerResponse<User>> serverCreateUser({
     );
 
 Future<ServerResponse<User>> serverEditUser({
-  required int id,
+  required String id,
   String? username,
   String? fullName,
   AccessLevel? accessLevel,
   String? password,
-}) {
-  Map<String, dynamic> edits = {};
+}) =>
+    serverRequest(
+      path: '/users/$id',
+      method: 'PATCH',
+      decoder: User.fromJson,
+      payload: {
+        if (username != null) 'username': username,
+        if (fullName != null) 'fullName': fullName,
+        if (accessLevel != null) 'accessLevel': accessLevel.value,
+        if (password != null) 'password': password,
+      },
+    );
 
-  if (username != null) {
-    edits['username'] = username;
-  }
-
-  if (fullName != null) {
-    edits['fullName'] = fullName;
-  }
-
-  if (accessLevel != null) {
-    edits['accessLevel'] = accessLevel.value;
-  }
-
-  if (password != null) {
-    edits['password'] = password;
-  }
-
-  return serverRequest(
-    endpoint: '/users/$id',
-    method: 'PATCH',
-    decoder: User.fromJson,
-    payload: edits,
-  );
-}
-
-Future<ServerResponse<void>> serverDeleteUser({required int id}) =>
-    serverRequest(endpoint: '/users/$id', method: 'DELETE');
+Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
+    serverRequest(path: '/users/$id', method: 'DELETE');
 
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      endpoint: '/users/${Session.current!.user}',
+      path: '/users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,
@@ -179,18 +165,18 @@ Future<ServerResponse<User>> serverEditCurrentUser({
   AccessLevel? accessLevel,
   String? password,
 }) =>
-    serverEditUser(
-      id: Session.current!.team,
-      username: username,
-      fullName: fullName,
-      accessLevel: accessLevel,
-      password: password,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        User.currentUser = response.value;
-      }
-      return response;
-    });
+    serverRequest(
+      path: '/users/${Session.current!.user}',
+      method: 'PATCH',
+      decoder: User.fromJson,
+      callback: (user) => User.currentUser = user,
+      payload: {
+        if (username != null) 'username': username,
+        if (fullName != null) 'fullName': fullName,
+        if (accessLevel != null) 'accessLevel': accessLevel.value,
+        if (password != null) 'password': password,
+      },
+    );
 
 Future<ServerResponse<void>> serverDeleteCurrentUser() =>
     serverDeleteUser(id: Session.current!.user);

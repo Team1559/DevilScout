@@ -118,7 +118,7 @@ enum MatchLevel {
 }
 
 Future<ServerResponse<List<Event>>> serverGetAllEvents() => serverRequest(
-      endpoint: '/events',
+      path: '/events',
       method: 'GET',
       decoder: listOf(Event.fromJson),
       etag: Event._allEventsEtag,
@@ -130,7 +130,7 @@ Future<ServerResponse<Event>> serverGetEvent({
   Etag? etag,
 }) =>
     serverRequest(
-      endpoint: '/events/$eventKey',
+      path: '/events/$eventKey',
       method: 'GET',
       decoder: Event.fromJson,
       etag: etag,
@@ -141,7 +141,7 @@ Future<ServerResponse<List<EventMatch>>> serverGetEventSchedule({
   Etag? etag,
 }) =>
     serverRequest(
-      endpoint: '/events/$eventKey/match-schedule',
+      path: '/events/$eventKey/match-schedule',
       method: 'GET',
       decoder: listOf(EventMatch.fromJson),
       etag: etag,
@@ -152,7 +152,7 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
   Etag? etag,
 }) =>
     serverRequest(
-      endpoint: '/events/$eventKey/teams',
+      path: '/events/$eventKey/teams',
       method: 'GET',
       decoder: listOf(FrcTeam.fromJson),
     );
@@ -165,7 +165,7 @@ Future<ServerResponse<Event>> serverGetCurrentEvent() {
   }
 
   return serverRequest(
-    endpoint: '/events/${Team.currentTeam!.eventKey}',
+    path: '/events/${Team.currentTeam!.eventKey}',
     method: 'GET',
     decoder: Event.fromJson,
     callback: (event) => Event.currentEvent = event,
@@ -181,7 +181,7 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
   }
 
   return serverRequest(
-    endpoint: '/events/${Team.currentTeam!.eventKey}/match-schedule',
+    path: '/events/${Team.currentTeam!.eventKey}/match-schedule',
     method: 'GET',
     decoder: listOf(EventMatch.fromJson),
     callback: (schedule) => EventMatch.currentEventSchedule = schedule,
@@ -197,7 +197,7 @@ Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() {
   }
 
   return serverRequest(
-    endpoint: '/events/${Team.currentTeam!.eventKey}/teams',
+    path: '/events/${Team.currentTeam!.eventKey}/teams',
     method: 'GET',
     decoder: listOf(FrcTeam.fromJson),
     callback: (teams) => FrcTeam.currentEventTeams = teams,

@@ -37,7 +37,7 @@ class Team {
 }
 
 Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequest(
-      endpoint: '/teams',
+      path: '/teams',
       method: 'GET',
       decoder: listOf(Team.fromJson),
       etag: Team._allTeamsEtag,
@@ -45,7 +45,7 @@ Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequest(
 
 Future<ServerResponse<Team>> serverGetTeam({required int number, Etag? etag}) =>
     serverRequest(
-      endpoint: '/teams/$number',
+      path: '/teams/$number',
       method: 'GET',
       decoder: Team.fromJson,
     );
@@ -55,7 +55,7 @@ Future<ServerResponse<Team>> serverCreateTeam({
   required String name,
 }) =>
     serverRequest(
-      endpoint: '/teams',
+      path: '/teams',
       method: 'POST',
       decoder: Team.fromJson,
       payload: {
@@ -69,52 +69,44 @@ Future<ServerResponse<Team>> serverEditTeam({
   String? name,
   String? eventKey,
   Etag? etag,
-}) {
-  Map<String, dynamic> edits = {};
-
-  if (name != null) {
-    edits['name'] = name;
-  }
-
-  if (eventKey != null) {
-    edits['eventKey'] = eventKey;
-  }
-
-  return serverRequest(
-    endpoint: '/teams/$number',
-    method: 'PATCH',
-    decoder: Team.fromJson,
-    payload: edits,
-    etag: etag,
-  );
-}
+}) =>
+    serverRequest(
+      path: '/teams/$number',
+      method: 'PATCH',
+      decoder: Team.fromJson,
+      etag: etag,
+      payload: {
+        if (name != null) 'name': name,
+        if (eventKey != null) 'eventKey': eventKey,
+      },
+    );
 
 Future<ServerResponse<void>> serverDeleteTeam({required int number}) =>
-    serverRequest(endpoint: '/teams/$number', method: 'DELETE');
+    serverRequest(
+      path: '/teams/$number',
+      method: 'DELETE',
+    );
 
-Future<ServerResponse<Team>> serverGetCurrentTeam() {
-  return serverRequest(
-    endpoint: '/teams/${Session.current!.team}',
-    method: 'GET',
-    decoder: Team.fromJson,
-    callback: (team) => Team.currentTeam = team,
-    etag: Team._currentTeamEtag,
-  );
-}
+Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(
+      path: '/teams/${Session.current!.team}',
+      method: 'GET',
+      decoder: Team.fromJson,
+      callback: (team) => Team.currentTeam = team,
+      etag: Team._currentTeamEtag,
+    );
 
 Future<ServerResponse<Team>> serverEditCurrentTeam({
   String? name,
   String? eventKey,
-}) {
-  return serverEditTeam(
-    number: Session.current!.team,
-    name: name,
-    eventKey: eventKey,
-    etag: Team._currentTeamEtag,
-  ).then((response) {
-    if (response.success && response.value != null) {
-      Team.currentTeam = response.value;
-    }
-    return response;
-  });
-}
+}) =>
+    serverRequest(
+      path: '/teams/${Session.current!.team}',
+      method: 'PATCH',
+      decoder: Team.fromJson,
+      etag: Team._currentTeamEtag,
+      callback: (team) => Team.currentTeam = team,
+      payload: {
+        if (name != null) 'name': name,
+        if (eventKey != null) 'eventKey': eventKey,
+      },
+    );
