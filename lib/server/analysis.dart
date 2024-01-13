@@ -25,7 +25,7 @@ class TeamStatistics {
 
 Future<ServerResponse<List<TeamStatistics>>> serverGetTeamsAnalysis() =>
     serverRequest(
-      endpoint: '/analysis/teams',
+      path: '/analysis/teams',
       method: 'GET',
       decoder: listOf(TeamStatistics.fromJson),
     );

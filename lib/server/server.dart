@@ -41,24 +41,21 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverURI = Uri.parse('http://localhost:8000');
-final Client _client = Client();
+final Uri _serverUri = Uri.parse('http://10.121.45.30');
+final Client _httpClient = Client();
 
 Future<ServerResponse<R>> serverRequest<R, T>({
-  required String endpoint,
+  required String path,
   required String method,
   R Function(T)? decoder,
   void Function(R)? callback,
-  Object? payload,
   Etag? etag,
-  String? sessionKey,
+  Object? payload,
 }) async {
-  sessionKey ??= Session.current?.key;
+  Request request = Request(method, _serverUri.resolve(path));
 
-  Request request = Request(method, _serverURI.resolve(endpoint));
-
-  if (sessionKey != null) {
-    request.headers.addAll({'X-DS-SESSION-KEY': sessionKey});
+  if (Session.current != null) {
+    request.headers.addAll({'X-DS-SESSION-KEY': Session.current!.key});
   }
 
   if (etag != null) {
@@ -66,12 +63,13 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   }
 
   if (payload != null) {
+    request.headers['Content-Type'] = 'application/json';
     request.body = jsonEncode(payload);
   }
 
   StreamedResponse response;
   try {
-    response = await _client.send(request);
+    response = await _httpClient.send(request);
   } on ClientException {
     return ServerResponse.error('Error contacting server, try again');
   }
@@ -86,10 +84,8 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   String body = await response.stream.bytesToString();
   R result = decoder.call(jsonDecode(body));
 
-  if (callback != null) {
-    callback.call(result);
-  }
-
+  etag?.update(response.headers);
+  callback?.call(result);
   return ServerResponse.success(result);
 }
 

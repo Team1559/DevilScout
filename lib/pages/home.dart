@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/server/session.dart';
+import '/server/session_file.dart';
 import 'login.dart';
 import 'match_scout_select.dart';
 
@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Session.loadFromFile().then((isLoggedIn) {
+    loadSessionFromFile().then((isLoggedIn) {
       if (context.mounted) {
         Navigator.pushReplacement(
           context,

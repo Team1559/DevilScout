@@ -148,7 +148,7 @@ class QuestionPage {
 
 Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
     serverRequest(
-      endpoint: '/questions/match',
+      path: '/questions/match',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
       callback: (questions) => QuestionConfig.matchQuestions = questions,
@@ -157,7 +157,7 @@ Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
 
 Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
     serverRequest(
-      endpoint: '/questions/pit',
+      path: '/questions/pit',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
       callback: (questions) => QuestionConfig.pitQuestions = questions,
@@ -166,7 +166,7 @@ Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
 
 Future<ServerResponse<List<QuestionConfig>>> serverGetDriveTeamQuestions() =>
     serverRequest(
-      endpoint: '/questions/drive-team',
+      path: '/questions/drive-team',
       method: 'GET',
       decoder: listOf(QuestionConfig.fromJson),
       callback: (questions) => QuestionConfig.driveTeamQuestions = questions,

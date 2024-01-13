@@ -5,14 +5,18 @@ import 'session.dart';
 
 part 'users.g.dart';
 
+/// A registered user on the server
 @JsonSerializable(createToJson: false)
 class User {
+  /// The current user's information, if authenticated
   static User? currentUser;
   static final Etag _currentUserEtag = Etag();
 
+  /// The list of all registered users, after request via [serverGetAllUsers]
   static List<User> allUsers = List.empty();
   static final Etag _allUsersEtag = Etag();
 
+  /// Erase all cached user information (for logout)
   static void clear() {
     currentUser = null;
     _currentUserEtag.clear();
@@ -21,176 +25,135 @@ class User {
     _allUsersEtag.clear();
   }
 
-  final int id;
-  final int team;
-  final String username;
-  final String fullName;
-  final AccessLevel accessLevel;
+  /// A 128-bit UUID in the format 01234567-89ab-cdef-0123-456789abcdef,
+  /// identifying the user to the server
+  final String id;
 
+  /// The team number the user belongs to, in the range 1 to 9999
+  final int team;
+
+  /// The user's username, used for login, e.g. 'xander'
+  final String username;
+
+  /// The user's full or display name, e.g. 'Xander Bhalla'
+  final String fullName;
+
+  /// Whether the user is an administrator with additional privileges
+  @JsonKey(name: 'admin')
+  final bool isAdmin;
+
+  /// Constructs a User, for deserializing JSON responses from the server. This
+  /// should not be called from client code.
   User({
     required this.id,
     required this.team,
     required this.username,
     required this.fullName,
-    required this.accessLevel,
+    required this.isAdmin,
   });
 
+  /// Constructs a User from a JSON map. This should not be called from client
+  /// code.
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 
-/// A user's permission to access resources on the server. If a client attempts
-/// to exceed their access level, the server will reject their request. The
-/// three access levels are as follows:
-///
-/// **user** - Granted to all authenticated members. Abilities include:
-/// - submitting match & pit scouting data to the server
-/// - accessing the various data analysis pages
-/// - modifying their account information, preferences, password, etc.
-///
-/// **admin** - Granted to team administrators, which may include coaches,
-/// mentors, team captains, or drive team members. Registered teams must have
-/// at least one admin, but no more than 6. In addition to standard access,
-/// abilities include:
-/// - submitting drive team post-match feedback
-/// - setting the team's current event
-/// - adding, removing, or disabling team members
-/// - resetting team members' passwords
-///
-/// **sudo** - Unhindered server management reserved for Team 1559 developers.
-/// Abilities are quite extensive and not listed here.
-@JsonEnum(valueField: 'value')
-enum AccessLevel {
-  user('USER'),
-  admin('ADMIN'),
-  sudo('SUDO');
-
-  final String value;
-
-  const AccessLevel(this.value);
-
-  @override
-  String toString() => value;
-
-  bool operator >(other) {
-    return index > other.index;
-  }
-
-  bool operator <(other) {
-    return index < other.index;
-  }
-
-  bool operator >=(other) {
-    return index >= other.index;
-  }
-
-  bool operator <=(other) {
-    return index <= other.index;
-  }
-}
-
-Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequest(
-      endpoint: '/users',
-      method: 'GET',
-      decoder: listOf(User.fromJson),
-      etag: User._allUsersEtag,
-    );
-
-Future<ServerResponse<List<User>>> serverGetUsersOnTeam({required int team}) =>
-    serverRequest(
-      endpoint: '/team/$team/users',
+/// Get the list of registered users on your team. Requires ADMIN.
+Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
+      path: '/team/${Session.current!.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
     );
 
+/// Get a user. Requires ADMIN if not the same user.
 Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
     serverRequest(
-      endpoint: '/users/$id',
+      path: '/teams/${Session.current!.team}/users/$id',
       method: 'GET',
       decoder: User.fromJson,
+      etag: etag,
     );
 
+/// Register a new user. Requires ADMIN.
 Future<ServerResponse<User>> serverCreateUser({
   required String username,
   required String fullName,
-  required int team,
-  required AccessLevel accesslevel,
   required String password,
+  bool isAdmin = false,
 }) =>
     serverRequest(
-      endpoint: '/users',
+      path: '/teams/${Session.current!.team}/users',
       method: 'POST',
       decoder: User.fromJson,
       payload: {
         'username': username,
         'fullName': fullName,
-        'team': team,
-        'accessLevel': accesslevel,
+        'admin': isAdmin,
         'password': password,
       },
     );
 
+/// Edit a user. Omit fields that should not be modified. Requires ADMIN if not
+/// the same user.
 Future<ServerResponse<User>> serverEditUser({
-  required int id,
+  required String id,
   String? username,
   String? fullName,
-  AccessLevel? accessLevel,
+  bool? isAdmin,
   String? password,
-}) {
-  Map<String, dynamic> edits = {};
+}) =>
+    serverRequest(
+      path: '/teams/${Session.current!.team}/users/$id',
+      method: 'PATCH',
+      decoder: User.fromJson,
+      payload: {
+        if (username != null) 'username': username,
+        if (fullName != null) 'fullName': fullName,
+        if (isAdmin != null) 'admin': isAdmin,
+        if (password != null) 'password': password,
+      },
+    );
 
-  if (username != null) {
-    edits['username'] = username;
-  }
+/// Delete a registered user. Requires ADMIN if not the same user.
+Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
+    serverRequest(
+      path: '/teams/${Session.current!.team}/users/$id',
+      method: 'DELETE',
+    );
 
-  if (fullName != null) {
-    edits['fullName'] = fullName;
-  }
-
-  if (accessLevel != null) {
-    edits['accessLevel'] = accessLevel.value;
-  }
-
-  if (password != null) {
-    edits['password'] = password;
-  }
-
-  return serverRequest(
-    endpoint: '/users/$id',
-    method: 'PATCH',
-    decoder: User.fromJson,
-    payload: edits,
-  );
-}
-
-Future<ServerResponse<void>> serverDeleteUser({required int id}) =>
-    serverRequest(endpoint: '/users/$id', method: 'DELETE');
-
+/// Get the user associated with the current session. Prefer this over
+/// [serverGetUser] for the current user.
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      endpoint: '/users/${Session.current!.user}',
+      path: '/teams/${Session.current!.team}/users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,
       etag: User._currentUserEtag,
     );
 
+/// Edit the current user. Prefer this over [serverGetUser] for the current
+/// user.
 Future<ServerResponse<User>> serverEditCurrentUser({
   String? username,
   String? fullName,
-  AccessLevel? accessLevel,
+  bool? isAdmin,
   String? password,
 }) =>
-    serverEditUser(
-      id: Session.current!.team,
-      username: username,
-      fullName: fullName,
-      accessLevel: accessLevel,
-      password: password,
-    ).then((response) {
-      if (response.success && response.value != null) {
-        User.currentUser = response.value;
-      }
-      return response;
-    });
+    serverRequest(
+      path: '/teams/${Session.current!.team}/users/${Session.current!.user}',
+      method: 'PATCH',
+      decoder: User.fromJson,
+      callback: (user) => User.currentUser = user,
+      etag: User._currentUserEtag,
+      payload: {
+        if (username != null) 'username': username,
+        if (fullName != null) 'fullName': fullName,
+        if (isAdmin != null) 'admin': isAdmin,
+        if (password != null) 'password': password,
+      },
+    );
 
+/// Delete the current user. This will inherently destroy the current login
+/// session. This should be preferred over [serverDeleteUser] for the current
+/// user.
 Future<ServerResponse<void>> serverDeleteCurrentUser() =>
     serverDeleteUser(id: Session.current!.user);

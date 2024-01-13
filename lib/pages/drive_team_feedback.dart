@@ -78,7 +78,7 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
               ServerResponse<void> response = await serverSubmitDriveTeamData(
                 eventKey: Event.currentEvent!.key,
                 matchKey: widget.match.key,
-                data: data,
+                partners: data,
               );
               if (!context.mounted) return;
 

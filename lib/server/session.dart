@@ -1,83 +1,50 @@
-import 'dart:io';
-
-import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'server.dart';
-import 'teams.dart';
-import 'users.dart';
 
 part 'session.g.dart';
 
-/// An authorized user session, containing user info as well as permissions
+/// An authorized user session
 @JsonSerializable(createToJson: false)
 class Session {
-  static Session? _current;
+  /// The current session, generated upon login
+  static Session? current;
 
-  static Session? get current => _current;
-  static set current(Session? session) {
-    _current = session;
+  /// Delete the current session (for logout). This should not be called by user
+  /// code.
+  static void clear() => current = null;
 
-    getApplicationDocumentsDirectory().then((directory) {
-      File file = File('${directory.path}/session.txt');
-      if (session == null) {
-        file.deleteSync();
-      } else {
-        file.createSync();
-        file.writeAsString(session.key);
-      }
-    });
-  }
-
-  static void clear() => _current = null;
-
-  static Future<bool> loadFromFile() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    Directory directory = await getApplicationDocumentsDirectory();
-    File file = File('${directory.path}/session.txt');
-    if (!file.existsSync()) {
-      return false;
-    }
-
-    String sessionKey = file.readAsStringSync();
-    ServerResponse<Session> response = await serverGetSession(sessionKey);
-    if (!response.success) {
-      return false;
-    }
-
-    _current = response.value!;
-    await Future.wait([
-      serverGetCurrentUser(),
-      serverGetCurrentTeam(),
-    ]);
-    return true;
-  }
-
-  /// The ID for the current session, which must be passed with every request
+  /// The session key, a 128-bit UUID in the format
+  /// 01234567-89ab-cdef-0123-456789abcdef, which must be passed to the server
+  /// to authenticate each request.
   final String key;
-  final int user;
+
+  /// The user ID associated with this session
+  final String user;
+
+  /// The registered team number associated with this session.
   final int team;
 
-  /// The expiration time of this session
-  DateTime expiration;
-
+  /// Constructs a Session, for deserializing JSON responses from the server.
+  /// This should not be called from client code.
   Session({
     required this.key,
     required this.user,
     required this.team,
-    required int expiration,
-  }) : expiration = DateTime.fromMillisecondsSinceEpoch(expiration);
+  });
 
+  /// Constructs a Session from a JSON map. This should not be called from
+  /// client code.
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
 }
 
-Future<ServerResponse<Session>> serverGetSession([String? sessionKey]) =>
+Future<ServerResponse<Session>> serverGetSession({
+  required String sessionKey,
+}) =>
     serverRequest(
-      endpoint: '/session',
+      path: '/sessions/$sessionKey',
       method: 'GET',
       decoder: Session.fromJson,
       callback: (session) => Session.current = session,
-      sessionKey: sessionKey,
     );
