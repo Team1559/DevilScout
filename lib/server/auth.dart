@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:devil_scout/server/session_file.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'events.dart';
@@ -244,7 +245,7 @@ Future<ServerResponse<void>> serverAuthenticate({
   }
 
   _LoginStatus.current = null;
-  Session.current = auth.session;
+  setSession(auth.session);
   User.currentUser = auth.user;
   Team.currentTeam = auth.team;
 

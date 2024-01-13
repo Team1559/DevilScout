@@ -59,7 +59,7 @@ class User {
 
 /// Get the list of registered users on your team. Requires ADMIN.
 Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
-      path: '/team/${Session.current!.team}/users',
+      path: '/teams/${Session.current!.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
     );

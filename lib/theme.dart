@@ -41,6 +41,9 @@ final lightTheme = ThemeData(
       borderRadius: BorderRadius.circular(20),
     ),
   ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: _lightBackground,
+  ),
   filledButtonTheme: FilledButtonThemeData(
     style: ButtonStyle(
       minimumSize: const MaterialStatePropertyAll(
@@ -60,6 +63,11 @@ final lightTheme = ThemeData(
     titleLarge: TextStyle(
       fontFamily: 'Montserrat',
       fontSize: 24.0,
+      fontWeight: FontWeight.bold,
+    ),
+    titleMedium: TextStyle(
+      fontFamily: 'Montserrat',
+      fontSize: 20.0,
       fontWeight: FontWeight.bold,
     ),
     labelLarge: TextStyle(
