@@ -38,10 +38,9 @@ class User {
   /// The user's full or display name, e.g. 'Xander Bhalla'
   final String fullName;
 
-  /// The user's level of access, as provided by the server. The server
-  /// regulates access to each endpoint, ensuring users cannot exceed this
-  /// limit.
-  final AccessLevel accessLevel;
+  /// Whether the user is an administrator with additional privileges
+  @JsonKey(name: 'admin')
+  final bool isAdmin;
 
   /// Constructs a User, for deserializing JSON responses from the server. This
   /// should not be called from client code.
@@ -50,7 +49,7 @@ class User {
     required this.team,
     required this.username,
     required this.fullName,
-    required this.accessLevel,
+    required this.isAdmin,
   });
 
   /// Constructs a User from a JSON map. This should not be called from client
@@ -58,131 +57,73 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 
-/// A user's permission to access resources on the server. If a client attempts
-/// to exceed their access level, the server will reject their request.
-@JsonEnum(valueField: 'value')
-enum AccessLevel {
-  /// Granted to all authenticated members. Abilities include:
-  /// - submitting match, pit, and drive team scouting data to the server
-  /// - accessing the various data analysis pages
-  /// - modifying/deleting account information, preferences, password, etc.
-  user('USER'),
-
-  /// Granted to team administrators, which may include coaches,
-  /// mentors, team captains, or drive team members. Registered teams must have
-  /// at least one admin, but no more than 6. In addition to standard access,
-  /// abilities include:
-  /// - changing the team's information (including current event)
-  /// - adding, removing, or disabling team members
-  /// - editing team member information or passwords
-  admin('ADMIN'),
-
-  /// Unhindered server management reserved for Team 1559 developers.
-  /// Abilities are quite extensive and not listed here.
-  sudo('SUDO');
-
-  /// The JSON representation of this enum
-  final String value;
-
-  const AccessLevel(this.value);
-
-  @override
-  String toString() => value;
-
-  bool operator >(other) {
-    return index > other.index;
-  }
-
-  bool operator <(other) {
-    return index < other.index;
-  }
-
-  bool operator >=(other) {
-    return index >= other.index;
-  }
-
-  bool operator <=(other) {
-    return index <= other.index;
-  }
-}
-
-/// Get the list of all registered users. Requires SUDO.
-Future<ServerResponse<List<User>>> serverGetAllUsers() => serverRequest(
-      path: '/users',
-      method: 'GET',
-      decoder: listOf(User.fromJson),
-      etag: User._allUsersEtag,
-    );
-
-/// Get the list of registered users on a team. Requires ADMIN, or SUDO if on a
-/// different team.
-Future<ServerResponse<List<User>>> serverGetUsersOnTeam({required int team}) =>
-    serverRequest(
-      path: '/team/$team/users',
+/// Get the list of registered users on your team. Requires ADMIN.
+Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
+      path: '/team/${Session.current!.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
     );
 
-/// Get a user. Requires ADMIN if not the same user, or SUDO if on a different
-/// team.
+/// Get a user. Requires ADMIN if not the same user.
 Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
     serverRequest(
-      path: '/users/$id',
+      path: '/teams/${Session.current!.team}/users/$id',
       method: 'GET',
       decoder: User.fromJson,
+      etag: etag,
     );
 
-/// Register a new user. Requires ADMIN, or SUDO if on a different team.
+/// Register a new user. Requires ADMIN.
 Future<ServerResponse<User>> serverCreateUser({
   required String username,
   required String fullName,
-  required int team,
-  required AccessLevel accesslevel,
   required String password,
+  bool isAdmin = false,
 }) =>
     serverRequest(
-      path: '/users',
+      path: '/teams/${Session.current!.team}/users',
       method: 'POST',
       decoder: User.fromJson,
       payload: {
         'username': username,
         'fullName': fullName,
-        'team': team,
-        'accessLevel': accesslevel,
+        'admin': isAdmin,
         'password': password,
       },
     );
 
 /// Edit a user. Omit fields that should not be modified. Requires ADMIN if not
-/// the same user, and SUDO if on a different team.
+/// the same user.
 Future<ServerResponse<User>> serverEditUser({
   required String id,
   String? username,
   String? fullName,
-  AccessLevel? accessLevel,
+  bool? isAdmin,
   String? password,
 }) =>
     serverRequest(
-      path: '/users/$id',
+      path: '/teams/${Session.current!.team}/users/$id',
       method: 'PATCH',
       decoder: User.fromJson,
       payload: {
         if (username != null) 'username': username,
         if (fullName != null) 'fullName': fullName,
-        if (accessLevel != null) 'accessLevel': accessLevel.value,
+        if (isAdmin != null) 'admin': isAdmin,
         if (password != null) 'password': password,
       },
     );
 
-/// Delete a registered user. Requires ADMIN if not the same user, and SUDO if
-/// on a different team.
+/// Delete a registered user. Requires ADMIN if not the same user.
 Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
-    serverRequest(path: '/users/$id', method: 'DELETE');
+    serverRequest(
+      path: '/teams/${Session.current!.team}/users/$id',
+      method: 'DELETE',
+    );
 
 /// Get the user associated with the current session. Prefer this over
 /// [serverGetUser] for the current user.
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      path: '/users/${Session.current!.user}',
+      path: '/teams/${Session.current!.team}/users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,
@@ -194,11 +135,11 @@ Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
 Future<ServerResponse<User>> serverEditCurrentUser({
   String? username,
   String? fullName,
-  AccessLevel? accessLevel,
+  bool? isAdmin,
   String? password,
 }) =>
     serverRequest(
-      path: '/users/${Session.current!.user}',
+      path: '/teams/${Session.current!.team}/users/${Session.current!.user}',
       method: 'PATCH',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,
@@ -206,7 +147,7 @@ Future<ServerResponse<User>> serverEditCurrentUser({
       payload: {
         if (username != null) 'username': username,
         if (fullName != null) 'fullName': fullName,
-        if (accessLevel != null) 'accessLevel': accessLevel.value,
+        if (isAdmin != null) 'admin': isAdmin,
         if (password != null) 'password': password,
       },
     );

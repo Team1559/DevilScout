@@ -51,64 +51,6 @@ class Team {
   factory Team.fromJson(Map<String, dynamic> json) => _$TeamFromJson(json);
 }
 
-/// Get the list of all registered scouting teams. Requires SUDO.
-Future<ServerResponse<List<Team>>> serverGetAllTeams() => serverRequest(
-      path: '/teams',
-      method: 'GET',
-      decoder: listOf(Team.fromJson),
-      etag: Team._allTeamsEtag,
-    );
-
-/// Get a registered scouting team's information. Requires SUDO if not from same
-/// team.
-Future<ServerResponse<Team>> serverGetTeam({required int number, Etag? etag}) =>
-    serverRequest(
-      path: '/teams/$number',
-      method: 'GET',
-      decoder: Team.fromJson,
-    );
-
-/// Register a new team to the app. Requires SUDO.
-Future<ServerResponse<Team>> serverCreateTeam({
-  required int number,
-  required String name,
-}) =>
-    serverRequest(
-      path: '/teams',
-      method: 'POST',
-      decoder: Team.fromJson,
-      payload: {
-        'number': number,
-        'name': name,
-      },
-    );
-
-/// Edit a team's information. Requires ADMIN, or SUDO if from a different team.
-Future<ServerResponse<Team>> serverEditTeam({
-  required int number,
-  String? name,
-  String? eventKey,
-  Etag? etag,
-}) =>
-    serverRequest(
-      path: '/teams/$number',
-      method: 'PATCH',
-      decoder: Team.fromJson,
-      etag: etag,
-      payload: {
-        if (name != null) 'name': name,
-        if (eventKey != null) 'eventKey': eventKey,
-      },
-    );
-
-/// Delete a team from the app, and delete all of the team's users via
-/// cascading. This action is irreversible. Requires SUDO.
-Future<ServerResponse<void>> serverDeleteTeam({required int number}) =>
-    serverRequest(
-      path: '/teams/$number',
-      method: 'DELETE',
-    );
-
 /// Get the current team's information. Prefer this over [serverGetTeam] for the
 /// current team.
 Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(

@@ -56,7 +56,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                     'No event set',
                     style: Theme.of(context).textTheme.displayMedium,
                   ),
-                  if (User.currentUser!.accessLevel >= AccessLevel.admin)
+                  if (User.currentUser!.isAdmin)
                     FilledButton(
                       onPressed: () {},
                       child: const Text('Go to team management'),

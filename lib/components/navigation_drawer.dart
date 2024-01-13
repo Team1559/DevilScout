@@ -75,7 +75,7 @@ class NavDrawer extends StatelessWidget {
                           }
                         },
                       ),
-                      if (User.currentUser!.accessLevel >= AccessLevel.admin)
+                      if (User.currentUser!.isAdmin)
                         ListTile(
                           title: const Text('Drive Team'),
                           leading: const Icon(Icons.abc),
@@ -118,15 +118,9 @@ class NavDrawer extends StatelessWidget {
                 ),
               ],
             ),
-            if (User.currentUser!.accessLevel >= AccessLevel.admin)
+            if (User.currentUser!.isAdmin)
               ListTile(
                 title: Text('Manage Team ${Team.currentTeam!.number}'),
-                leading: const Icon(Icons.image),
-                onTap: () {},
-              ),
-            if (User.currentUser!.accessLevel >= AccessLevel.sudo)
-              ListTile(
-                title: const Text('SUDO Panel'),
                 leading: const Icon(Icons.image),
                 onTap: () {},
               ),
