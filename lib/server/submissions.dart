@@ -1,5 +1,6 @@
 import 'server.dart';
 
+/// Submit match data to the server in the format defined by match questions.
 Future<ServerResponse<void>> serverSubmitMatchData({
   required String eventKey,
   required String matchKey,
@@ -17,6 +18,7 @@ Future<ServerResponse<void>> serverSubmitMatchData({
       },
     );
 
+/// Submit pit data to the server in the format defined by pit questions.
 Future<ServerResponse<void>> serverSubmitPitData({
   required String eventKey,
   required int team,
@@ -32,10 +34,11 @@ Future<ServerResponse<void>> serverSubmitPitData({
       },
     );
 
+/// Submit drive team feedback data to the server. [partners] should have team numbers as string keys, and the question-defined response format as its body.
 Future<ServerResponse<void>> serverSubmitDriveTeamData({
   required String eventKey,
   required String matchKey,
-  required Map<String, Map<String, dynamic>> data,
+  required Map<String, Map<String, dynamic>> partners,
 }) =>
     serverRequest(
       path: '/submissions/drive-team-scouting',
@@ -43,6 +46,6 @@ Future<ServerResponse<void>> serverSubmitDriveTeamData({
       payload: {
         'event': eventKey,
         'match': matchKey,
-        'partners': data,
+        'partners': partners,
       },
     );

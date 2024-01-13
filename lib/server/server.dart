@@ -41,7 +41,7 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverUri = Uri.parse('http://localhost:8000');
+final Uri _serverUri = Uri.parse('http://10.121.45.30');
 final Client _httpClient = Client();
 
 Future<ServerResponse<R>> serverRequest<R, T>({
