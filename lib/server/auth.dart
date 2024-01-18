@@ -252,22 +252,18 @@ Future<ServerResponse<void>> serverAuthenticate({
 }
 
 /// Log out the current session, if it exists.
-Future<ServerResponse<void>> serverLogout() {
-  Future<ServerResponse<void>> request = serverRequest(
-    path: '/logout',
-    method: 'DELETE',
-  );
-
-  Session.clear();
-  User.clear();
-  Team.clear();
-  Event.clear();
-  FrcTeam.clear();
-  EventMatch.clear();
-  QuestionConfig.clear();
-
-  return request;
-}
+Future<ServerResponse<void>> serverLogout() => serverRequest(
+      path: '/logout',
+      method: 'DELETE',
+    ).whenComplete(() {
+      Session.clear();
+      User.clear();
+      Team.clear();
+      Event.clear();
+      FrcTeam.clear();
+      EventMatch.clear();
+      QuestionConfig.clear();
+    });
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256
