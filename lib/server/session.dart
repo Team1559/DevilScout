@@ -39,6 +39,10 @@ class Session {
       _$SessionFromJson(json);
 }
 
+/// Get the session associated with the supplied session key. Does not require
+/// authentication. Used to check if a cached session is still valid. This
+/// should not be called directly by client code; see session_file.dart
+/// instead.
 Future<ServerResponse<Session>> serverGetSession({
   required String sessionKey,
 }) =>

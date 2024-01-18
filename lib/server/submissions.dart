@@ -34,7 +34,9 @@ Future<ServerResponse<void>> serverSubmitPitData({
       },
     );
 
-/// Submit drive team feedback data to the server. [partners] should have team numbers as string keys, and the question-defined response format as its body.
+/// Submit drive team feedback data to the server. [partners] should have team
+/// numbers as string keys, and the question-defined response format as its
+/// body.
 Future<ServerResponse<void>> serverSubmitDriveTeamData({
   required String eventKey,
   required String matchKey,
