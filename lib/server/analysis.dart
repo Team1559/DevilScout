@@ -83,7 +83,7 @@ class PercentageStatistic extends Statistic {
 
 Future<ServerResponse<List<TeamStatistics>>> serverGetTeamsAnalysis() =>
     serverRequest(
-      path: '/analysis/teams',
+      path: 'analysis/teams',
       method: 'GET',
       decoder: listOf(TeamStatistics.fromJson),
     );

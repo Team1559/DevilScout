@@ -8,7 +8,7 @@ Future<ServerResponse<void>> serverSubmitMatchData({
   required Map<String, Map<String, dynamic>> data,
 }) =>
     serverRequest(
-      path: '/submissions/match-scouting',
+      path: 'submissions/match-scouting',
       method: 'POST',
       payload: {
         'event': eventKey,
@@ -25,7 +25,7 @@ Future<ServerResponse<void>> serverSubmitPitData({
   required Map<String, Map<String, dynamic>> data,
 }) =>
     serverRequest(
-      path: '/submissions/pit-scouting',
+      path: 'submissions/pit-scouting',
       method: 'POST',
       payload: {
         'event': eventKey,
@@ -43,7 +43,7 @@ Future<ServerResponse<void>> serverSubmitDriveTeamData({
   required Map<String, Map<String, dynamic>> partners,
 }) =>
     serverRequest(
-      path: '/submissions/drive-team-scouting',
+      path: 'submissions/drive-team-scouting',
       method: 'POST',
       payload: {
         'event': eventKey,

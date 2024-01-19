@@ -47,7 +47,7 @@ Future<ServerResponse<Session>> serverGetSession({
   required String sessionKey,
 }) =>
     serverRequest(
-      path: '/sessions/$sessionKey',
+      path: 'sessions/$sessionKey',
       method: 'GET',
       decoder: Session.fromJson,
       callback: (session) => Session.current = session,

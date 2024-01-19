@@ -54,7 +54,7 @@ class Team {
 /// Get the current team's information. Prefer this over [serverGetTeam] for the
 /// current team.
 Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(
-      path: '/teams/${Session.current!.team}',
+      path: 'teams/${Session.current!.team}',
       method: 'GET',
       decoder: Team.fromJson,
       callback: (team) => Team.currentTeam = team,
@@ -68,7 +68,7 @@ Future<ServerResponse<Team>> serverEditCurrentTeam({
   String? eventKey,
 }) =>
     serverRequest(
-      path: '/teams/${Session.current!.team}',
+      path: 'teams/${Session.current!.team}',
       method: 'PATCH',
       decoder: Team.fromJson,
       etag: Team._currentTeamEtag,

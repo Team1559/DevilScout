@@ -54,7 +54,7 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverUri = Uri.parse('https://scouting.victorrobotics.org');
+final Uri _serverApiUri = Uri.parse('https://scouting.victorrobotics.org/api/v1');
 final Client _httpClient = Client();
 
 /// A generic method to access a server API endpoint. Clients are recommended
@@ -83,7 +83,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   Etag? etag,
   Object? payload,
 }) async {
-  Request request = Request(method, _serverUri.resolve(path));
+  Request request = Request(method, _serverApiUri.resolve(path));
 
   if (Session.current != null) {
     request.headers.addAll({'X-DS-SESSION-KEY': Session.current!.key});
