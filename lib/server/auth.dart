@@ -154,7 +154,7 @@ Future<ServerResponse<void>> serverLogin({
       List.generate(8, (index) => _random.nextInt(0x100), growable: false);
 
   ServerResponse<_LoginChallenge> response = await serverRequest(
-    path: '/login',
+    path: 'login',
     method: 'POST',
     decoder: _LoginChallenge.fromJson,
     payload: {
@@ -212,7 +212,7 @@ Future<ServerResponse<void>> serverAuthenticate({
   ];
 
   Future<ServerResponse<_AuthResponse>> request = serverRequest(
-    path: '/auth',
+    path: 'auth',
     method: 'POST',
     decoder: _AuthResponse.fromJson,
     payload: {
@@ -252,22 +252,18 @@ Future<ServerResponse<void>> serverAuthenticate({
 }
 
 /// Log out the current session, if it exists.
-Future<ServerResponse<void>> serverLogout() {
-  Future<ServerResponse<void>> request = serverRequest(
-    path: '/logout',
-    method: 'DELETE',
-  );
-
-  Session.clear();
-  User.clear();
-  Team.clear();
-  Event.clear();
-  FrcTeam.clear();
-  EventMatch.clear();
-  QuestionConfig.clear();
-
-  return request;
-}
+Future<ServerResponse<void>> serverLogout() => serverRequest(
+      path: 'logout',
+      method: 'DELETE',
+    ).whenComplete(() {
+      Session.clear();
+      User.clear();
+      Team.clear();
+      Event.clear();
+      FrcTeam.clear();
+      EventMatch.clear();
+      QuestionConfig.clear();
+    });
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256

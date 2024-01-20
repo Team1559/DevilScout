@@ -23,108 +23,100 @@ class NavDrawer extends StatelessWidget {
               'DevilScout',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            ExpansionPanelList.radio(
-              materialGapSize: 2,
-              expandedHeaderPadding: EdgeInsets.zero,
-              dividerColor: Colors.grey,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ExpansionPanelRadio(
-                  value: 'Scout',
-                  canTapOnHeader: true,
-                  headerBuilder: (context, isExpanded) => const ListTile(
-                    title: Text('Scout'),
-                    leading: Icon(Icons.image),
-                  ),
-                  body: Column(
-                    children: [
-                      ListTile(
-                        title: const Text('Matches'),
-                        leading: const Icon(Icons.abc),
-                        onTap: () {
-                          MatchSelectPageState? parent = context
-                              .findAncestorStateOfType<MatchSelectPageState>();
-                          if (parent == null) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MatchSelectPage(),
-                              ),
-                            );
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('Pits'),
-                        leading: const Icon(Icons.abc),
-                        onTap: () {
-                          EventTeamSelectPageState? parent =
-                              context.findAncestorStateOfType<
-                                  EventTeamSelectPageState>();
-                          if (parent == null) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const EventTeamSelectPage(),
-                              ),
-                            );
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        },
-                      ),
-                      if (User.currentUser!.isAdmin)
-                        ListTile(
-                          title: const Text('Drive Team'),
-                          leading: const Icon(Icons.abc),
-                          onTap: () {
-                            DriveTeamFeedbackSelectPageState? parent =
-                                context.findAncestorStateOfType<
-                                    DriveTeamFeedbackSelectPageState>();
-                            if (parent == null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const DriveTeamFeedbackSelectPage(),
-                                ),
-                              );
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                    ],
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Scout',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                ExpansionPanelRadio(
-                  value: 'Analyze',
-                  canTapOnHeader: true,
-                  headerBuilder: (context, isExpanded) => const ListTile(
-                    title: Text('Analyze'),
-                    leading: Icon(Icons.image),
-                  ),
-                  body: Column(
-                    children: [
-                      ListTile(
-                        onTap: () {},
-                        title: const Text('Teams'),
-                        leading: const Icon(Icons.abc),
-                      )
-                    ],
-                  ),
+                ListTile(
+                  title: const Text('Matches'),
+                  leading: const Icon(Icons.schedule),
+                  onTap: () {
+                    MatchSelectPageState? parent =
+                        context.findAncestorStateOfType<MatchSelectPageState>();
+                    if (parent == null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MatchSelectPage(),
+                        ),
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                ListTile(
+                  title: const Text('Pits'),
+                  leading: const Icon(Icons.image),
+                  onTap: () {
+                    EventTeamSelectPageState? parent = context
+                        .findAncestorStateOfType<EventTeamSelectPageState>();
+                    if (parent == null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EventTeamSelectPage(),
+                        ),
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                ListTile(
+                  title: const Text('Drive Team'),
+                  leading: const Icon(Icons.image),
+                  onTap: () {
+                    DriveTeamFeedbackSelectPageState? parent =
+                        context.findAncestorStateOfType<
+                            DriveTeamFeedbackSelectPageState>();
+                    if (parent == null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const DriveTeamFeedbackSelectPage(),
+                        ),
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
                 ),
               ],
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Analyze',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                ListTile(
+                  title: const Text('Teams'),
+                  leading: const Icon(Icons.image),
+                  onTap: () {},
+                ),
+              ],
+            ),
+            const Spacer(),
             if (User.currentUser!.isAdmin)
               ListTile(
                 title: Text('Manage Team ${Team.currentTeam!.number}'),
-                leading: const Icon(Icons.image),
+                leading: const Icon(Icons.manage_accounts),
                 onTap: () {},
               ),
-            const Spacer(),
             Text(
               User.currentUser!.fullName,
               style: Theme.of(context).textTheme.headlineLarge,
