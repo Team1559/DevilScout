@@ -195,7 +195,7 @@ abstract class QuestionWidget<C extends QuestionConfig> extends StatefulWidget {
   final void Function(dynamic) valueSetter;
   final void Function(void Function()) setState;
 
-  static QuestionWidget<C> of<C extends QuestionConfig>({
+  factory QuestionWidget.of({
     required C config,
     required void Function(dynamic) valueSetter,
     required void Function(void Function()) setState,
@@ -236,7 +236,6 @@ abstract class QuestionWidget<C extends QuestionConfig> extends StatefulWidget {
             valueSetter: valueSetter,
             setState: setState,
           ),
-        _ => throw Exception()
       } as QuestionWidget<C>;
 
   const QuestionWidget({
@@ -247,8 +246,7 @@ abstract class QuestionWidget<C extends QuestionConfig> extends StatefulWidget {
   });
 }
 
-abstract class QuestionWidgetState<T, W extends QuestionWidget>
-    extends State<W> {
+sealed class QuestionWidgetState<T, W extends QuestionWidget> extends State<W> {
   T value;
 
   QuestionWidgetState({required this.value});
