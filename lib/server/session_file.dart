@@ -21,18 +21,18 @@ Future<bool> loadSessionFromFile() async {
   }
 
   String sessionKey = file.readAsStringSync();
-  ServerResponse<Session> response =
-      await serverGetSession(sessionKey: sessionKey);
+  Session.current = Session(key: sessionKey, user: "", team: 0);
+
+  ServerResponse<Session> response = await serverGetSession();
   if (!response.success) {
     return false;
   }
 
   Session.current = response.value!;
-  await Future.wait([
+  return Future.wait([
     serverGetCurrentUser(),
     serverGetCurrentTeam(),
-  ]);
-  return true;
+  ]).then((list) => list.map((r) => r.success).reduce((a, b) => a || b));
 }
 
 /// Set the current session. This should not be called by user code.
