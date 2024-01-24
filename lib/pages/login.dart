@@ -6,6 +6,10 @@ import '/components/loading_overlay.dart';
 import '/components/snackbar.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
+import '/server/session.dart';
+import '/server/session_file.dart';
+import '/server/teams.dart';
+import '/server/users.dart';
 import 'match_scout_select.dart';
 
 class LoginPage extends StatefulWidget {
@@ -172,6 +176,12 @@ class _LoginFieldsState extends State<_LoginFields> {
                 displaySnackbar(context, response.toString());
                 return;
               }
+
+              AuthResponse auth = response.value!;
+              Session.current = auth.session;
+              Team.currentTeam = auth.team;
+              User.currentUser = auth.user;
+              saveSession();
 
               hideSnackbar(context);
               Navigator.pushReplacement(

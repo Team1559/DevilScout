@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:devil_scout/server/session_file.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'events.dart';
@@ -118,20 +117,20 @@ class _LoginChallenge {
 }
 
 @JsonSerializable(createToJson: false)
-class _AuthResponse {
+class AuthResponse {
   final User user;
   final Team team;
   final Session session;
   final List<int> serverSignature;
 
-  _AuthResponse({
+  AuthResponse({
     required this.user,
     required this.team,
     required this.session,
     required String serverSignature,
   }) : serverSignature = base64.decode(serverSignature);
 
-  factory _AuthResponse.fromJson(Map<String, dynamic> json) =>
+  factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
 }
 
@@ -187,7 +186,7 @@ Future<ServerResponse<void>> serverLogin({
 /// After receiving the login challenge, attempt to authenticate the user by
 /// completing the challenge with the given password. Returns null if
 /// successful, else an error message for the user.
-Future<ServerResponse<void>> serverAuthenticate({
+Future<ServerResponse<AuthResponse>> serverAuthenticate({
   required String password,
 }) async {
   if (_LoginStatus.current == null) {
@@ -212,10 +211,10 @@ Future<ServerResponse<void>> serverAuthenticate({
     for (int i = 0; i < 32; i++) clientKey[i] ^ clientSignature[i]
   ];
 
-  Future<ServerResponse<_AuthResponse>> request = serverRequest(
+  Future<ServerResponse<AuthResponse>> request = serverRequest(
     path: 'auth',
     method: 'POST',
-    decoder: _AuthResponse.fromJson,
+    decoder: AuthResponse.fromJson,
     payload: {
       'team': login.team,
       'username': login.username,
@@ -232,12 +231,12 @@ Future<ServerResponse<void>> serverAuthenticate({
     login.challenge.nonce,
   );
 
-  ServerResponse<_AuthResponse> response = await request;
+  ServerResponse<AuthResponse> response = await request;
   if (!response.success) {
     return response;
   }
 
-  _AuthResponse auth = response.value!;
+  AuthResponse auth = response.value!;
   for (int i = 0; i < 32; i++) {
     if (serverSignature[i] != auth.serverSignature[i]) {
       return ServerResponse.error('Failed to authenticate server');
@@ -245,11 +244,7 @@ Future<ServerResponse<void>> serverAuthenticate({
   }
 
   _LoginStatus.current = null;
-  setSession(auth.session);
-  User.currentUser = auth.user;
-  Team.currentTeam = auth.team;
-
-  return ServerResponse.success();
+  return ServerResponse.success(auth);
 }
 
 /// Log out the current session, if it exists.

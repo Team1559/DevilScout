@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '/server/session.dart';
 import '/server/session_file.dart';
+import '/server/teams.dart';
+import '/server/users.dart';
 import 'login.dart';
 import 'match_scout_select.dart';
 
@@ -15,16 +18,27 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    loadSessionFromFile().then((isLoggedIn) {
-      if (context.mounted) {
+    loadSessionFromFile().then((session) {
+      if (!context.mounted) return;
+
+      if (session == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) =>
-                isLoggedIn ? const MatchSelectPage() : const LoginPage(),
-          ),
+          MaterialPageRoute(builder: (context) => const LoginPage()),
         );
+        return;
       }
+
+      Session.current = session;
+      Future.wait([
+        serverGetCurrentUser(),
+        serverGetCurrentTeam(),
+      ]);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MatchSelectPage()),
+      );
     });
   }
 

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 import '/pages/drive_team_feedback_select.dart';
 import '/pages/login.dart';
+import '/pages/management.dart';
 import '/pages/match_scout_select.dart';
 import '/pages/settings.dart';
 import '/pages/team_select.dart';
-import '/pages/management.dart';
 import '/server/auth.dart';
+import '/server/session_file.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
 
@@ -157,7 +158,7 @@ class NavDrawer extends StatelessWidget {
                 const SizedBox(width: 20),
                 FilledButton.icon(
                   onPressed: () {
-                    serverLogout();
+                    serverLogout().whenComplete(saveSession);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

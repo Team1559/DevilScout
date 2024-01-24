@@ -33,7 +33,7 @@ class ServerResponse<T> {
   @override
   String toString() {
     if (success) {
-      return value?.toString() ?? '[Success, no value]';
+      return value?.runtimeType.toString() ?? '[Success, no value]';
     } else {
       return message ?? '[Error, no message]';
     }
@@ -54,7 +54,8 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverApiUri = Uri.parse('https://scouting.victorrobotics.org/api/v1/');
+final Uri _serverApiUri =
+    Uri.parse('https://scouting.victorrobotics.org/api/v1/');
 final Client _httpClient = Client();
 
 /// A generic method to access a server API endpoint. Clients are recommended
