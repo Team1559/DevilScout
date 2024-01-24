@@ -64,7 +64,6 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
               LoadingOverlay.of(context).show();
 
               ServerResponse<void> response = await serverSubmitMatchData(
-                eventKey: Event.currentEvent!.key,
                 matchKey: widget.match.key,
                 team: widget.team,
                 data: data,

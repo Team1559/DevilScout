@@ -43,11 +43,8 @@ class Session {
 /// authentication. Used to check if a cached session is still valid. This
 /// should not be called directly by client code; see session_file.dart
 /// instead.
-Future<ServerResponse<Session>> serverGetSession({
-  required String sessionKey,
-}) =>
-    serverRequest(
-      path: 'sessions/$sessionKey',
+Future<ServerResponse<Session>> serverGetSession() => serverRequest(
+      path: 'session',
       method: 'GET',
       decoder: Session.fromJson,
       callback: (session) => Session.current = session,

@@ -65,9 +65,9 @@ Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
     );
 
 /// Get a user. Requires ADMIN if not the same user.
-Future<ServerResponse<User>> serverGetUser({required int id, Etag? etag}) =>
+Future<ServerResponse<User>> serverGetUser({required String id, Etag? etag}) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users/$id',
+      path: 'users/$id',
       method: 'GET',
       decoder: User.fromJson,
       etag: etag,
@@ -103,7 +103,7 @@ Future<ServerResponse<User>> serverEditUser({
   String? password,
 }) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users/$id',
+      path: 'users/$id',
       method: 'PATCH',
       decoder: User.fromJson,
       payload: {
@@ -117,14 +117,14 @@ Future<ServerResponse<User>> serverEditUser({
 /// Delete a registered user. Requires ADMIN if not the same user.
 Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users/$id',
+      path: 'users/$id',
       method: 'DELETE',
     );
 
 /// Get the user associated with the current session. Prefer this over
 /// [serverGetUser] for the current user.
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      path: 'teams/${Session.current!.team}/users/${Session.current!.user}',
+      path: 'users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,
@@ -140,7 +140,7 @@ Future<ServerResponse<User>> serverEditCurrentUser({
   String? password,
 }) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users/${Session.current!.user}',
+      path: 'users/${Session.current!.user}',
       method: 'PATCH',
       decoder: User.fromJson,
       callback: (user) => User.currentUser = user,

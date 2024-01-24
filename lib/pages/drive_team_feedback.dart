@@ -76,7 +76,6 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
               LoadingOverlay.of(context).show();
 
               ServerResponse<void> response = await serverSubmitDriveTeamData(
-                eventKey: Event.currentEvent!.key,
                 matchKey: widget.match.key,
                 partners: data,
               );
