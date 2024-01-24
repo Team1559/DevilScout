@@ -28,6 +28,7 @@ class LargeTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15.0),
       child: TextField(
+        style: Theme.of(context).textTheme.labelLarge,
         onChanged: onChanged,
         controller: controller,
         obscureText: obscureText,

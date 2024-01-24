@@ -89,6 +89,7 @@ Future<ServerResponse<User>> serverCreateUser({
         'fullName': fullName,
         'admin': isAdmin,
         'password': password,
+        'team': Session.current!.team,
       },
     );
 
