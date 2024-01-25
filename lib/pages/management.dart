@@ -107,7 +107,7 @@ class ManagementPageState extends State<ManagementPage> {
         ),
         SizedBox(
           width: double.infinity,
-          child: FilledButton(
+          child: FilledButton.icon(
             style: const ButtonStyle(
               shape: MaterialStatePropertyAll(
                 RoundedRectangleBorder(
@@ -120,33 +120,42 @@ class ManagementPageState extends State<ManagementPage> {
             ),
             onPressed: () => showDialog(
               context: context,
-              builder: (BuildContext context) {
-                return _addUserDialog();
-              },
+              builder: _addUserDialog,
             ),
-            child: const Text('Add User'),
+            icon:  const Icon(Icons.add),
+            label: const Text('Add User'),
           ),
         ),
       ],
     );
   }
 
-  Widget _addUserDialog() {
+  Widget _addUserDialog(BuildContext context) {
     final nameController = TextEditingController();
     final usernameController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
 
-    return FractionallySizedBox(
-      heightFactor: 0.8,
-      child: AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.background,
-        title: Text('Add User', style: Theme.of(context).textTheme.titleMedium),
-        content: Column(
-          children: <Widget>[
-            LargeTextField(controller: nameController, hintText: 'Full Name'),
+    return AlertDialog(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      title: Center(
+        child: Text(
+          'New User',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             LargeTextField(
-                controller: usernameController, hintText: 'Username'),
+              controller: nameController,
+              hintText: 'Full Name',
+            ),
+            LargeTextField(
+              controller: usernameController,
+              hintText: 'Username',
+            ),
             LargeTextField(
               controller: passwordController,
               hintText: 'Password',
@@ -159,46 +168,46 @@ class ManagementPageState extends State<ManagementPage> {
             ),
           ],
         ),
-        actions: [
-          FilledButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          FilledButton(
-            child: const Text('Add'),
-            onPressed: () async {
-              if (passwordController.text != confirmPasswordController.text) {
-                displaySnackbar(
-                  context,
-                  'The passwords do not match. Please try again.',
-                );
-                return;
-              }
-
-              ServerResponse<User> response = await serverCreateUser(
-                fullName: nameController.text,
-                username: usernameController.text,
-                password: passwordController.text,
-              );
-              if (!context.mounted) return;
-
-              if (response.success) {
-                setState(() => User.allUsers.add(response.value!));
-                displaySnackbar(
-                    context, 'User "${response.value!.fullName}" added');
-              } else {
-                displaySnackbar(
-                  context,
-                  response.message ?? 'An error occurred',
-                );
-              }
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
       ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: const Text('Add'),
+          onPressed: () async {
+            if (passwordController.text != confirmPasswordController.text) {
+              displaySnackbar(
+                context,
+                'The passwords do not match. Please try again.',
+              );
+              return;
+            }
+
+            ServerResponse<User> response = await serverCreateUser(
+              fullName: nameController.text,
+              username: usernameController.text,
+              password: passwordController.text,
+            );
+            if (!context.mounted) return;
+
+            if (response.success) {
+              setState(() => User.allUsers.add(response.value!));
+              displaySnackbar(
+                  context, 'User "${response.value!.fullName}" added');
+            } else {
+              displaySnackbar(
+                context,
+                response.message ?? 'An error occurred',
+              );
+            }
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }
