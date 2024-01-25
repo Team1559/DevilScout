@@ -107,8 +107,11 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   }
 
   if (response.statusCode >= 400) {
-    String body = await response.stream.bytesToString();
-    return ServerResponse.errorFromJson(body);
+    if (response.headers['content-type']?.contains('json') ?? false) {
+      String body = await response.stream.bytesToString();
+      return ServerResponse.errorFromJson(body);
+    }
+    return ServerResponse.error('Error contacting server, try again');
   } else if (decoder == null || response.statusCode == 304) {
     return ServerResponse.success();
   }

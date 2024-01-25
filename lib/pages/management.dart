@@ -14,18 +14,10 @@ class ManagementPage extends StatefulWidget {
 }
 
 class ManagementPageState extends State<ManagementPage> {
-  late Future<bool> futureUsers;
-  late List<User> users;
-
   @override
   void initState() {
     super.initState();
-    futureUsers = serverGetUsers().then((response) {
-      if (response.success) {
-        users = List.of(response.value!, growable: true);
-      }
-      return response.success;
-    });
+    serverGetUsers().whenComplete(() => setState(() {}));
   }
 
   @override
@@ -70,53 +62,43 @@ class ManagementPageState extends State<ManagementPage> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Scrollbar(
-              child: FutureBuilder(
-                future: futureUsers,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
-                  } else if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      User user = users[index];
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+              child: ListView.builder(
+                itemCount: User.allUsers.length,
+                itemBuilder: (context, index) {
+                  User user = User.allUsers[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 2.0,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            title: Text(user.fullName),
+                          ),
                         ),
-                        elevation: 2.0,
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: ListTile(
-                                title: Text(user.fullName),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => serverDeleteUser(id: user.id)
-                                  .then((response) {
-                                if (response.success) {
-                                  setState(() => users.remove(user));
-                                  displaySnackbar(context,
-                                      'User "${user.fullName}" deleted');
-                                } else {
-                                  displaySnackbar(
-                                    context,
-                                    response.message ?? 'An error occurred',
-                                  );
-                                }
-                              }),
-                            ),
-                          ],
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: user.isAdmin
+                              ? null
+                              : () => serverDeleteUser(id: user.id)
+                                      .then((response) {
+                                    if (response.success) {
+                                      setState(
+                                          () => User.allUsers.remove(user));
+                                      displaySnackbar(context,
+                                          'User "${user.fullName}" deleted');
+                                    } else {
+                                      displaySnackbar(
+                                        context,
+                                        response.message ?? 'An error occurred',
+                                      );
+                                    }
+                                  }),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   );
                 },
               ),
@@ -203,7 +185,7 @@ class ManagementPageState extends State<ManagementPage> {
               if (!context.mounted) return;
 
               if (response.success) {
-                setState(() => users.add(response.value!));
+                setState(() => User.allUsers.add(response.value!));
                 displaySnackbar(
                     context, 'User "${response.value!.fullName}" added');
               } else {

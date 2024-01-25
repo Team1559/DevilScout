@@ -62,6 +62,7 @@ Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
       path: 'teams/${Session.current!.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
+      callback: (users) => User.allUsers = List.of(users),
     );
 
 /// Get a user. Requires ADMIN if not the same user.
