@@ -54,7 +54,7 @@ class DriveTeamFeedbackSelectPageState extends State<DriveTeamFeedbackSelectPage
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
-        if (!Team.currentTeam!.hasEventKey) {
+        if (!Team.current!.hasEventKey) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

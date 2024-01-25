@@ -9,7 +9,7 @@ part 'users.g.dart';
 @JsonSerializable(createToJson: false)
 class User {
   /// The current user's information, if authenticated
-  static User? currentUser;
+  static User? current;
   static final Etag _currentUserEtag = Etag();
 
   /// The list of all registered users, after request via [serverGetAllUsers]
@@ -18,7 +18,7 @@ class User {
 
   /// Erase all cached user information (for logout)
   static void clear() {
-    currentUser = null;
+    current = null;
     _currentUserEtag.clear();
 
     allUsers = List.empty();
@@ -126,7 +126,7 @@ Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
       path: 'users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
-      callback: (user) => User.currentUser = user,
+      callback: (user) => User.current = user,
       etag: User._currentUserEtag,
     );
 
@@ -142,7 +142,7 @@ Future<ServerResponse<User>> serverEditCurrentUser({
       path: 'users/${Session.current!.user}',
       method: 'PATCH',
       decoder: User.fromJson,
-      callback: (user) => User.currentUser = user,
+      callback: (user) => User.current = user,
       etag: User._currentUserEtag,
       payload: {
         if (username != null) 'username': username,

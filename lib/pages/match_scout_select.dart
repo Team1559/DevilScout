@@ -45,7 +45,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
-        if (!Team.currentTeam!.hasEventKey) {
+        if (!Team.current!.hasEventKey) {
           return SafeArea(
             minimum: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Center(
@@ -56,7 +56,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                     'No event set',
                     style: Theme.of(context).textTheme.displayMedium,
                   ),
-                  if (User.currentUser!.isAdmin)
+                  if (User.current!.isAdmin)
                     FilledButton(
                       onPressed: () {},
                       child: const Text('Go to team management'),
@@ -89,7 +89,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
         child: ExpansionTile(
           iconColor: Colors.black,
           leading: Builder(builder: (context) {
-            int team = Team.currentTeam!.number;
+            int team = Team.current!.number;
             Color? alliance;
             if (match.blue.contains(team)) {
               alliance = Colors.blue;

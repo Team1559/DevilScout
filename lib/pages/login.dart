@@ -179,8 +179,8 @@ class _LoginFieldsState extends State<_LoginFields> {
 
               AuthResponse auth = response.value!;
               Session.current = auth.session;
-              Team.currentTeam = auth.team;
-              User.currentUser = auth.user;
+              Team.current = auth.team;
+              User.current = auth.user;
               saveSession();
 
               hideSnackbar(context);

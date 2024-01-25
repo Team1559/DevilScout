@@ -100,9 +100,9 @@ class NavDrawer extends StatelessWidget {
               ],
             ),
             const Spacer(),
-            if (User.currentUser!.isAdmin)
+            if (User.current!.isAdmin)
               ListTile(
-                title: Text('Manage Team ${Team.currentTeam!.number}'),
+                title: Text('Manage Team ${Team.current!.number}'),
                 leading: const Icon(Icons.manage_accounts),
                 onTap: () {
                   ManagementPageState? parent =
@@ -120,11 +120,11 @@ class NavDrawer extends StatelessWidget {
                 },
               ),
             Text(
-              User.currentUser!.fullName,
+              User.current!.fullName,
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             Text(
-              Team.currentTeam!.name,
+              Team.current!.name,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             Row(

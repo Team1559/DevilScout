@@ -158,14 +158,14 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
     );
 
 Future<ServerResponse<Event>> serverGetCurrentEvent() {
-  if (Team.currentTeam == null || Team.currentTeam!.eventKey == '') {
+  if (Team.current == null || Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}',
+    path: 'events/${Team.current!.eventKey}',
     method: 'GET',
     decoder: Event.fromJson,
     callback: (event) => Event.currentEvent = event,
@@ -174,14 +174,14 @@ Future<ServerResponse<Event>> serverGetCurrentEvent() {
 }
 
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
-  if (Team.currentTeam!.eventKey == '') {
+  if (Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}/matches',
+    path: 'events/${Team.current!.eventKey}/matches',
     method: 'GET',
     decoder: listOf(EventMatch.fromJson),
     callback: (schedule) => EventMatch.currentEventSchedule = schedule,
@@ -190,14 +190,14 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
 }
 
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() {
-  if (Team.currentTeam!.eventKey == '') {
+  if (Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}/teams',
+    path: 'events/${Team.current!.eventKey}/teams',
     method: 'GET',
     decoder: listOf(FrcTeam.fromJson),
     callback: (teams) => FrcTeam.currentEventTeams = teams,

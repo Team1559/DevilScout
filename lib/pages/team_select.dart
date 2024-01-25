@@ -42,7 +42,7 @@ class EventTeamSelectPageState extends State<EventTeamSelectPage> {
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
-        if (!Team.currentTeam!.hasEventKey) {
+        if (!Team.current!.hasEventKey) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -51,7 +51,7 @@ class EventTeamSelectPageState extends State<EventTeamSelectPage> {
                   'No event set',
                   style: Theme.of(context).textTheme.displayMedium,
                 ),
-                if (User.currentUser!.isAdmin)
+                if (User.current!.isAdmin)
                   FilledButton(
                     onPressed: () {},
                     child: const Text('Go to team management'),
