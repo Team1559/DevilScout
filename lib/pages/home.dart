@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    loadSessionFromFile().then((session) {
+    loadSessionFromFile().then((session) async {
       if (!context.mounted) return;
 
       if (session == null) {
@@ -30,11 +30,12 @@ class _HomePageState extends State<HomePage> {
       }
 
       Session.current = session;
-      Future.wait([
+      await Future.wait([
         serverGetCurrentUser(),
         serverGetCurrentTeam(),
       ]);
 
+      if (!context.mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MatchSelectPage()),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../server/server.dart';
+import '/components/large_text_field.dart';
 import '/components/navigation_drawer.dart';
 import '/components/snackbar.dart';
-import '/components/large_text_field.dart';
 import '/server/users.dart';
 
 class ManagementPage extends StatefulWidget {
@@ -135,110 +136,87 @@ class ManagementPageState extends State<ManagementPage> {
                 ),
               ),
             ),
-            onPressed: () {
-              final nameController = TextEditingController();
-              final usernameController = TextEditingController();
-              final passwordController = TextEditingController();
-              final confirmPasswordController = TextEditingController();
-              bool isAdmin = false;
-
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (context, setState) {
-                      return FractionallySizedBox(
-                        heightFactor: 0.8,
-                        child: AlertDialog(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.background,
-                          title: Text('Add User',
-                              style: Theme.of(context).textTheme.titleMedium),
-                          content: Column(
-                            children: <Widget>[
-                              LargeTextField(
-                                  controller: nameController,
-                                  hintText: 'Full Name'),
-                              LargeTextField(
-                                  controller: usernameController,
-                                  hintText: 'Username'),
-                              LargeTextField(
-                                controller: passwordController,
-                                hintText: 'Password',
-                                obscureText: true,
-                              ),
-                              LargeTextField(
-                                controller: confirmPasswordController,
-                                hintText: 'Confirm Password',
-                                obscureText: true,
-                              ),
-                              DefaultTextStyle(
-                                style: Theme.of(context).textTheme.labelLarge!,
-                                child: CheckboxListTile(
-                                  title: const Text('Admin'),
-                                  value: isAdmin,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      isAdmin = value!;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          actions: <Widget>[
-                            FilledButton(
-                              child: const Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            FilledButton(
-                              child: const Text('Add'),
-                              onPressed: () {
-                                if (passwordController.text !=
-                                    confirmPasswordController.text) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'The passwords do not match. Please try again.'),
-                                    ),
-                                  );
-                                } else {
-                                  serverCreateUser(
-                                    fullName: nameController.text,
-                                    username: usernameController.text,
-                                    password: passwordController.text,
-                                    isAdmin: isAdmin,
-                                  ).then((response) {
-                                    if (response.success) {
-                                      setState(
-                                          () => users.add(response.value!));
-                                      displaySnackbar(context,
-                                          'User "${response.value!.fullName}" added');
-                                    } else {
-                                      displaySnackbar(
-                                        context,
-                                        response.message ?? 'An error occurred',
-                                      );
-                                    }
-                                    Navigator.of(context).pop();
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+            onPressed: () => showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return _addUserDialog();
+              },
+            ),
             child: const Text('Add User'),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _addUserDialog() {
+    final nameController = TextEditingController();
+    final usernameController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    return FractionallySizedBox(
+      heightFactor: 0.8,
+      child: AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        title: Text('Add User', style: Theme.of(context).textTheme.titleMedium),
+        content: Column(
+          children: <Widget>[
+            LargeTextField(controller: nameController, hintText: 'Full Name'),
+            LargeTextField(
+                controller: usernameController, hintText: 'Username'),
+            LargeTextField(
+              controller: passwordController,
+              hintText: 'Password',
+              obscureText: true,
+            ),
+            LargeTextField(
+              controller: confirmPasswordController,
+              hintText: 'Confirm Password',
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          FilledButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          FilledButton(
+            child: const Text('Add'),
+            onPressed: () async {
+              if (passwordController.text != confirmPasswordController.text) {
+                displaySnackbar(
+                  context,
+                  'The passwords do not match. Please try again.',
+                );
+                return;
+              }
+
+              ServerResponse<User> response = await serverCreateUser(
+                fullName: nameController.text,
+                username: usernameController.text,
+                password: passwordController.text,
+              );
+              if (!context.mounted) return;
+
+              if (response.success) {
+                setState(() => users.add(response.value!));
+                displaySnackbar(
+                    context, 'User "${response.value!.fullName}" added');
+              } else {
+                displaySnackbar(
+                  context,
+                  response.message ?? 'An error occurred',
+                );
+              }
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

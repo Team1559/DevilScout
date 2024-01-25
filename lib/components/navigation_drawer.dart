@@ -28,17 +28,10 @@ class NavDrawer extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    'Scout',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
+                _header(context, 'Scout'),
                 ListTile(
                   title: const Text('Matches'),
-                  leading: const Icon(Icons.schedule),
+                  leading: const Icon(Icons.event),
                   onTap: () {
                     MatchSelectPageState? parent =
                         context.findAncestorStateOfType<MatchSelectPageState>();
@@ -56,7 +49,7 @@ class NavDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   title: const Text('Pits'),
-                  leading: const Icon(Icons.image),
+                  leading: const Icon(Icons.assignment),
                   onTap: () {
                     EventTeamSelectPageState? parent = context
                         .findAncestorStateOfType<EventTeamSelectPageState>();
@@ -74,7 +67,7 @@ class NavDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   title: const Text('Drive Team'),
-                  leading: const Icon(Icons.image),
+                  leading: const Icon(Icons.sports_esports),
                   onTap: () {
                     DriveTeamFeedbackSelectPageState? parent =
                         context.findAncestorStateOfType<
@@ -94,20 +87,14 @@ class NavDrawer extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    'Analyze',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
+                _header(context, 'Analyze'),
                 ListTile(
                   title: const Text('Teams'),
-                  leading: const Icon(Icons.image),
+                  leading: const Icon(Icons.query_stats),
                   onTap: () {},
                 ),
               ],
@@ -116,7 +103,7 @@ class NavDrawer extends StatelessWidget {
             if (User.currentUser!.isAdmin)
               ListTile(
                 title: Text('Manage Team ${Team.currentTeam!.number}'),
-                leading: const Icon(Icons.image),
+                leading: const Icon(Icons.manage_accounts),
                 onTap: () {
                   ManagementPageState? parent =
                       context.findAncestorStateOfType<ManagementPageState>();
@@ -143,20 +130,26 @@ class NavDrawer extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FilledButton(
+                FilledButton.icon(
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Settings'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Colors.grey[700]),
+                  ),
                   onPressed: () => Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const SettingsPage(),
                     ),
                   ),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.grey[700]),
-                  ),
-                  child: const Icon(Icons.settings),
                 ),
                 const SizedBox(width: 20),
                 FilledButton.icon(
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Log Out'),
+                  style: const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(Colors.red),
+                  ),
                   onPressed: () {
                     serverLogout().whenComplete(saveSession);
                     Navigator.pushReplacement(
@@ -166,11 +159,6 @@ class NavDrawer extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Log Out'),
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.red),
-                  ),
                 ),
               ],
             ),
@@ -179,4 +167,13 @@ class NavDrawer extends StatelessWidget {
       ),
     );
   }
+
+  Widget _header(BuildContext context, String text) => Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      );
 }
