@@ -46,7 +46,7 @@ part 'auth.g.dart';
 // client nonce it transmitted, and begins computing a proof of authentication.
 // That process is as follows:
 //
-// passwordHash    = PBKDF2-SHA256(password, salt, 4096 iterations)
+// passwordHash    = PBKDF2-SHA256(password, salt, 65536 iterations)
 // clientKey       = HMAC-SHA256(passwordHash, "Client Key")
 // storedKey       = SHA256(clientKey)
 // clientSignature = HMAC-SHA256(storedKey, "{team number}{username}" + nonce)
@@ -140,7 +140,7 @@ final Sha256 _sha256 = Sha256();
 final Hmac _hmacSha256 = Hmac(_sha256);
 final Pbkdf2 _pbkdf2Sha256 = Pbkdf2(
   macAlgorithm: _hmacSha256,
-  iterations: 4096,
+  iterations: 65536,
   bits: 256,
 );
 
