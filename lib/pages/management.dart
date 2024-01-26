@@ -63,44 +63,8 @@ class ManagementPageState extends State<ManagementPage> {
               child: Scrollbar(
                 child: ListView.builder(
                   itemCount: User.allUsers.length,
-                  itemBuilder: (context, index) {
-                    User user = User.allUsers[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      elevation: 2.0,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ListTile(
-                              title: Text(user.fullName),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: user.isAdmin
-                                ? null
-                                : () => serverDeleteUser(id: user.id)
-                                        .then((response) {
-                                      if (response.success) {
-                                        setState(
-                                            () => User.allUsers.remove(user));
-                                        displaySnackbar(context,
-                                            'User "${user.fullName}" deleted');
-                                      } else {
-                                        displaySnackbar(
-                                          context,
-                                          response.message ??
-                                              'An error occurred',
-                                        );
-                                      }
-                                    }),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  itemBuilder: (context, index) =>
+                      _userCard(User.allUsers[index], context),
                 ),
               ),
             ),
@@ -131,6 +95,35 @@ class ManagementPageState extends State<ManagementPage> {
           ),
         ],
       );
+
+  Card _userCard(User user, BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      elevation: 2.0,
+      child: Row(
+        children: [
+          Expanded(
+            child: ListTile(
+              title: Text(user.fullName),
+            ),
+          ),
+          if (!user.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserEditDialog(user: user),
+                  fullscreenDialog: true
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class UserAddDialog extends StatefulWidget {
@@ -142,11 +135,8 @@ class UserAddDialog extends StatefulWidget {
 
 class _UserAddDialogState extends State<UserAddDialog> {
   final nameController = TextEditingController();
-
   final usernameController = TextEditingController();
-
   final passwordController = TextEditingController();
-
   final confirmPasswordController = TextEditingController();
 
   @override
@@ -161,48 +151,50 @@ class _UserAddDialogState extends State<UserAddDialog> {
   void _listener() => setState(() {});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('New User'),
-          centerTitle: true,
-          actions: [
-            IconButton.filled(
-              onPressed: _areFieldsValid() ? () => _tryAddUser(context) : null,
-              icon: const Icon(Icons.add),
-              color: Colors.white,
-            ),
-            const SizedBox(width: 4),
-          ],
-        ),
-        body: SafeArea(
-          minimum: const EdgeInsets.symmetric(horizontal: 12),
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                LargeTextField(
-                  controller: nameController,
-                  hintText: 'Full Name',
-                ),
-                LargeTextField(
-                  controller: usernameController,
-                  hintText: 'Username',
-                ),
-                LargeTextField(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
-                LargeTextField(
-                  controller: confirmPasswordController,
-                  hintText: 'Confirm Password',
-                  obscureText: true,
-                ),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('New User'),
+        centerTitle: true,
+        actions: [
+          IconButton.filled(
+            onPressed: _areFieldsValid() ? () => _tryAddUser(context) : null,
+            icon: const Icon(Icons.check),
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
+      body: SafeArea(
+        minimum: const EdgeInsets.symmetric(horizontal: 12),
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              LargeTextField(
+                controller: nameController,
+                hintText: 'Full Name',
+              ),
+              LargeTextField(
+                controller: usernameController,
+                hintText: 'Username',
+              ),
+              LargeTextField(
+                controller: passwordController,
+                hintText: 'Password',
+                obscureText: true,
+              ),
+              LargeTextField(
+                controller: confirmPasswordController,
+                hintText: 'Confirm Password',
+                obscureText: true,
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   bool _areFieldsValid() {
     String fullName = nameController.text;
@@ -233,6 +225,128 @@ class _UserAddDialogState extends State<UserAddDialog> {
       fullName: nameController.text,
       username: usernameController.text,
       password: passwordController.text,
+    );
+    if (!context.mounted) return;
+
+    if (response.success) {
+      User.allUsers.add(response.value!);
+      Navigator.of(context).pop();
+    } else {
+      displaySnackbar(
+        context,
+        response.message ?? 'An error occurred',
+      );
+    }
+  }
+}
+
+class UserEditDialog extends StatefulWidget {
+  final User user;
+
+  const UserEditDialog({super.key, required this.user});
+
+  @override
+  State<UserEditDialog> createState() => _UserEditDialogState();
+}
+
+class _UserEditDialogState extends State<UserEditDialog> {
+  final nameController = TextEditingController();
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    nameController.text = widget.user.fullName;
+    usernameController.text = widget.user.username;
+
+    nameController.addListener(_listener);
+    usernameController.addListener(_listener);
+    passwordController.addListener(_listener);
+    confirmPasswordController.addListener(_listener);
+  }
+
+  void _listener() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit User'),
+        centerTitle: true,
+        actions: [
+          IconButton.filled(
+            onPressed: _areFieldsValid() ? () => _tryEditUser(context) : null,
+            icon: const Icon(Icons.check),
+            color: Colors.white,
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
+      body: SafeArea(
+        minimum: const EdgeInsets.symmetric(horizontal: 12),
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              LargeTextField(
+                controller: nameController,
+                hintText: 'Full Name',
+              ),
+              LargeTextField(
+                controller: usernameController,
+                hintText: 'Username',
+              ),
+              LargeTextField(
+                controller: passwordController,
+                hintText: 'Password',
+                obscureText: true,
+              ),
+              LargeTextField(
+                controller: confirmPasswordController,
+                hintText: 'Confirm Password',
+                obscureText: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _areFieldsValid() {
+    String fullName = nameController.text;
+    if (fullName.isEmpty) return false;
+
+    String username = usernameController.text;
+    if (username.isEmpty) return false;
+
+    String password = passwordController.text;
+    if (password != confirmPasswordController.text) return false;
+    if (password.isNotEmpty && password.length < 8) return false;
+
+    return true;
+  }
+
+  Future<void> _tryEditUser(BuildContext context) async {
+    String password = passwordController.text;
+    String username = usernameController.text;
+    String fullName = nameController.text;
+
+    if (password.isNotEmpty &&
+        (username.toLowerCase().contains(password) ||
+            fullName.toLowerCase().contains(password.toLowerCase()))) {
+      displaySnackbar(context, 'Password should not contain name');
+      return;
+    }
+
+    ServerResponse<User> response = await serverEditUser(
+      id: widget.user.id,
+      username: username == widget.user.username ? null : username,
+      fullName: fullName == widget.user.fullName ? null : fullName,
+      password: password.isEmpty ? null : password,
     );
     if (!context.mounted) return;
 

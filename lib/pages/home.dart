@@ -49,14 +49,15 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         minimum: const EdgeInsets.symmetric(horizontal: 25),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               "Loading...",
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.left,
             ),
+            const CircularProgressIndicator(),
           ],
         ),
       ),
