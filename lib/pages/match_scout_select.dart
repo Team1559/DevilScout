@@ -15,6 +15,8 @@ class MatchSelectPage extends StatefulWidget {
 }
 
 class MatchSelectPageState extends State<MatchSelectPage> {
+  bool loaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,7 +25,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
     Future.wait([
       serverGetCurrentEvent(),
       serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() {}));
+    ]).whenComplete(() => setState(() => loaded = true));
 
     // Preload the list of teams
     serverGetCurrentEventTeamList();
@@ -70,6 +72,10 @@ class MatchSelectPageState extends State<MatchSelectPage> {
               ),
             ),
           );
+        }
+
+        if (!loaded) {
+          return const Center(child: CircularProgressIndicator());
         }
 
         return ListView.builder(

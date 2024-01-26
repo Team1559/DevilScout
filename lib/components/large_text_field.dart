@@ -6,6 +6,8 @@ class LargeTextField extends StatelessWidget {
   final String? hintText;
   final bool obscureText;
   final bool autocorrect;
+  final bool autofocus;
+  final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
@@ -17,6 +19,8 @@ class LargeTextField extends StatelessWidget {
     this.hintText,
     this.obscureText = false,
     this.autocorrect = false,
+    this.focusNode,
+    this.autofocus = false,
     this.textInputAction,
     this.inputFormatters,
     this.keyboardType,
@@ -33,6 +37,8 @@ class LargeTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        autofocus: autofocus,
+        focusNode: focusNode,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,

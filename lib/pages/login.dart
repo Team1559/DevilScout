@@ -65,7 +65,20 @@ class _LoginFieldsState extends State<_LoginFields> {
   final _username = TextEditingController();
   final _password = TextEditingController();
 
+  final _passwordFocus = FocusNode();
+
   bool _showingPassword = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _teamNumber.addListener(_listener);
+    _username.addListener(_listener);
+    _password.addListener(_listener);
+  }
+
+  void _listener() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -112,36 +125,35 @@ class _LoginFieldsState extends State<_LoginFields> {
               Size(double.infinity, 48.0),
             ),
           ),
+          onPressed: _areFieldsValid()
+              ? () async {
+                  ServerResponse<void> response = await serverLogin(
+                    team: int.parse(_teamNumber.text),
+                    username: _username.text,
+                  );
+                  if (!context.mounted) return;
+
+                  if (!response.success) {
+                    displaySnackbar(context, response.toString());
+                    return;
+                  }
+
+                  hideSnackbar(context);
+                  setState(() {
+                    _password.clear();
+                    _showingPassword = true;
+                  });
+                  FocusScope.of(context).requestFocus(_passwordFocus);
+                }
+              : null,
           child: const Text('Next'),
-          onPressed: () async {
-            if (_username.text.isEmpty) {
-              displaySnackbar(context, 'Enter your username');
-              return;
-            } else if (_teamNumber.text.isEmpty) {
-              displaySnackbar(context, 'Enter your team number');
-              return;
-            }
-
-            ServerResponse<void> response = await serverLogin(
-              team: int.parse(_teamNumber.text),
-              username: _username.text,
-            );
-            if (!context.mounted) return;
-
-            if (!response.success) {
-              displaySnackbar(context, response.toString());
-              return;
-            }
-
-            hideSnackbar(context);
-            setState(() {
-              _password.clear();
-              _showingPassword = true;
-            });
-          },
         ),
       ],
     );
+  }
+
+  bool _areFieldsValid() {
+    return _username.text.isNotEmpty && _teamNumber.text.isNotEmpty;
   }
 
   Widget _passwordInput() {
@@ -152,6 +164,8 @@ class _LoginFieldsState extends State<_LoginFields> {
           controller: _password,
           hintText: 'Password',
           obscureText: true,
+          focusNode: _passwordFocus,
+          autofocus: true,
         ),
         FilledButton(
           style: const ButtonStyle(
@@ -159,12 +173,7 @@ class _LoginFieldsState extends State<_LoginFields> {
               Size(double.infinity, 48.0),
             ),
           ),
-          onPressed: () {
-            if (_password.text.isEmpty) {
-              displaySnackbar(context, 'Enter your password');
-              return;
-            }
-
+          onPressed: _password.text.isEmpty ? null : () {
             LoadingOverlay.of(context).show();
 
             serverAuthenticate(
