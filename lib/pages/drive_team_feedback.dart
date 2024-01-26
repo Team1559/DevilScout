@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../server/session.dart';
 import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
@@ -11,12 +12,10 @@ import '/server/submissions.dart';
 
 class DriveTeamFeedbackPage extends StatefulWidget {
   final EventMatch match;
-  final int team;
 
   const DriveTeamFeedbackPage({
     super.key,
     required this.match,
-    required this.team,
   });
 
   @override
@@ -35,10 +34,10 @@ class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
       }
     });
 
-    partners = List.of(widget.match.blue.contains(widget.team)
+    partners = List.of(widget.match.blue.contains(Session.current!.team)
         ? widget.match.blue
         : widget.match.red);
-    partners.remove(widget.team);
+    partners.remove(Session.current!.team);
   }
 
   @override

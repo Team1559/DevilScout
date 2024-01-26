@@ -19,14 +19,14 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   void initState() {
     super.initState();
 
+    // Update event information for UI
     Future.wait([
       serverGetCurrentEvent(),
       serverGetCurrentEventSchedule(),
-    ]).whenComplete(() {
-      setState(() {});
-      // This one doesn't affect the UI
-      serverGetCurrentEventTeamList();
-    });
+    ]).whenComplete(() => setState(() {}));
+
+    // Preload the list of teams
+    serverGetCurrentEventTeamList();
   }
 
   @override
@@ -178,7 +178,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
         if (match.completed) {
           bool cancel = await showAdaptiveDialog(
             context: context,
-            builder: (context) => AlertDialog.adaptive(
+            builder: (context) => AlertDialog(
               title: const Text('Match Already Completed'),
               content: const Text(
                 'Are you sure you want to scout a completed match?',
@@ -195,9 +195,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
               ],
             ),
           );
-          if (cancel || !context.mounted) {
-            return;
-          }
+          if (cancel || !context.mounted) return;
         }
 
         Navigator.push(

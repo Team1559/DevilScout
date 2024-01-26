@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'server.dart';
+import 'session.dart';
 import 'teams.dart';
 
 part 'events.g.dart';
@@ -66,6 +67,7 @@ class FrcTeam {
 @JsonSerializable(createToJson: false)
 class EventMatch {
   static List<EventMatch> currentEventSchedule = List.empty();
+  static List<EventMatch> currentTeamSchedule = List.empty();
   static final Etag _currentEventScheduleEtag = Etag();
 
   static void clear() {
@@ -97,6 +99,8 @@ class EventMatch {
 
   factory EventMatch.fromJson(Map<String, dynamic> json) =>
       _$EventMatchFromJson(json);
+
+  bool containsTeam(int team) => blue.contains(team) || red.contains(team);
 }
 
 @JsonEnum(valueField: '_json')
@@ -184,7 +188,13 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
     path: 'events/${Team.current!.eventKey}/matches',
     method: 'GET',
     decoder: listOf(EventMatch.fromJson),
-    callback: (schedule) => EventMatch.currentEventSchedule = schedule,
+    callback: (schedule) {
+      EventMatch.currentEventSchedule = schedule;
+      EventMatch.currentTeamSchedule = List.of(
+        schedule.where((match) => match.containsTeam(Session.current!.team)),
+        growable: false,
+      );
+    },
     etag: EventMatch._currentEventScheduleEtag,
   );
 }
