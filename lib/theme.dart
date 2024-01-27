@@ -1,4 +1,4 @@
-part of 'main.dart';
+import 'package:flutter/material.dart';
 
 const _primary = Color(0xFF3063FF);
 const _onPrimary = Colors.white;

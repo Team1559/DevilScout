@@ -6,14 +6,16 @@ import '/server/teams.dart';
 import '/server/users.dart';
 import 'pit_scout.dart';
 
-class EventTeamSelectPage extends StatefulWidget {
-  const EventTeamSelectPage({super.key});
+class PitSelectPage extends StatefulWidget {
+  const PitSelectPage({super.key});
 
   @override
-  State<EventTeamSelectPage> createState() => EventTeamSelectPageState();
+  State<PitSelectPage> createState() => PitSelectPageState();
 }
 
-class EventTeamSelectPageState extends State<EventTeamSelectPage> {
+class PitSelectPageState extends State<PitSelectPage> {
+  bool loaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -21,9 +23,7 @@ class EventTeamSelectPageState extends State<EventTeamSelectPage> {
     Future.wait([
       serverGetCurrentEvent(),
       serverGetCurrentEventTeamList(),
-    ]).whenComplete(() {
-      setState(() {});
-    });
+    ]).whenComplete(() => setState(() => loaded = true));
   }
 
   @override
@@ -64,6 +64,10 @@ class EventTeamSelectPageState extends State<EventTeamSelectPage> {
               ],
             ),
           );
+        }
+
+        if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
+          return const Center(child: CircularProgressIndicator());
         }
 
         return ListView.builder(

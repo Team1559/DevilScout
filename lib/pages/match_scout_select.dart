@@ -74,7 +74,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
           );
         }
 
-        if (!loaded) {
+        if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());
         }
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '/pages/drive_team_feedback_select.dart';
+import '/pages/drive_team_scout_select.dart';
 import '/pages/login.dart';
 import '/pages/management.dart';
 import '/pages/match_scout_select.dart';
+import '/pages/pit_scout_select.dart';
 import '/pages/settings.dart';
-import '/pages/team_select.dart';
 import '/server/auth.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
@@ -32,58 +32,32 @@ class NavDrawer extends StatelessWidget {
                 ListTile(
                   title: const Text('Matches'),
                   leading: const Icon(Icons.event),
-                  onTap: () {
-                    MatchSelectPageState? parent =
-                        context.findAncestorStateOfType<MatchSelectPageState>();
-                    if (parent == null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MatchSelectPage(),
-                        ),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onTap: () => pushIfInactive<MatchSelectPageState>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MatchSelectPage(),
+                    ),
+                  ),
                 ),
                 ListTile(
                   title: const Text('Pits'),
                   leading: const Icon(Icons.assignment),
-                  onTap: () {
-                    EventTeamSelectPageState? parent = context
-                        .findAncestorStateOfType<EventTeamSelectPageState>();
-                    if (parent == null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EventTeamSelectPage(),
-                        ),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onTap: () => pushIfInactive<PitSelectPageState>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PitSelectPage(),
+                    ),
+                  ),
                 ),
                 ListTile(
                   title: const Text('Drive Team'),
                   leading: const Icon(Icons.sports_esports),
-                  onTap: () {
-                    DriveTeamFeedbackSelectPageState? parent =
-                        context.findAncestorStateOfType<
-                            DriveTeamFeedbackSelectPageState>();
-                    if (parent == null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const DriveTeamFeedbackSelectPage(),
-                        ),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onTap: () => pushIfInactive<DriveTeamScoutSelectPageState>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DriveTeamScoutSelectPage(),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -104,20 +78,12 @@ class NavDrawer extends StatelessWidget {
               ListTile(
                 title: Text('Manage Team ${Team.current!.number}'),
                 leading: const Icon(Icons.manage_accounts),
-                onTap: () {
-                  ManagementPageState? parent =
-                      context.findAncestorStateOfType<ManagementPageState>();
-                  if (parent == null) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ManagementPage(),
-                      ),
-                    );
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
+                onTap: () => pushIfInactive<ManagementPageState>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ManagementPage(),
+                  ),
+                ),
               ),
             Text(
               User.current!.fullName,
@@ -136,7 +102,7 @@ class NavDrawer extends StatelessWidget {
                   style: ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(Colors.grey[700]),
                   ),
-                  onPressed: () => Navigator.pushReplacement(
+                  onPressed: () => pushIfInactive<SettingsPageState>(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const SettingsPage(),
@@ -166,6 +132,16 @@ class NavDrawer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void pushIfInactive<STATE extends State>(
+      BuildContext context, MaterialPageRoute<STATE> route) {
+    STATE? parent = context.findAncestorStateOfType<STATE>();
+    if (parent == null) {
+      Navigator.pushReplacement(context, route);
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   Widget _header(BuildContext context, String text) => Container(

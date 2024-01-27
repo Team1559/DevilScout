@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '/components/large_text_field.dart';
 import '/components/navigation_drawer.dart';
-import '/components/snackbar.dart';
-import '/server/server.dart';
+import '/components/user_edit_dialog.dart';
 import '/server/users.dart';
 
 class ManagementPage extends StatefulWidget {
@@ -85,10 +83,15 @@ class ManagementPageState extends State<ManagementPage> {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const UserAddDialog(),
+                  builder: (context) => const UserEditDialog(),
                   fullscreenDialog: true,
                 ),
-              ).whenComplete(() => setState(() {})),
+              ).then((user) {
+                if (user == null) return;
+                setState(() {
+                  User.allUsers.add(user);
+                });
+              }),
               icon: const Icon(Icons.add),
               label: const Text('Add User'),
             ),
@@ -107,6 +110,7 @@ class ManagementPageState extends State<ManagementPage> {
           Expanded(
             child: ListTile(
               title: Text(user.fullName),
+              subtitle: Text(user.username),
             ),
           ),
           if (!user.isAdmin)
@@ -115,249 +119,18 @@ class ManagementPageState extends State<ManagementPage> {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserEditDialog(user: user),
-                  fullscreenDialog: true
-                ),
-              ),
+                    builder: (context) => UserEditDialog(user: user),
+                    fullscreenDialog: true),
+              ).then((user) {
+                setState(() {
+                  if (user == null) {
+                    User.allUsers.remove(user);
+                  }
+                });
+              }),
             ),
         ],
       ),
     );
-  }
-}
-
-class UserAddDialog extends StatefulWidget {
-  const UserAddDialog({super.key});
-
-  @override
-  State<UserAddDialog> createState() => _UserAddDialogState();
-}
-
-class _UserAddDialogState extends State<UserAddDialog> {
-  final nameController = TextEditingController();
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    nameController.addListener(_listener);
-    usernameController.addListener(_listener);
-    passwordController.addListener(_listener);
-    confirmPasswordController.addListener(_listener);
-  }
-
-  void _listener() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('New User'),
-        centerTitle: true,
-        actions: [
-          IconButton.filled(
-            onPressed: _areFieldsValid() ? () => _tryAddUser(context) : null,
-            icon: const Icon(Icons.check),
-            color: Colors.white,
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 12),
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              LargeTextField(
-                controller: nameController,
-                hintText: 'Full Name',
-              ),
-              LargeTextField(
-                controller: usernameController,
-                hintText: 'Username',
-              ),
-              LargeTextField(
-                controller: passwordController,
-                hintText: 'Password',
-                obscureText: true,
-              ),
-              LargeTextField(
-                controller: confirmPasswordController,
-                hintText: 'Confirm Password',
-                obscureText: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _areFieldsValid() {
-    String fullName = nameController.text;
-    if (fullName.isEmpty) return false;
-
-    String username = usernameController.text;
-    if (username.isEmpty) return false;
-
-    String password = passwordController.text;
-    if (password != confirmPasswordController.text) return false;
-    if (password.length < 8) return false;
-
-    return true;
-  }
-
-  Future<void> _tryAddUser(BuildContext context) async {
-    String password = passwordController.text;
-    String username = usernameController.text;
-    String fullName = nameController.text;
-
-    if (username.toLowerCase().contains(password) ||
-        fullName.toLowerCase().contains(password.toLowerCase())) {
-      displaySnackbar(context, 'Password should not contain name');
-      return;
-    }
-
-    ServerResponse<User> response = await serverCreateUser(
-      fullName: nameController.text,
-      username: usernameController.text,
-      password: passwordController.text,
-    );
-    if (!context.mounted) return;
-
-    if (response.success) {
-      User.allUsers.add(response.value!);
-      Navigator.of(context).pop();
-    } else {
-      displaySnackbar(
-        context,
-        response.message ?? 'An error occurred',
-      );
-    }
-  }
-}
-
-class UserEditDialog extends StatefulWidget {
-  final User user;
-
-  const UserEditDialog({super.key, required this.user});
-
-  @override
-  State<UserEditDialog> createState() => _UserEditDialogState();
-}
-
-class _UserEditDialogState extends State<UserEditDialog> {
-  final nameController = TextEditingController();
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    nameController.text = widget.user.fullName;
-    usernameController.text = widget.user.username;
-
-    nameController.addListener(_listener);
-    usernameController.addListener(_listener);
-    passwordController.addListener(_listener);
-    confirmPasswordController.addListener(_listener);
-  }
-
-  void _listener() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit User'),
-        centerTitle: true,
-        actions: [
-          IconButton.filled(
-            onPressed: _areFieldsValid() ? () => _tryEditUser(context) : null,
-            icon: const Icon(Icons.check),
-            color: Colors.white,
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 12),
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              LargeTextField(
-                controller: nameController,
-                hintText: 'Full Name',
-              ),
-              LargeTextField(
-                controller: usernameController,
-                hintText: 'Username',
-              ),
-              LargeTextField(
-                controller: passwordController,
-                hintText: 'Password',
-                obscureText: true,
-              ),
-              LargeTextField(
-                controller: confirmPasswordController,
-                hintText: 'Confirm Password',
-                obscureText: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool _areFieldsValid() {
-    String fullName = nameController.text;
-    if (fullName.isEmpty) return false;
-
-    String username = usernameController.text;
-    if (username.isEmpty) return false;
-
-    String password = passwordController.text;
-    if (password != confirmPasswordController.text) return false;
-    if (password.isNotEmpty && password.length < 8) return false;
-
-    return true;
-  }
-
-  Future<void> _tryEditUser(BuildContext context) async {
-    String password = passwordController.text;
-    String username = usernameController.text;
-    String fullName = nameController.text;
-
-    if (password.isNotEmpty &&
-        (username.toLowerCase().contains(password) ||
-            fullName.toLowerCase().contains(password.toLowerCase()))) {
-      displaySnackbar(context, 'Password should not contain name');
-      return;
-    }
-
-    ServerResponse<User> response = await serverEditUser(
-      id: widget.user.id,
-      username: username == widget.user.username ? null : username,
-      fullName: fullName == widget.user.fullName ? null : fullName,
-      password: password.isEmpty ? null : password,
-    );
-    if (!context.mounted) return;
-
-    if (response.success) {
-      User.allUsers.add(response.value!);
-      Navigator.of(context).pop();
-    } else {
-      displaySnackbar(
-        context,
-        response.message ?? 'An error occurred',
-      );
-    }
   }
 }

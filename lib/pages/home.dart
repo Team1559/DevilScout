@@ -45,20 +45,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 25),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Loading...",
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.left,
-            ),
-            const CircularProgressIndicator(),
-          ],
+        minimum: EdgeInsets.symmetric(horizontal: 25),
+        child: Center(
+          child: CircularProgressIndicator(),
         ),
       ),
     );

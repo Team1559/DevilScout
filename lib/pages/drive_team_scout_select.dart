@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/components/navigation_drawer.dart';
-import '/pages/drive_team_feedback.dart';
+import '/pages/drive_team_scout.dart';
 import '/server/events.dart';
 import '/server/session.dart';
 import '/server/teams.dart';
 
-class DriveTeamFeedbackSelectPage extends StatefulWidget {
-  const DriveTeamFeedbackSelectPage({super.key});
+class DriveTeamScoutSelectPage extends StatefulWidget {
+  const DriveTeamScoutSelectPage({super.key});
 
   @override
-  State<DriveTeamFeedbackSelectPage> createState() =>
-      DriveTeamFeedbackSelectPageState();
+  State<DriveTeamScoutSelectPage> createState() =>
+      DriveTeamScoutSelectPageState();
 }
 
-class DriveTeamFeedbackSelectPageState
-    extends State<DriveTeamFeedbackSelectPage> {
+class DriveTeamScoutSelectPageState
+    extends State<DriveTeamScoutSelectPage> {
   @override
   void initState() {
     super.initState();
@@ -82,7 +82,7 @@ class DriveTeamFeedbackSelectPageState
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DriveTeamFeedbackPage(
+              builder: (context) => DriveTeamScoutPage(
                 match: match,
               ),
             ),

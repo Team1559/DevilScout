@@ -12,14 +12,9 @@ import '/server/teams.dart';
 import '/server/users.dart';
 import 'match_scout_select.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -58,14 +53,9 @@ class _LoginFields extends StatefulWidget {
 }
 
 class _LoginFieldsState extends State<_LoginFields> {
-  static const Key _usernameKey = Key('username');
-  static const Key _passwordKey = Key('password');
-
   final _teamNumber = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
-
-  final _passwordFocus = FocusNode();
 
   bool _showingPassword = false;
 
@@ -88,83 +78,149 @@ class _LoginFieldsState extends State<_LoginFields> {
         duration: const Duration(milliseconds: 175),
         transitionBuilder: (child, animation) => SlideTransition(
           position: Tween(
-            begin: Offset(child.key == _passwordKey ? 2 : -2, 0),
+            begin: Offset(child is PasswordInput ? 2 : -2, 0),
             end: Offset.zero,
           ).animate(animation),
           child: child,
         ),
-        child: _showingPassword ? _passwordInput() : _userAndTeamInput(),
-      ),
-    );
-  }
-
-  Widget _userAndTeamInput() {
-    return Column(
-      key: _usernameKey,
-      children: [
-        LargeTextField(
-          controller: _username,
-          hintText: 'Username',
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(32),
-          ],
-          textInputAction: TextInputAction.next,
-        ),
-        LargeTextField(
-          controller: _teamNumber,
-          hintText: 'Team Number',
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(4),
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          keyboardType: TextInputType.number,
-        ),
-        FilledButton(
-          style: const ButtonStyle(
-            minimumSize: MaterialStatePropertyAll(
-              Size(double.infinity, 48.0),
-            ),
-          ),
-          onPressed: _areFieldsValid()
-              ? () async {
-                  ServerResponse<void> response = await serverLogin(
-                    team: int.parse(_teamNumber.text),
-                    username: _username.text,
-                  );
-                  if (!context.mounted) return;
-
-                  if (!response.success) {
-                    displaySnackbar(context, response.toString());
-                    return;
-                  }
+        child: _showingPassword
+            ? PasswordInput(
+                username: _username.text,
+                teamNum: int.parse(_teamNumber.text),
+                passwordController: _password,
+                previousAction: () => setState(() => _showingPassword = false),
+                loginAction: (auth) {
+                  Session.current = auth.session;
+                  Team.current = auth.team;
+                  User.current = auth.user;
+                  saveSession();
 
                   hideSnackbar(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MatchSelectPage()),
+                  );
+                },
+              )
+            : UsernameInput(
+                usernameController: _username,
+                teamNumController: _teamNumber,
+                continueAction: () {
                   setState(() {
                     _password.clear();
                     _showingPassword = true;
                   });
-                  FocusScope.of(context).requestFocus(_passwordFocus);
-                }
-              : null,
-          child: const Text('Next'),
-        ),
-      ],
+                },
+              ),
+      ),
     );
   }
+}
 
-  bool _areFieldsValid() {
-    return _username.text.isNotEmpty && _teamNumber.text.isNotEmpty;
+class UsernameInput extends StatefulWidget {
+  final TextEditingController usernameController;
+  final TextEditingController teamNumController;
+  final void Function()? continueAction;
+
+  const UsernameInput({
+    super.key,
+    required this.usernameController,
+    required this.teamNumController,
+    required this.continueAction,
+  });
+
+  @override
+  State<UsernameInput> createState() => _UsernameInputState();
+}
+
+class _UsernameInputState extends State<UsernameInput> {
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          LargeTextField(
+            controller: widget.usernameController,
+            hintText: 'Username',
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(32),
+            ],
+            textInputAction: TextInputAction.next,
+          ),
+          LargeTextField(
+            controller: widget.teamNumController,
+            hintText: 'Team Number',
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(4),
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            keyboardType: TextInputType.number,
+          ),
+          FilledButton(
+            style: const ButtonStyle(
+              minimumSize: MaterialStatePropertyAll(
+                Size(double.infinity, 48.0),
+              ),
+            ),
+            onPressed: widget.usernameController.text.isNotEmpty &&
+                    widget.teamNumController.text.isNotEmpty
+                ? () async {
+                    ServerResponse<void> response = await serverLogin(
+                      team: int.parse(widget.teamNumController.text),
+                      username: widget.usernameController.text,
+                    );
+                    if (!context.mounted) return;
+
+                    if (!response.success) {
+                      displaySnackbar(context, response.toString());
+                      return;
+                    }
+
+                    hideSnackbar(context);
+                    setState(() {
+                      widget.continueAction?.call();
+                    });
+                  }
+                : null,
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
   }
+}
 
-  Widget _passwordInput() {
+class PasswordInput extends StatefulWidget {
+  final String username;
+  final int teamNum;
+  final TextEditingController passwordController;
+  final void Function() previousAction;
+  final void Function(AuthResponse auth) loginAction;
+
+  const PasswordInput({
+    super.key,
+    required this.username,
+    required this.teamNum,
+    required this.passwordController,
+    required this.previousAction,
+    required this.loginAction,
+  });
+
+  @override
+  State<PasswordInput> createState() => _PasswordInputState();
+}
+
+class _PasswordInputState extends State<PasswordInput> {
+  @override
+  Widget build(BuildContext context) {
     return Column(
-      key: _passwordKey,
       children: [
         LargeTextField(
-          controller: _password,
+          controller: widget.passwordController,
           hintText: 'Password',
           obscureText: true,
-          focusNode: _passwordFocus,
           autofocus: true,
         ),
         FilledButton(
@@ -173,37 +229,29 @@ class _LoginFieldsState extends State<_LoginFields> {
               Size(double.infinity, 48.0),
             ),
           ),
-          onPressed: _password.text.isEmpty ? null : () {
-            LoadingOverlay.of(context).show();
+          onPressed: widget.passwordController.text.isEmpty
+              ? null
+              : () {
+                  LoadingOverlay.of(context).show();
 
-            serverAuthenticate(
-              password: _password.text,
-            ).then((response) {
-              LoadingOverlay.of(context).hide();
+                  serverAuthenticate(
+                    password: widget.passwordController.text,
+                  ).then((response) {
+                    LoadingOverlay.of(context).hide();
 
-              if (!response.success) {
-                displaySnackbar(context, response.toString());
-                return;
-              }
+                    if (!response.success) {
+                      displaySnackbar(context, response.toString());
+                      return;
+                    }
 
-              AuthResponse auth = response.value!;
-              Session.current = auth.session;
-              Team.current = auth.team;
-              User.current = auth.user;
-              saveSession();
-
-              hideSnackbar(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const MatchSelectPage()),
-              );
-            });
-          },
+                    AuthResponse auth = response.value!;
+                    widget.loginAction.call(auth);
+                  });
+                },
           child: const Text('Log In'),
         ),
         TextButton(
-          onPressed: () => setState(() => _showingPassword = false),
+          onPressed: widget.previousAction,
           child: const Text('Back'),
         ),
       ],

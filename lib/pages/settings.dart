@@ -1,22 +1,95 @@
+import 'package:devil_scout/components/user_edit_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '/components/navigation_drawer.dart';
+import '/server/users.dart';
+import '/settings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<SettingsPage> createState() => SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class SettingsPageState extends State<SettingsPage> {
+  AppSettings? settings;
+
+  @override
+  void initState() {
+    super.initState();
+    getSettings().then((value) {
+      setState(() => settings = value);
+      settings!.addListener(settingsListener);
+    });
+  }
+
+  void settingsListener() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    settings?.removeListener(settingsListener);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: const Text('This is the Settings Page'),
+      body: Builder(builder: (context) {
+        if (settings == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return ListView(
+          children: [
+            ListTile(
+              title: const Text('Edit Account'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserEditDialog(
+                      user: User.current,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('Use Device Theme'),
+              trailing: Checkbox(
+                value: settings!.theme == ThemeMode.system,
+                onChanged: (value) => setState(() {
+                  settings!.theme =
+                      value! ? ThemeMode.system : ThemeModeHelper.current();
+                }),
+              ),
+            ),
+            Opacity(
+              opacity: settings!.theme == ThemeMode.system ? .7 : 1,
+              child: ListTile(
+                title: const Text('Dark Mode'),
+                trailing: Checkbox(
+                  value: settings!.theme.resolve() == ThemeMode.dark,
+                  onChanged: settings!.theme == ThemeMode.system
+                      ? null
+                      : (value) => setState(() {
+                            settings!.theme =
+                                value! ? ThemeMode.dark : ThemeMode.light;
+                          }),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
       drawer: const NavDrawer(),
     );
   }

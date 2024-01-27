@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../server/session.dart';
 import '/components/loading_overlay.dart';
 import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
@@ -8,21 +7,22 @@ import '/components/snackbar.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
 import '/server/server.dart';
+import '/server/session.dart';
 import '/server/submissions.dart';
 
-class DriveTeamFeedbackPage extends StatefulWidget {
+class DriveTeamScoutPage extends StatefulWidget {
   final EventMatch match;
 
-  const DriveTeamFeedbackPage({
+  const DriveTeamScoutPage({
     super.key,
     required this.match,
   });
 
   @override
-  State<DriveTeamFeedbackPage> createState() => _DriveTeamFeedbackPageState();
+  State<DriveTeamScoutPage> createState() => _DriveTeamScoutPageState();
 }
 
-class _DriveTeamFeedbackPageState extends State<DriveTeamFeedbackPage> {
+class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
   late final List<int> partners;
 
   @override
