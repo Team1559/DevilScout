@@ -13,7 +13,7 @@ class User {
   static final Etag _currentUserEtag = Etag();
 
   /// The list of all registered users, after request via [serverGetAllUsers]
-  static List<User> allUsers = List.empty();
+  static List<User> allUsers = List.empty(growable: true);
   static final Etag _allUsersEtag = Etag();
 
   /// Erase all cached user information (for logout)
@@ -21,7 +21,7 @@ class User {
     current = null;
     _currentUserEtag.clear();
 
-    allUsers = List.empty();
+    allUsers = List.empty(growable: true);
     _allUsersEtag.clear();
   }
 

@@ -18,6 +18,7 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    serverGetCurrentUser();
     getSettings().then((value) {
       setState(() => settings = value);
       settings!.addListener(settingsListener);
@@ -50,14 +51,15 @@ class SettingsPageState extends State<SettingsPage> {
         return ListView(
           children: [
             ListTile(
-              title: const Text('Edit Account'),
+              title: const Text('Edit User'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserEditDialog(
-                      user: User.current,
-                    ),
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  isDismissible: true,
+                  builder: (context) => UserEditDialog(
+                    user: User.current,
+                    showAdmin: User.current!.isAdmin,
                   ),
                 );
               },

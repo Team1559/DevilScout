@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '/pages/login.dart';
+import '/server/auth.dart';
 import '/server/server.dart';
+import '/server/session_file.dart';
 import '/server/users.dart';
 import 'large_text_field.dart';
 import 'snackbar.dart';
 
 class UserEditDialog extends StatefulWidget {
   final User? user;
+  final bool showAdmin;
 
-  const UserEditDialog({super.key, this.user});
+  const UserEditDialog({
+    super.key,
+    this.user,
+    required this.showAdmin,
+  });
 
   @override
   State<UserEditDialog> createState() => _UserEditDialogState();
@@ -19,10 +27,13 @@ class _UserEditDialogState extends State<UserEditDialog> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  late bool isAdmin;
 
   @override
   void initState() {
     super.initState();
+
+    isAdmin = widget.user?.isAdmin ?? false;
 
     if (widget.user != null) {
       nameController.text = widget.user!.fullName;
@@ -39,48 +50,156 @@ class _UserEditDialogState extends State<UserEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit User'),
-        centerTitle: true,
-        actions: [
-          IconButton.filled(
-            onPressed: _areFieldsValid() ? () => _tryEditUser(context) : null,
-            icon: const Icon(Icons.check),
-            color: Colors.white,
-          ),
-          const SizedBox(width: 4),
-        ],
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      body: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 12),
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              LargeTextField(
-                controller: nameController,
-                hintText: 'Full Name',
+      child: SafeArea(
+        minimum: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context, widget.user),
+                ),
+                const Spacer(),
+                Text(
+                  widget.user == null ? 'Add User' : 'Edit User',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                IconButton.filled(
+                  onPressed:
+                      _areFieldsValid() ? () => _tryEditUser(context) : null,
+                  icon: const Icon(Icons.check),
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 4),
+              ],
+            ),
+            SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  LargeTextField(
+                    controller: nameController,
+                    hintText: 'Full Name',
+                  ),
+                  LargeTextField(
+                    controller: usernameController,
+                    hintText: 'Username',
+                  ),
+                  LargeTextField(
+                    controller: passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                  ),
+                  LargeTextField(
+                    controller: confirmPasswordController,
+                    hintText: 'Confirm Password',
+                    obscureText: true,
+                  ),
+                  if (widget.showAdmin)
+                    ListTile(
+                      title: const Text('Administrator'),
+                      trailing: Checkbox(
+                        value: isAdmin,
+                        onChanged: (value) {
+                          if (value!) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Are you sure?'),
+                                content: const Text(
+                                  'This user will have administrator access, which you cannot revoke.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: Navigator.of(context).pop,
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() => isAdmin = true);
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Continue'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            setState(() => isAdmin = false);
+                          }
+                        },
+                      ),
+                    ),
+                  if (widget.user != null)
+                    TextButton(
+                      child: const Text('Delete User'),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Are you sure?'),
+                            content: Text(
+                              widget.user == User.current
+                                  ? 'You will be logged out immediately, and your account will be permanently erased. We will retain any scouting data you submitted, but it will be disassociated with your identity.\n\nThis action is irreversible.'
+                                  : 'This account will be permanently erased. Any scouting data they submitted will be anonymized, but remain associated with your team.\n\nThis action is irreversible.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: Navigator.of(context).pop,
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                child: const Text('Delete'),
+                                onPressed: () => deleteUser(context),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                ],
               ),
-              LargeTextField(
-                controller: usernameController,
-                hintText: 'Username',
-              ),
-              LargeTextField(
-                controller: passwordController,
-                hintText: 'Password',
-                obscureText: true,
-              ),
-              LargeTextField(
-                controller: confirmPasswordController,
-                hintText: 'Confirm Password',
-                obscureText: true,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> deleteUser(BuildContext context) async {
+    ServerResponse<void> response = await serverDeleteUser(id: widget.user!.id);
+    if (!context.mounted) return;
+
+    if (!response.success) {
+      displaySnackbar(context, response.message ?? 'An error occurred');
+      return;
+    }
+
+    if (User.allUsers.contains(widget.user)) {
+      User.allUsers.remove(widget.user);
+    }
+
+    if (widget.user == User.current) {
+      serverLogout().whenComplete(saveSession);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+      );
+      return;
+    } else {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    }
   }
 
   bool _areFieldsValid() {
@@ -116,6 +235,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
         fullName: nameController.text,
         username: usernameController.text,
         password: passwordController.text,
+        isAdmin: isAdmin,
       );
     } else {
       response = await serverEditUser(
@@ -123,6 +243,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
         username: username == widget.user!.username ? null : username,
         fullName: fullName == widget.user!.fullName ? null : fullName,
         password: password.isEmpty ? null : password,
+        isAdmin: widget.user!.isAdmin == isAdmin ? null : isAdmin,
       );
     }
     if (!context.mounted) return;

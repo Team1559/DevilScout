@@ -54,6 +54,7 @@ class ManagementPageState extends State<ManagementPage> {
   }
 
   Column _usersPanel() => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: Padding(
@@ -67,34 +68,31 @@ class ManagementPageState extends State<ManagementPage> {
               ),
             ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: const ButtonStyle(
-                shape: MaterialStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(8.0),
-                      bottomRight: Radius.circular(8.0),
-                    ),
+          FilledButton.icon(
+            style: const ButtonStyle(
+              shape: MaterialStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(8.0),
+                    bottomRight: Radius.circular(8.0),
                   ),
                 ),
               ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const UserEditDialog(),
-                  fullscreenDialog: true,
-                ),
-              ).then((user) {
-                if (user == null) return;
-                setState(() {
-                  User.allUsers.add(user);
-                });
-              }),
-              icon: const Icon(Icons.add),
-              label: const Text('Add User'),
             ),
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              isDismissible: true,
+              builder: (context) => const UserEditDialog(showAdmin: false),
+            ).then((user) {
+              setState(() {
+                if (user != null) {
+                  User.allUsers.add(user);
+                }
+              });
+            }),
+            icon: const Icon(Icons.add),
+            label: const Text('Add User'),
           ),
         ],
       );
@@ -116,11 +114,14 @@ class ManagementPageState extends State<ManagementPage> {
           if (!user.isAdmin)
             IconButton(
               icon: const Icon(Icons.edit),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => UserEditDialog(user: user),
-                    fullscreenDialog: true),
+              onPressed: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                isDismissible: true,
+                builder: (context) => UserEditDialog(
+                  user: user,
+                  showAdmin: true,
+                ),
               ).then((user) {
                 setState(() {
                   if (user == null) {

@@ -27,14 +27,12 @@ class LoginPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    "Welcome,\nlet's get you logged in.",
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.left,
-                  ),
+                Text(
+                  "Welcome,\nlet's get you logged in.",
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.left,
                 ),
+                const SizedBox(height: 20),
                 const _LoginFields(),
               ],
             ),
@@ -137,57 +135,50 @@ class UsernameInput extends StatefulWidget {
 class _UsernameInputState extends State<UsernameInput> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: Column(
-        children: [
-          LargeTextField(
-            controller: widget.usernameController,
-            hintText: 'Username',
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(32),
-            ],
-            textInputAction: TextInputAction.next,
-          ),
-          LargeTextField(
-            controller: widget.teamNumController,
-            hintText: 'Team Number',
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(4),
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            keyboardType: TextInputType.number,
-          ),
-          FilledButton(
-            style: const ButtonStyle(
-              minimumSize: MaterialStatePropertyAll(
-                Size(double.infinity, 48.0),
-              ),
-            ),
-            onPressed: widget.usernameController.text.isNotEmpty &&
-                    widget.teamNumController.text.isNotEmpty
-                ? () async {
-                    ServerResponse<void> response = await serverLogin(
-                      team: int.parse(widget.teamNumController.text),
-                      username: widget.usernameController.text,
-                    );
-                    if (!context.mounted) return;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LargeTextField(
+          controller: widget.usernameController,
+          hintText: 'Username',
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(32),
+          ],
+          textInputAction: TextInputAction.next,
+        ),
+        LargeTextField(
+          controller: widget.teamNumController,
+          hintText: 'Team Number',
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(4),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+          keyboardType: TextInputType.number,
+        ),
+        FilledButton(
+          onPressed: widget.usernameController.text.isNotEmpty &&
+                  widget.teamNumController.text.isNotEmpty
+              ? () async {
+                  ServerResponse<void> response = await serverLogin(
+                    team: int.parse(widget.teamNumController.text),
+                    username: widget.usernameController.text,
+                  );
+                  if (!context.mounted) return;
 
-                    if (!response.success) {
-                      displaySnackbar(context, response.toString());
-                      return;
-                    }
-
-                    hideSnackbar(context);
-                    setState(() {
-                      widget.continueAction?.call();
-                    });
+                  if (!response.success) {
+                    displaySnackbar(context, response.toString());
+                    return;
                   }
-                : null,
-            child: const Text('Next'),
-          ),
-        ],
-      ),
+
+                  hideSnackbar(context);
+                  setState(() {
+                    widget.continueAction?.call();
+                  });
+                }
+              : null,
+          child: const Text('Next'),
+        ),
+      ],
     );
   }
 }
@@ -216,6 +207,7 @@ class _PasswordInputState extends State<PasswordInput> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         LargeTextField(
           controller: widget.passwordController,
@@ -224,11 +216,6 @@ class _PasswordInputState extends State<PasswordInput> {
           autofocus: true,
         ),
         FilledButton(
-          style: const ButtonStyle(
-            minimumSize: MaterialStatePropertyAll(
-              Size(double.infinity, 48.0),
-            ),
-          ),
           onPressed: widget.passwordController.text.isEmpty
               ? null
               : () {

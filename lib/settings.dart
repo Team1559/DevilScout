@@ -51,9 +51,6 @@ class AppSettings with ChangeNotifier, WidgetsBindingObserver {
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
     notifyListeners();
-    if (_theme != ThemeMode.system) {
-      _theme = ThemeModeHelper.current();
-    }
   }
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>
