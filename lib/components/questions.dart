@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:numberpicker/numberpicker.dart';
 
-import '/components/text_field.dart';
 import '/components/snackbar.dart';
 import '/server/questions.dart';
 import '/server/server.dart';
@@ -476,6 +475,10 @@ class NumberQuestion extends QuestionWidget<NumberConfig> {
     required super.listener,
   });
 
+  int defaultValue() {
+    return (config.min + config.max) ~/ 2;
+  }
+
   @override
   State<NumberQuestion> createState() => _NumberQuestionState();
 }
@@ -486,16 +489,22 @@ class _NumberQuestionState extends QuestionWidgetState<int?, NumberQuestion> {
   _NumberQuestionState() : super(value: null);
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => setValue(widget.defaultValue()));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return LargeTextField(
-      hintText: '${widget.config.min}-${widget.config.max}',
-      controller: controller,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        NumberTextInputFormatter(min: widget.config.min, max: widget.config.max)
-      ],
-      keyboardType: TextInputType.number,
-      onChanged: (text) => setValue(int.tryParse(text)),
+    return NumberPicker(
+      axis: Axis.horizontal,
+      minValue: widget.config.min,
+      maxValue: widget.config.max,
+      value: value ?? widget.defaultValue(),
+      itemCount: 7,
+      itemWidth: 50,
+      onChanged: setValue,
     );
   }
 }
