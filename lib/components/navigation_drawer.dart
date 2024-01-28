@@ -31,7 +31,10 @@ class NavDrawer extends StatelessWidget {
           ),
         ),
         body: SafeArea(
-          minimum: const EdgeInsets.symmetric(vertical: 16, horizontal: 15),
+          minimum: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
