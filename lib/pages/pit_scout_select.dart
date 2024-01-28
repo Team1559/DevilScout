@@ -35,9 +35,13 @@ class PitSelectPageState extends State<PitSelectPage> {
             ? null
             : PreferredSize(
                 preferredSize: Size.zero,
-                child: Text(
-                  Event.currentEvent!.name,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    Event.currentEvent!.name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
       ),

@@ -43,9 +43,13 @@ class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
             ? null
             : PreferredSize(
                 preferredSize: Size.zero,
-                child: Text(
-                  Event.currentEvent!.name,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    Event.currentEvent!.name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
       ),
@@ -113,7 +117,10 @@ class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
             partnersStr,
             style: Theme.of(context).textTheme.labelMedium,
           ),
-          trailing: Text(timeFormat.format(match.time)),
+          trailing: Text(
+            timeFormat.format(match.time),
+            textAlign: TextAlign.end,
+          ),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(

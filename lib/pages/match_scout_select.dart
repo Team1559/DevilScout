@@ -43,9 +43,13 @@ class MatchSelectPageState extends State<MatchSelectPage> {
             ? null
             : PreferredSize(
                 preferredSize: Size.zero,
-                child: Text(
-                  Event.currentEvent!.name,
-                  style: Theme.of(context).textTheme.titleSmall,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    Event.currentEvent!.name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
       ),
@@ -121,7 +125,10 @@ class MatchSelectPageState extends State<MatchSelectPage> {
             match.name,
             style: Theme.of(context).textTheme.titleSmall,
           ),
-          trailing: Text(timeFormat.format(match.time)),
+          trailing: Text(
+            timeFormat.format(match.time),
+            textAlign: TextAlign.end,
+          ),
           children: [
             Padding(
               padding: const EdgeInsets.all(4),

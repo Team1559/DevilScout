@@ -72,6 +72,7 @@ class EventMatch {
 
   static void clear() {
     currentEventSchedule = List.empty();
+    currentTeamSchedule = List.empty();
     _currentEventScheduleEtag.clear();
   }
 
