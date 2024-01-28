@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '/components/snackbar.dart';
+import '/components/text_field.dart';
 import '/pages/login.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
 import '/server/session_file.dart';
 import '/server/users.dart';
-import 'large_text_field.dart';
-import 'snackbar.dart';
 
 class UserEditDialog extends StatefulWidget {
   final User? user;
@@ -146,11 +146,13 @@ class _UserEditDialogState extends State<UserEditDialog> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Are you sure?'),
-                            content: Text(
-                              widget.user == User.current
-                                  ? 'You will be logged out immediately, and your account will be permanently erased. We will retain any scouting data you submitted, but it will be disassociated with your identity.\n\nThis action is irreversible.'
-                                  : 'This account will be permanently erased. Any scouting data they submitted will be anonymized, but remain associated with your team.\n\nThis action is irreversible.',
-                            ),
+                            content: widget.user == User.current
+                                ? const Text(
+                                    'You will be logged out immediately, and your account will be permanently erased. We will retain any scouting data you submitted, but it will be disassociated with your identity.\n\nThis action is irreversible.',
+                                  )
+                                : const Text(
+                                    'This account will be permanently erased. Any scouting data they submitted will be anonymized, but remain associated with your team.\n\nThis action is irreversible.',
+                                  ),
                             actions: [
                               TextButton(
                                 onPressed: Navigator.of(context).pop,
@@ -179,7 +181,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (!context.mounted) return;
 
     if (!response.success) {
-      displaySnackbar(context, response.message ?? 'An error occurred');
+      snackbarError(context, response.message ?? 'An error occurred');
       return;
     }
 
@@ -214,6 +216,13 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (password.isNotEmpty && password.length < 8) return false;
     if (password.isEmpty && widget.user == null) return false;
 
+    if (widget.user != null &&
+        fullName == widget.user!.fullName &&
+        username == widget.user!.username &&
+        password.isEmpty) {
+      return false;
+    }
+
     return true;
   }
 
@@ -225,7 +234,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (password.isNotEmpty &&
         (password.toLowerCase().contains(username.toLowerCase()) ||
             password.toLowerCase().contains(fullName.toLowerCase()))) {
-      displaySnackbar(context, 'Password should not contain name');
+      snackbarError(context, 'Password should not contain name');
       return;
     }
 
@@ -249,7 +258,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (!context.mounted) return;
 
     if (!response.success) {
-      displaySnackbar(
+      snackbarError(
         context,
         response.message ?? 'An error occurred',
       );

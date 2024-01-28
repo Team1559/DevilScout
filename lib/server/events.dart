@@ -1,8 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
-import 'session.dart';
-import 'teams.dart';
+import '/server/server.dart';
+import '/server/session.dart';
+import '/server/teams.dart';
 
 part 'events.g.dart';
 

@@ -1,4 +1,4 @@
-import 'server.dart';
+import '/server/server.dart';
 
 /// Submit match data to the server in the format defined by match questions.
 Future<ServerResponse<void>> serverSubmitMatchData({

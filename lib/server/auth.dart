@@ -4,12 +4,12 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'events.dart';
-import 'questions.dart';
-import 'server.dart';
-import 'session.dart';
-import 'teams.dart';
-import 'users.dart';
+import '/server/events.dart';
+import '/server/questions.dart';
+import '/server/server.dart';
+import '/server/session.dart';
+import '/server/teams.dart';
+import '/server/users.dart';
 
 part 'auth.g.dart';
 

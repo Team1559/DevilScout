@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '/pages/home.dart';
-import 'settings.dart';
-import 'theme.dart';
+import '/pages/load_session.dart';
+import '/settings.dart';
+import '/theme.dart';
 
 void main() {
   runApp(const MainApp());
@@ -43,7 +43,7 @@ class MainAppState extends State<MainApp> {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
-      home: const HomePage(),
+      home: const LoadSessionPage(),
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: settings?.theme,

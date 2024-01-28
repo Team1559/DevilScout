@@ -46,10 +46,10 @@ final lightTheme = ThemeData(
   filledButtonTheme: const FilledButtonThemeData(
     style: ButtonStyle(
       minimumSize: MaterialStatePropertyAll(
-        Size(120, 48.0),
+        Size(120, 48),
       ),
       maximumSize: MaterialStatePropertyAll(
-        Size(double.infinity, 48.0),
+        Size(double.infinity, 48),
       ),
       shape: MaterialStatePropertyAll(
         RoundedRectangleBorder(

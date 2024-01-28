@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '/components/large_text_field.dart';
+import '/components/text_field.dart';
 import '/components/loading_overlay.dart';
 import '/components/snackbar.dart';
+import '/pages/select_match.dart';
 import '/server/auth.dart';
 import '/server/session.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
-import 'match_scout_select.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -32,7 +32,7 @@ class LoginPage extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: 20),
-                const _LoginFields(),
+                const LoginFields(),
               ],
             ),
           ),
@@ -42,21 +42,21 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class _LoginFields extends StatefulWidget {
-  const _LoginFields();
+class LoginFields extends StatefulWidget {
+  const LoginFields({super.key});
 
   @override
-  State<_LoginFields> createState() => _LoginFieldsState();
+  State<LoginFields> createState() => _LoginFieldsState();
 }
 
-class _LoginFieldsState extends State<_LoginFields> {
+class _LoginFieldsState extends State<LoginFields> {
   static const Duration animationDuration = Duration(milliseconds: 175);
 
   final _teamNumber = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
 
-  bool _showingPassword = false;
+  bool _showingUsername = true;
 
   FocusNode usernameFocus = FocusNode();
   FocusNode teamNumberFocus = FocusNode();
@@ -92,14 +92,14 @@ class _LoginFieldsState extends State<_LoginFields> {
   }
 
   Widget visibleFields(BuildContext context) {
-    if (!_showingPassword) {
+    if (_showingUsername) {
       return UsernameInput(
         usernameController: _username,
         teamNumController: _teamNumber,
         usernameFocusNode: usernameFocus,
         teamNumberFocusNode: teamNumberFocus,
         continueAction: () => setState(() {
-          _showingPassword = true;
+          _showingUsername = false;
           passwordFocus.requestFocus();
         }),
       );
@@ -110,7 +110,7 @@ class _LoginFieldsState extends State<_LoginFields> {
         passwordController: _password,
         focusNode: usernameFocus,
         previousAction: () => setState(() {
-          _showingPassword = false;
+          _showingUsername = true;
           teamNumberFocus.requestFocus();
           Future.delayed(animationDuration, _password.clear);
         }),
@@ -120,7 +120,7 @@ class _LoginFieldsState extends State<_LoginFields> {
           User.current = auth.user;
           saveSession();
 
-          hideSnackbar(context);
+          hideError(context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MatchSelectPage()),
@@ -171,8 +171,8 @@ class _UsernameInputState extends State<UsernameInput> {
           controller: widget.teamNumController,
           hintText: 'Team Number',
           inputFormatters: [
-            LengthLimitingTextInputFormatter(4),
             FilteringTextInputFormatter.digitsOnly,
+            const NumberTextInputFormatter(min: 0, max: 9999),
           ],
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.continueAction,
@@ -199,11 +199,11 @@ class _UsernameInputState extends State<UsernameInput> {
         if (!context.mounted) return;
 
         if (!response.success) {
-          displaySnackbar(context, response.toString());
+          snackbarError(context, response.toString());
           return;
         }
 
-        hideSnackbar(context);
+        hideError(context);
         widget.continueAction.call();
       });
     };
@@ -271,7 +271,7 @@ class _PasswordInputState extends State<PasswordInput> {
         LoadingOverlay.of(context).hide();
 
         if (!response.success) {
-          displaySnackbar(context, response.toString());
+          snackbarError(context, response.toString());
           return;
         }
 

@@ -1,7 +1,7 @@
-import 'package:devil_scout/components/user_edit_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '/components/navigation_drawer.dart';
+import '/components/user_edit_dialog.dart';
 import '/server/users.dart';
 import '/settings.dart';
 
@@ -75,7 +75,7 @@ class SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Opacity(
-              opacity: settings!.theme == ThemeMode.system ? .7 : 1,
+              opacity: settings!.theme == ThemeMode.system ? .5 : 1,
               child: ListTile(
                 title: const Text('Dark Mode'),
                 trailing: Checkbox(

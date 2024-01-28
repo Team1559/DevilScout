@@ -25,7 +25,7 @@ class ManagementPage extends StatelessWidget {
       drawer: const NavDrawer(),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
           child: Column(
             children: [
               Text(
@@ -75,7 +75,7 @@ class ManagementPage extends StatelessWidget {
                 'Team Roster',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 10.0),
+              const SizedBox(height: 10),
               const RosterPanel(),
             ],
           ),
@@ -232,9 +232,9 @@ class _RosterPanelState extends State<RosterPanel> {
       decoration: BoxDecoration(
         border: Border.all(
           color: Colors.black,
-          width: 2.0,
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(10),
       ),
       height: MediaQuery.of(context).size.height * 0.5,
       child: Column(
@@ -257,8 +257,8 @@ class _RosterPanelState extends State<RosterPanel> {
               shape: MaterialStatePropertyAll(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8.0),
-                    bottomRight: Radius.circular(8.0),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
                   ),
                 ),
               ),

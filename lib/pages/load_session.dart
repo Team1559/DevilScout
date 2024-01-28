@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '/server/session.dart';
+import '/pages/login.dart';
+import '/pages/select_match.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
-import 'login.dart';
-import 'match_scout_select.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class LoadSessionPage extends StatefulWidget {
+  const LoadSessionPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<LoadSessionPage> createState() => _LoadSessionPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _LoadSessionPageState extends State<LoadSessionPage> {
   @override
   void initState() {
     super.initState();
-    loadSessionFromFile().then((session) async {
-      if (!context.mounted) return;
-
-      if (session == null) {
+    loadCachedSession().then((success) {
+      if (!success) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -29,17 +26,15 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      Session.current = session;
-      await Future.wait([
+      Future.wait([
         serverGetCurrentUser(),
         serverGetCurrentTeam(),
-      ]);
-
-      if (!context.mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MatchSelectPage()),
-      );
+      ]).whenComplete(() {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MatchSelectPage()),
+        );
+      });
     });
   }
 

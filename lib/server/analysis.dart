@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
+import '/server/server.dart';
 
 part 'analysis.g.dart';
 

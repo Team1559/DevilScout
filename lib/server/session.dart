@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
+import '/server/server.dart';
 
 part 'session.g.dart';
 
 /// An authorized user session
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class Session {
   /// The current session, generated upon login
   static Session? current;
@@ -37,6 +37,8 @@ class Session {
   /// client code.
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SessionToJson(this);
 }
 
 /// Get the session associated with the supplied session key. Does not require

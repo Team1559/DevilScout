@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/components/navigation_drawer.dart';
+import '/pages/manage.dart';
+import '/pages/scout_match.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
 import '/theme.dart';
-import 'management.dart';
-import 'match_scout.dart';
 
 class MatchSelectPage extends StatefulWidget {
   const MatchSelectPage({super.key});
@@ -58,7 +58,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return SafeArea(
-            minimum: const EdgeInsets.symmetric(horizontal: 16.0),
+            minimum: const EdgeInsets.symmetric(horizontal: 16),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

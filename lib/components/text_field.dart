@@ -32,7 +32,7 @@ class LargeTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 15.0),
+      padding: const EdgeInsets.only(bottom: 15),
       child: TextField(
         style: Theme.of(context).textTheme.labelLarge,
         onChanged: onChanged,
@@ -54,17 +54,40 @@ class LargeTextField extends StatelessWidget {
             ),
           ),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2.0,
-              )),
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 2,
+            ),
+          ),
           fillColor: Theme.of(context).colorScheme.background,
           filled: true,
-          contentPadding: const EdgeInsets.all(22.0),
+          contentPadding: const EdgeInsets.all(22),
           hintText: hintText,
         ),
       ),
     );
+  }
+}
+
+class NumberTextInputFormatter extends TextInputFormatter {
+  final int min;
+  final int max;
+
+  const NumberTextInputFormatter({required this.min, required this.max});
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+
+    int num = int.parse(newValue.text);
+    if (num < min || num > max) {
+      return oldValue;
+    } else if (newValue.text.startsWith('0') && newValue.text.length > 1) {
+      return const TextEditingValue(text: '0');
+    } else {
+      return newValue;
+    }
   }
 }

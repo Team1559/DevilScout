@@ -1,23 +1,23 @@
-import 'package:devil_scout/pages/management.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/components/navigation_drawer.dart';
-import '/pages/drive_team_scout.dart';
+import '/pages/manage.dart';
+import '/pages/scout_drive_team.dart';
 import '/server/events.dart';
 import '/server/session.dart';
 import '/server/teams.dart';
 import '/theme.dart';
 
-class DriveTeamScoutSelectPage extends StatefulWidget {
-  const DriveTeamScoutSelectPage({super.key});
+class DriveTeamSelectPage extends StatefulWidget {
+  const DriveTeamSelectPage({super.key});
 
   @override
-  State<DriveTeamScoutSelectPage> createState() =>
-      DriveTeamScoutSelectPageState();
+  State<DriveTeamSelectPage> createState() =>
+      DriveTeamSelectPageState();
 }
 
-class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
+class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
   static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
 
   bool loaded = false;
@@ -107,7 +107,7 @@ class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
     partnersStr = partnersStr.substring(1, partnersStr.length - 1);
 
     return Opacity(
-      opacity: match.completed ? 0.7 : 1,
+      opacity: match.completed ? 0.5 : 1,
       child: Card(
         child: ListTile(
           leading: Builder(

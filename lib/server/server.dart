@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 
-import 'session.dart';
+import '/server/session.dart';
 
 /// A response from the Devil Scout Server. Responses return in one of three states:
 ///

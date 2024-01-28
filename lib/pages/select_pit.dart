@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '/components/navigation_drawer.dart';
+import '/pages/manage.dart';
+import '/pages/scout_pit.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
-import 'management.dart';
-import 'pit_scout.dart';
 
 class PitSelectPage extends StatefulWidget {
   const PitSelectPage({super.key});
