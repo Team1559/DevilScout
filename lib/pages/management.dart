@@ -2,27 +2,24 @@ import 'package:flutter/material.dart';
 
 import '/components/navigation_drawer.dart';
 import '/components/user_edit_dialog.dart';
+import '/server/teams.dart';
 import '/server/users.dart';
 
-class ManagementPage extends StatefulWidget {
+class ManagementPage extends StatelessWidget {
   const ManagementPage({super.key});
-
-  @override
-  State<ManagementPage> createState() => ManagementPageState();
-}
-
-class ManagementPageState extends State<ManagementPage> {
-  @override
-  void initState() {
-    super.initState();
-    serverGetUsers().whenComplete(() => setState(() {}));
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Management'),
+        title: const Text('Manage'),
+        bottom: PreferredSize(
+          preferredSize: Size.zero,
+          child: Text(
+            Team.current!.name,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
       ),
       drawer: const NavDrawer(),
       body: SafeArea(
@@ -31,34 +28,50 @@ class ManagementPageState extends State<ManagementPage> {
           child: Column(
             children: [
               Text(
-                "Team Roster",
+                'Team Roster',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 10.0),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 2.0,
-                  ),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: _usersPanel(),
-              ),
+              const RosterPanel(),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Column _usersPanel() => Column(
+class RosterPanel extends StatefulWidget {
+  const RosterPanel({super.key});
+
+  @override
+  State<RosterPanel> createState() => _RosterPanelState();
+}
+
+class _RosterPanelState extends State<RosterPanel> {
+  @override
+  void initState() {
+    super.initState();
+    serverGetUsers().whenComplete(() => setState(() {}));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.black,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      height: MediaQuery.of(context).size.height * 0.5,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(4),
               child: Scrollbar(
                 child: ListView.builder(
                   itemCount: User.allUsers.length,
@@ -95,42 +108,41 @@ class ManagementPageState extends State<ManagementPage> {
             label: const Text('Add User'),
           ),
         ],
-      );
+      ),
+    );
+  }
 
   Card _userCard(User user, BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      elevation: 2.0,
-      child: Row(
-        children: [
-          Expanded(
-            child: ListTile(
-              title: Text(user.fullName),
-              subtitle: Text(user.username),
-            ),
-          ),
-          if (!user.isAdmin)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                isDismissible: true,
-                builder: (context) => UserEditDialog(
-                  user: user,
-                  showAdmin: true,
-                ),
-              ).then((user) {
-                setState(() {
-                  if (user == null) {
-                    User.allUsers.remove(user);
-                  }
-                });
-              }),
-            ),
-        ],
+      child: ListTile(
+        title: Text(
+          user.fullName,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        subtitle: Text(
+          user.username,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: user.isAdmin
+              ? null
+              : () => showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    isDismissible: true,
+                    builder: (context) => UserEditDialog(
+                      user: user,
+                      showAdmin: true,
+                    ),
+                  ).then((user) {
+                    setState(() {
+                      if (user == null) {
+                        User.allUsers.remove(user);
+                      }
+                    });
+                  }),
+        ),
       ),
     );
   }

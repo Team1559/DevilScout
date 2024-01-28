@@ -4,7 +4,16 @@ void displaySnackbar(BuildContext context, String message) {
   hideSnackbar(context);
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Center(child: Text(message)),
+      backgroundColor: Theme.of(context).colorScheme.error,
+      content: Center(
+        child: Text(
+          message,
+          style: Theme.of(context)
+              .textTheme
+              .labelLarge!
+              .copyWith(color: Theme.of(context).colorScheme.onError),
+        ),
+      ),
     ),
   );
 }

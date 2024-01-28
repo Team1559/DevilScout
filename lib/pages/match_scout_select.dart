@@ -5,6 +5,7 @@ import '/components/navigation_drawer.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
+import '/theme.dart';
 import 'match_scout.dart';
 
 class MatchSelectPage extends StatefulWidget {
@@ -15,6 +16,8 @@ class MatchSelectPage extends StatefulWidget {
 }
 
 class MatchSelectPageState extends State<MatchSelectPage> {
+  static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
+
   bool loaded = false;
 
   @override
@@ -35,15 +38,16 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Text('Select Match'),
-            Text(
-              Event.currentEvent?.name ?? '',
-              style: Theme.of(context).textTheme.labelSmall,
-            )
-          ],
-        ),
+        title: const Text('Select Match'),
+        bottom: Event.currentEvent == null
+            ? null
+            : PreferredSize(
+                preferredSize: Size.zero,
+                child: Text(
+                  Event.currentEvent!.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
@@ -72,16 +76,16 @@ class MatchSelectPageState extends State<MatchSelectPage> {
               ),
             ),
           );
-        }
-
-        if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
+        } else if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: EventMatch.currentEventSchedule.length,
-          itemBuilder: _matchCard,
+        return Scrollbar(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: EventMatch.currentEventSchedule.length,
+            itemBuilder: _matchCard,
+          ),
         );
       }),
     );
@@ -90,10 +94,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   Widget _matchCard(BuildContext context, int index) {
     EventMatch match = EventMatch.currentEventSchedule[index];
     return Opacity(
-      opacity: match.completed ? 0.7 : 1,
+      opacity: match.completed ? 0.5 : 1,
       child: Card(
         child: ExpansionTile(
-          iconColor: Colors.black,
           leading: Builder(builder: (context) {
             int team = Team.current!.number;
             Color? alliance;
@@ -114,13 +117,16 @@ class MatchSelectPageState extends State<MatchSelectPage> {
               ),
             );
           }),
-          title: Text(match.name),
-          trailing: Text(DateFormat('h:mm a').format(match.time)),
+          title: Text(
+            match.name,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          trailing: Text(timeFormat.format(match.time)),
           children: [
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(4),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
                 child: Table(
                   children: [
                     TableRow(
@@ -174,7 +180,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
         padding: EdgeInsets.fromLTRB(
             leftPadding, topPadding, rightPadding, bottomPadding),
         child: Container(
-          color: isRed ? Colors.red : Colors.blue,
+          color: isRed ? frcRed : frcBlue,
           padding: const EdgeInsets.symmetric(vertical: 8),
           alignment: Alignment.center,
           child: Text('$team'),
@@ -182,12 +188,12 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       ),
       onTap: () async {
         if (match.completed) {
-          bool cancel = await showAdaptiveDialog(
+          bool cancel = await showDialog(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text('Match Already Completed'),
               content: const Text(
-                'Are you sure you want to scout a completed match?',
+                'Are you sure you want to scout this match?',
               ),
               actions: [
                 TextButton(

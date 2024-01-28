@@ -23,9 +23,17 @@ class MainAppState extends State<MainApp> {
     super.initState();
     getSettings().then((value) => setState(() {
           settings = value;
-          settings!.addListener(() => setState(() {}));
+          settings!.addListener(_listener);
         }));
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    settings?.removeListener(_listener);
+  }
+
+  void _listener() => setState(() {});
 
   @override
   Widget build(BuildContext context) {

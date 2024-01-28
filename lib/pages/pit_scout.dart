@@ -10,7 +10,7 @@ import '/server/server.dart';
 import '/server/submissions.dart';
 
 class PitScoutPage extends StatefulWidget {
-  final int team;
+  final FrcTeam team;
 
   const PitScoutPage({super.key, required this.team});
 
@@ -33,20 +33,18 @@ class _PitScoutPageState extends State<PitScoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Team ${widget.team}'),
-        leadingWidth: 120,
-        leading: Builder(builder: (context) {
-          return Row(children: [
-            IconButton(
-              onPressed: Navigator.of(context).maybePop,
-              icon: const Icon(Icons.arrow_back),
-            ),
-            IconButton(
-              onPressed: Scaffold.of(context).openDrawer,
-              icon: const Icon(Icons.menu),
-            ),
-          ]);
-        }),
+        title: Text('Team ${widget.team.number}'),
+        bottom: PreferredSize(
+          preferredSize: Size.zero,
+          child: Text(
+            widget.team.name,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: Navigator.of(context).maybePop,
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       drawer: const NavDrawer(),
       body: LoadingOverlay(
@@ -58,7 +56,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
 
               ServerResponse<void> response = await serverSubmitPitData(
                 eventKey: Event.currentEvent!.key,
-                team: widget.team,
+                team: widget.team.number,
                 data: data,
               );
               if (!context.mounted) return;

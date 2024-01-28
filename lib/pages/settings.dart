@@ -21,18 +21,18 @@ class SettingsPageState extends State<SettingsPage> {
     serverGetCurrentUser();
     getSettings().then((value) {
       setState(() => settings = value);
-      settings!.addListener(settingsListener);
+      settings!.addListener(_listener);
     });
   }
 
-  void settingsListener() {
+  void _listener() {
     setState(() {});
   }
 
   @override
   void dispose() {
     super.dispose();
-    settings?.removeListener(settingsListener);
+    settings?.removeListener(_listener);
   }
 
   @override

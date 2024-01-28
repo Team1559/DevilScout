@@ -34,26 +34,18 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(children: [
-          Text('Team ${widget.team}'),
-          Text(
+        title: Text('Team ${widget.team}'),
+        bottom: PreferredSize(
+          preferredSize: Size.zero,
+          child: Text(
             widget.match.name,
-            style: Theme.of(context).textTheme.labelSmall,
-          )
-        ]),
-        leadingWidth: 120,
-        leading: Builder(builder: (context) {
-          return Row(children: [
-            IconButton(
-              onPressed: Navigator.of(context).maybePop,
-              icon: const Icon(Icons.arrow_back),
-            ),
-            IconButton(
-              onPressed: Scaffold.of(context).openDrawer,
-              icon: const Icon(Icons.menu),
-            ),
-          ]);
-        }),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+        leading: IconButton(
+          onPressed: Navigator.of(context).maybePop,
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       drawer: const NavDrawer(),
       body: LoadingOverlay(

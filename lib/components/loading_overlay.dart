@@ -19,15 +19,11 @@ class LoadingOverlayState extends State<LoadingOverlay> {
   late bool _loading = widget.showByDefault;
 
   void show() {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
   }
 
   void hide() {
-    setState(() {
-      _loading = false;
-    });
+    setState(() => _loading = false);
   }
 
   @override
@@ -35,18 +31,23 @@ class LoadingOverlayState extends State<LoadingOverlay> {
     return Stack(
       children: [
         widget.child,
-        if (_loading)
-          const Opacity(
-            opacity: 0.5,
-            child: ModalBarrier(
-              dismissible: false,
-              color: Colors.black,
-            ),
+        Visibility(
+          visible: _loading,
+          child: const Stack(
+            children: [
+              Opacity(
+                opacity: 0.5,
+                child: ModalBarrier(
+                  dismissible: false,
+                  color: Colors.black,
+                ),
+              ),
+              Center(
+                child: CircularProgressIndicator(),
+              ),
+            ],
           ),
-        if (_loading)
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
+        ),
       ],
     );
   }

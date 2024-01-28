@@ -6,6 +6,7 @@ import '/pages/drive_team_scout.dart';
 import '/server/events.dart';
 import '/server/session.dart';
 import '/server/teams.dart';
+import '/theme.dart';
 
 class DriveTeamScoutSelectPage extends StatefulWidget {
   const DriveTeamScoutSelectPage({super.key});
@@ -15,8 +16,11 @@ class DriveTeamScoutSelectPage extends StatefulWidget {
       DriveTeamScoutSelectPageState();
 }
 
-class DriveTeamScoutSelectPageState
-    extends State<DriveTeamScoutSelectPage> {
+class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
+  static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
+
+  bool loaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +28,7 @@ class DriveTeamScoutSelectPageState
     Future.wait([
       serverGetCurrentEvent(),
       serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() {}));
+    ]).whenComplete(() => setState(() => loaded = true));
 
     // Preload list of teams
     serverGetCurrentEventTeamList();
@@ -34,15 +38,16 @@ class DriveTeamScoutSelectPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Text('Select Match'),
-            Text(
-              Event.currentEvent?.name ?? '',
-              style: Theme.of(context).textTheme.labelSmall,
-            )
-          ],
-        ),
+        title: const Text('Select Match'),
+        bottom: Event.currentEvent == null
+            ? null
+            : PreferredSize(
+                preferredSize: Size.zero,
+                child: Text(
+                  Event.currentEvent!.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
@@ -64,10 +69,16 @@ class DriveTeamScoutSelectPageState
           );
         }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: EventMatch.currentTeamSchedule.length,
-          itemBuilder: _matchCard,
+        if (EventMatch.currentTeamSchedule.isEmpty && !loaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Scrollbar(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: EventMatch.currentTeamSchedule.length,
+            itemBuilder: _matchCard,
+          ),
         );
       }),
     );
@@ -75,10 +86,34 @@ class DriveTeamScoutSelectPageState
 
   Widget _matchCard(BuildContext context, int index) {
     EventMatch match = EventMatch.currentTeamSchedule[index];
+
+    List<int> partners = List.of(
+        match.blue.contains(Team.current!.number) ? match.blue : match.red)
+      ..remove(Team.current!.number)
+      ..sort();
+    String partnersStr = partners.toString();
+    partnersStr = partnersStr.substring(1, partnersStr.length - 1);
+
     return Opacity(
       opacity: match.completed ? 0.7 : 1,
       child: Card(
         child: ListTile(
+          leading: Builder(
+            builder: (context) => Icon(
+              Icons.star,
+              color:
+                  match.blue.contains(Session.current!.team) ? frcBlue : frcRed,
+            ),
+          ),
+          title: Text(
+            match.name,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          subtitle: Text(
+            partnersStr,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          trailing: Text(timeFormat.format(match.time)),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -87,17 +122,6 @@ class DriveTeamScoutSelectPageState
               ),
             ),
           ),
-          iconColor: Colors.black,
-          leading: Builder(
-            builder: (context) => Icon(
-              Icons.star,
-              color: match.blue.contains(Session.current!.team)
-                  ? Colors.blue
-                  : Colors.red,
-            ),
-          ),
-          title: Text(match.name),
-          trailing: Text(DateFormat('h:mm a').format(match.time)),
         ),
       ),
     );

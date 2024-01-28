@@ -30,15 +30,16 @@ class PitSelectPageState extends State<PitSelectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Text('Select Team'),
-            Text(
-              Event.currentEvent?.name ?? '',
-              style: Theme.of(context).textTheme.labelSmall,
-            )
-          ],
-        ),
+        title: const Text('Select Team'),
+        bottom: Event.currentEvent == null
+            ? null
+            : PreferredSize(
+                preferredSize: Size.zero,
+                child: Text(
+                  Event.currentEvent!.name,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
       ),
       drawer: const NavDrawer(),
       body: Builder(builder: (context) {
@@ -70,10 +71,12 @@ class PitSelectPageState extends State<PitSelectPage> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: FrcTeam.currentEventTeams.length,
-          itemBuilder: _teamCard,
+        return Scrollbar(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: FrcTeam.currentEventTeams.length,
+            itemBuilder: _teamCard,
+          ),
         );
       }),
     );
@@ -83,15 +86,28 @@ class PitSelectPageState extends State<PitSelectPage> {
     FrcTeam team = FrcTeam.currentEventTeams[index];
     return Card(
       child: ListTile(
-        iconColor: Colors.black,
-        title: Text(team.name),
-        leading: Text('${team.number}'),
+        trailing: Text(
+          '${team.number}',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        title: Text(
+          team.name,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.fade,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        subtitle: Text(
+          team.location,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.fade,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PitScoutPage(
-              team: team.number,
-            ),
+            builder: (context) => PitScoutPage(team: team),
           ),
         ),
       ),

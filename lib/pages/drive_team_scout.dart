@@ -45,19 +45,10 @@ class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.match.name),
-        leadingWidth: 120,
-        leading: Builder(builder: (context) {
-          return Row(children: [
-            IconButton(
-              onPressed: Navigator.of(context).maybePop,
-              icon: const Icon(Icons.arrow_back),
-            ),
-            IconButton(
-              onPressed: Scaffold.of(context).openDrawer,
-              icon: const Icon(Icons.menu),
-            ),
-          ]);
-        }),
+        leading: IconButton(
+          onPressed: Navigator.of(context).maybePop,
+          icon: const Icon(Icons.arrow_back),
+        ),
       ),
       drawer: const NavDrawer(),
       body: LoadingOverlay(

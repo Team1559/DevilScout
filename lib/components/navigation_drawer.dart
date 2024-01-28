@@ -18,32 +18,38 @@ class NavDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       width: double.infinity,
-      child: SafeArea(
-        minimum: const EdgeInsets.symmetric(vertical: 32, horizontal: 2.0),
-        child: Column(children: [
-          Stack(children: [
-            Center(
-              child: Text(
-                'DevilScout',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: Navigator.of(context).pop,
-                icon: const Icon(Icons.close),
-              ),
-            ),
-          ]),
-          Column(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          title: Text(
+            'Devil Scout',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: Navigator.of(context).pop,
+          ),
+        ),
+        body: SafeArea(
+          minimum: const EdgeInsets.symmetric(vertical: 16, horizontal: 2.0),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _header(context, 'Scout'),
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Scout',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ),
               ListTile(
-                title: const Text('Matches'),
+                title: Text(
+                  'Matches',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 leading: const Icon(Icons.event),
-                onTap: () => pushIfInactive<MatchSelectPageState>(
+                onTap: () => pushStatefulIfInactive<MatchSelectPageState>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const MatchSelectPage(),
@@ -51,9 +57,12 @@ class NavDrawer extends StatelessWidget {
                 ),
               ),
               ListTile(
-                title: const Text('Pits'),
+                title: Text(
+                  'Pits',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 leading: const Icon(Icons.assignment),
-                onTap: () => pushIfInactive<PitSelectPageState>(
+                onTap: () => pushStatefulIfInactive<PitSelectPageState>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const PitSelectPage(),
@@ -61,90 +70,120 @@ class NavDrawer extends StatelessWidget {
                 ),
               ),
               ListTile(
-                title: const Text('Drive Team'),
+                title: Text(
+                  'Drive Team',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 leading: const Icon(Icons.sports_esports),
-                onTap: () => pushIfInactive<DriveTeamScoutSelectPageState>(
+                onTap: () =>
+                    pushStatefulIfInactive<DriveTeamScoutSelectPageState>(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const DriveTeamScoutSelectPage(),
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _header(context, 'Analyze'),
+              const SizedBox(height: 20),
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Analyze',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ),
               ListTile(
-                title: const Text('Teams'),
+                title: Text(
+                  'Teams',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 leading: const Icon(Icons.query_stats),
                 onTap: () {},
               ),
-            ],
-          ),
-          const Spacer(),
-          if (User.current!.isAdmin)
-            ListTile(
-              title: Text('Manage Team ${Team.current!.number}'),
-              leading: const Icon(Icons.manage_accounts),
-              onTap: () => pushIfInactive<ManagementPageState>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ManagementPage(),
-                ),
-              ),
-            ),
-          Text(
-            User.current!.fullName,
-            style: Theme.of(context).textTheme.headlineLarge,
-          ),
-          Text(
-            Team.current!.name,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FilledButton.icon(
-                icon: const Icon(Icons.settings),
-                label: const Text('Settings'),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.grey[700]),
-                ),
-                onPressed: () => pushIfInactive<SettingsPageState>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SettingsPage(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              FilledButton.icon(
-                icon: const Icon(Icons.logout),
-                label: const Text('Log Out'),
-                style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.red),
-                ),
-                onPressed: () {
-                  serverLogout().whenComplete(saveSession);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
+              if (User.current!.isAdmin)
+                Column(
+                  children: [
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'Admin',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                     ),
-                  );
-                },
-              ),
+                    ListTile(
+                      title: Text(
+                        'Manage Team ${Team.current!.number}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      leading: const Icon(Icons.manage_accounts),
+                      onTap: () => pushStatelessIfInactive<ManagementPage>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ManagementPage(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              const Spacer(),
+              Column(
+                children: [
+                  Text(
+                    User.current!.fullName,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  Text(
+                    Team.current!.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FilledButton.icon(
+                        icon: const Icon(Icons.settings),
+                        label: const Text('Settings'),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Colors.grey[700]),
+                        ),
+                        onPressed: () =>
+                            pushStatefulIfInactive<SettingsPageState>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.logout),
+                        label: const Text('Log Out'),
+                        style: const ButtonStyle(
+                          backgroundColor: MaterialStatePropertyAll(Colors.red),
+                        ),
+                        onPressed: () {
+                          serverLogout().whenComplete(saveSession);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              )
             ],
           ),
-        ]),
+        ),
       ),
     );
   }
 
-  void pushIfInactive<STATE extends State>(
+  void pushStatefulIfInactive<STATE extends State>(
       BuildContext context, MaterialPageRoute<STATE> route) {
     STATE? parent = context.findAncestorStateOfType<STATE>();
     if (parent == null) {
@@ -154,12 +193,13 @@ class NavDrawer extends StatelessWidget {
     }
   }
 
-  Widget _header(BuildContext context, String text) => Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-      );
+  void pushStatelessIfInactive<WIDGET extends Widget>(
+      BuildContext context, MaterialPageRoute<WIDGET> route) {
+    WIDGET? parent = context.findAncestorWidgetOfExactType<WIDGET>();
+    if (parent == null) {
+      Navigator.pushReplacement(context, route);
+    } else {
+      Navigator.pop(context);
+    }
+  }
 }
