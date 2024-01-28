@@ -1,12 +1,16 @@
+import 'package:devil_scout/components/loading_overlay.dart';
+import 'package:devil_scout/components/snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '/server/questions.dart';
+import '/server/server.dart';
 import 'large_text_field.dart';
 
 class QuestionDisplay extends StatefulWidget {
   final List<QuestionPage> pages;
-  final void Function(Map<String, Map<String, dynamic>>) submitAction;
+  final Future<ServerResponse<void>> Function(Map<String, Map<String, dynamic>>)
+      submitAction;
 
   const QuestionDisplay({
     super.key,
@@ -22,63 +26,155 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   final PageController controller = PageController();
   late final Map<String, Map<String, dynamic>> responses;
 
+  int currentPage = 0;
+
   @override
   void initState() {
     super.initState();
     responses = {};
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: LoadingOverlay(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: PageView(
+                controller: controller,
+                onPageChanged: (page) => setState(() => currentPage = page),
+                children: List.generate(widget.pages.length, (index) {
+                  QuestionPage page = widget.pages[index];
+                  return _QuestionDisplayPage(
+                    sectionTitle: page.title,
+                    questions: page.questions,
+                    responses: responses.putIfAbsent(page.key, () => {}),
+                    previousPage: index == 0 ? null : previousPage,
+                    nextPage:
+                        index == widget.pages.length - 1 ? null : nextPage,
+                    setState: setState,
+                  );
+                }),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                FilledButton(
+                  onPressed: onFirstPage() ? null : previousPage,
+                  child: const Text('Previous'),
+                ),
+                const SizedBox(width: 16),
+                FilledButton(
+                  onPressed: submitButtonAction(),
+                  child:
+                      onLastPage() ? const Text('Submit') : const Text('Next'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void Function()? submitButtonAction() {
+    if (!onLastPage()) {
+      return nextPage;
+    } else if (!_allQuestionsAnswered()) {
+      return null;
+    }
+
+    return () => showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Are you sure?'),
+            content: const Text(
+              "You won't be able to edit your response after submitting.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                child: const Text('Submit'),
+                onPressed: () {
+                  widget.submitAction.call(responses).then((response) {
+                    if (!context.mounted) return;
+
+                    Navigator.pop(context);
+
+                    if (!response.success) {
+                      displaySnackbar(
+                        context,
+                        response.message ?? 'An error occured',
+                      );
+                      return;
+                    }
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Success!'),
+                        content: const Text(
+                          'Your submission was uploaded to the server, and will be processed within a few minutes.',
+                        ),
+                        actions: [
+                          TextButton(
+                            child: const Text('Return'),
+                            onPressed: () {
+                              Navigator.of(context)
+                                ..pop()
+                                ..pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+                },
+              ),
+            ],
+          ),
+        );
+  }
+
   void nextPage() {
-    controller.nextPage(
+    if (!onLastPage()) {
+      setState(() {
+        currentPage++;
+        gotoPage();
+      });
+    }
+  }
+
+  void previousPage() {
+    if (!onFirstPage()) {
+      setState(() {
+        currentPage--;
+        gotoPage();
+      });
+    }
+  }
+
+  void gotoPage() {
+    controller.animateToPage(
+      currentPage,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeIn,
     );
   }
 
-  void previousPage() {
-    if (controller.page! > 0) {
-      controller.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
-    }
+  bool onFirstPage() {
+    return currentPage == 0;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        PageView(
-          controller: controller,
-          children: List.generate(widget.pages.length, (index) {
-            String name = widget.pages[index].title;
-            List<QuestionConfig>? questions = widget.pages[index].questions;
-
-            return _QuestionDisplayPage(
-              name: name,
-              questions: questions,
-              responses:
-                  responses.putIfAbsent(widget.pages[index].key, () => {}),
-              previousPage: index == 0 ? null : previousPage,
-              nextPage: index == widget.pages.length - 1 ? null : nextPage,
-              setState: setState,
-            );
-          }),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-            child: FilledButton(
-              onPressed: _allQuestionsAnswered()
-                  ? () => widget.submitAction.call(responses)
-                  : null,
-              child: const Text('Submit'),
-            ),
-          ),
-        ),
-      ],
-    );
+  bool onLastPage() {
+    return currentPage == widget.pages.length - 1;
   }
 
   bool _allQuestionsAnswered() {
@@ -99,7 +195,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
 }
 
 class _QuestionDisplayPage extends StatefulWidget {
-  final String name;
+  final String sectionTitle;
   final List<QuestionConfig> questions;
   final Map<String, dynamic> responses;
 
@@ -108,7 +204,7 @@ class _QuestionDisplayPage extends StatefulWidget {
   final void Function(void Function()) setState;
 
   const _QuestionDisplayPage({
-    required this.name,
+    required this.sectionTitle,
     required this.questions,
     required this.responses,
     required this.previousPage,
@@ -127,65 +223,45 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: widget.previousPage,
-                icon: const Icon(Icons.navigate_before),
-              ),
-              const Spacer(),
-              Text(
-                widget.name,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: widget.nextPage,
-                icon: const Icon(Icons.navigate_next),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: ListView.builder(
-              itemCount: widget.questions.length,
-              itemBuilder: question,
+    super.build(context); // required by KeepAlive
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: ListView(
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              widget.sectionTitle,
+              style: Theme.of(context).textTheme.headlineLarge,
+              textAlign: TextAlign.center,
             ),
-          ),
+            for (int i = 0; i < widget.questions.length; i++)
+              question(context, i),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget question(BuildContext context, int index) {
     QuestionConfig question = widget.questions[index];
-    return Center(
-      child: Column(
-        children: [
-          Text(
-            question.prompt,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          QuestionWidget.of(
-            config: question,
-            setState: (void Function() callback) {
-              setState(callback);
-              widget.setState.call(() {});
-            },
-            valueSetter: (response) =>
-                widget.responses[question.key] = response,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Text(
+          question.prompt,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        QuestionWidget.of(
+          config: question,
+          setState: (void Function() callback) {
+            setState(callback);
+            widget.setState.call(() {});
+          },
+          valueSetter: (response) => widget.responses[question.key] = response,
+        ),
+      ],
     );
   }
 }
