@@ -4,6 +4,7 @@ import '/components/navigation_drawer.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
+import 'management.dart';
 import 'pit_scout.dart';
 
 class PitSelectPage extends StatefulWidget {
@@ -54,12 +55,19 @@ class PitSelectPageState extends State<PitSelectPage> {
               children: [
                 Text(
                   'No event set',
-                  style: Theme.of(context).textTheme.displayMedium,
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 if (User.current!.isAdmin)
                   FilledButton(
-                    onPressed: () {},
                     child: const Text('Go to team management'),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ManagementPage(),
+                        ),
+                      );
+                    },
                   )
                 else
                   Text(

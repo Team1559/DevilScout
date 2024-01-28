@@ -1,3 +1,4 @@
+import 'package:devil_scout/pages/management.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -62,11 +63,18 @@ class DriveTeamScoutSelectPageState extends State<DriveTeamScoutSelectPage> {
               children: [
                 Text(
                   'No event set',
-                  style: Theme.of(context).textTheme.displayMedium,
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 FilledButton(
-                  onPressed: () {},
                   child: const Text('Go to team management'),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ManagementPage(),
+                      ),
+                    );
+                  },
                 )
               ],
             ),

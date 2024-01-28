@@ -6,6 +6,7 @@ import '/server/events.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
 import '/theme.dart';
+import 'management.dart';
 import 'match_scout.dart';
 
 class MatchSelectPage extends StatefulWidget {
@@ -64,12 +65,19 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                 children: [
                   Text(
                     'No event set',
-                    style: Theme.of(context).textTheme.displayMedium,
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   if (User.current!.isAdmin)
                     FilledButton(
-                      onPressed: () {},
                       child: const Text('Go to team management'),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ManagementPage(),
+                          ),
+                        );
+                      },
                     )
                   else
                     Text(

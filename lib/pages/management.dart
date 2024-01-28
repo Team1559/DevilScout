@@ -133,47 +133,9 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
         controller: scrollController,
         shrinkWrap: true,
         itemCount: results.length,
-        itemBuilder: (context, index) {
-          Event event = results[index];
-          return Card(
-            child: ListTile(
-              title: Text(event.name),
-              subtitle: Text(event.location),
-              onTap: () => showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Select event'),
-                  content: Text(
-                    'Your entire team will be switched to ${event.name}.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: Navigator.of(context).pop,
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        serverEditCurrentTeam(eventKey: event.key)
-                            .then((response) {
-                          if (!context.mounted) return;
-
-                          if (!response.success) {
-                            // error message
-                            return;
-                          }
-
-                          Navigator.pop(context);
-                          Navigator.pop(context, event);
-                        });
-                      },
-                      child: const Text('Select'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+        itemBuilder: (context, index) => EventCard(
+          event: results[index],
+        ),
       ),
     );
   }
@@ -200,6 +162,53 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
     return event.name.toLowerCase().contains(searchText) ||
         event.key.toLowerCase().contains(searchText) ||
         event.location.toLowerCase().contains(searchText);
+  }
+}
+
+class EventCard extends StatelessWidget {
+  final Event event;
+
+  const EventCard({super.key, required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        title: Text(event.name),
+        subtitle: Text(event.location),
+        onTap: () => showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Select event'),
+            content: Text(
+              'Your entire team will be switched to ${event.name}.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  serverEditCurrentTeam(eventKey: event.key).then((response) {
+                    if (!context.mounted) return;
+
+                    if (!response.success) {
+                      // error message
+                      return;
+                    }
+
+                    Navigator.pop(context);
+                    Navigator.pop(context, event);
+                  });
+                },
+                child: const Text('Select'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -243,7 +252,7 @@ class _RosterPanelState extends State<RosterPanel> {
               ),
             ),
           ),
-          FilledButton.icon(
+          FilledButton(
             style: const ButtonStyle(
               shape: MaterialStatePropertyAll(
                 RoundedRectangleBorder(
@@ -260,14 +269,13 @@ class _RosterPanelState extends State<RosterPanel> {
               isDismissible: true,
               builder: (context) => const UserEditDialog(showAdmin: false),
             ).then((user) {
-              setState(() {
-                if (user != null) {
+              if (user != null) {
+                setState(() {
                   User.allUsers.add(user);
-                }
-              });
+                });
+              }
             }),
-            icon: const Icon(Icons.add),
-            label: const Text('Add User'),
+            child: const Icon(Icons.add),
           ),
         ],
       ),
@@ -298,11 +306,11 @@ class _RosterPanelState extends State<RosterPanel> {
                       showAdmin: true,
                     ),
                   ).then((user) {
-                    setState(() {
-                      if (user == null) {
+                    if (user == null) {
+                      setState(() {
                         User.allUsers.remove(user);
-                      }
-                    });
+                      });
+                    }
                   }),
         ),
       ),
