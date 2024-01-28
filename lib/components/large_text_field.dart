@@ -12,6 +12,7 @@ class LargeTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
   final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
 
   const LargeTextField({
     super.key,
@@ -25,6 +26,7 @@ class LargeTextField extends StatelessWidget {
     this.inputFormatters,
     this.keyboardType,
     this.onChanged,
+    this.onSubmitted,
   });
 
   @override
@@ -37,11 +39,13 @@ class LargeTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        enableInteractiveSelection: !obscureText,
         autofocus: autofocus,
         focusNode: focusNode,
         textInputAction: textInputAction,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
+        onSubmitted: onSubmitted,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

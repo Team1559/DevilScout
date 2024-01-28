@@ -5,7 +5,6 @@ import '/components/large_text_field.dart';
 import '/components/loading_overlay.dart';
 import '/components/snackbar.dart';
 import '/server/auth.dart';
-import '/server/server.dart';
 import '/server/session.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
@@ -51,11 +50,17 @@ class _LoginFields extends StatefulWidget {
 }
 
 class _LoginFieldsState extends State<_LoginFields> {
+  static const Duration animationDuration = Duration(milliseconds: 175);
+
   final _teamNumber = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
 
   bool _showingPassword = false;
+
+  FocusNode usernameFocus = FocusNode();
+  FocusNode teamNumberFocus = FocusNode();
+  FocusNode passwordFocus = FocusNode();
 
   @override
   void initState() {
@@ -73,7 +78,7 @@ class _LoginFieldsState extends State<_LoginFields> {
     return SizedBox(
       height: 240,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 175),
+        duration: animationDuration,
         transitionBuilder: (child, animation) => SlideTransition(
           position: Tween(
             begin: Offset(child is PasswordInput ? 2 : -2, 0),
@@ -81,50 +86,64 @@ class _LoginFieldsState extends State<_LoginFields> {
           ).animate(animation),
           child: child,
         ),
-        child: _showingPassword
-            ? PasswordInput(
-                username: _username.text,
-                teamNum: int.parse(_teamNumber.text),
-                passwordController: _password,
-                previousAction: () => setState(() => _showingPassword = false),
-                loginAction: (auth) {
-                  Session.current = auth.session;
-                  Team.current = auth.team;
-                  User.current = auth.user;
-                  saveSession();
-
-                  hideSnackbar(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MatchSelectPage()),
-                  );
-                },
-              )
-            : UsernameInput(
-                usernameController: _username,
-                teamNumController: _teamNumber,
-                continueAction: () {
-                  setState(() {
-                    _password.clear();
-                    _showingPassword = true;
-                  });
-                },
-              ),
+        child: visibleFields(context),
       ),
     );
+  }
+
+  Widget visibleFields(BuildContext context) {
+    if (!_showingPassword) {
+      return UsernameInput(
+        usernameController: _username,
+        teamNumController: _teamNumber,
+        usernameFocusNode: usernameFocus,
+        teamNumberFocusNode: teamNumberFocus,
+        continueAction: () => setState(() {
+          _showingPassword = true;
+          passwordFocus.requestFocus();
+        }),
+      );
+    } else {
+      return PasswordInput(
+        username: _username.text,
+        teamNum: int.parse(_teamNumber.text),
+        passwordController: _password,
+        focusNode: usernameFocus,
+        previousAction: () => setState(() {
+          _showingPassword = false;
+          teamNumberFocus.requestFocus();
+          Future.delayed(animationDuration, _password.clear);
+        }),
+        loginAction: (auth) {
+          Session.current = auth.session;
+          Team.current = auth.team;
+          User.current = auth.user;
+          saveSession();
+
+          hideSnackbar(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MatchSelectPage()),
+          );
+        },
+      );
+    }
   }
 }
 
 class UsernameInput extends StatefulWidget {
   final TextEditingController usernameController;
   final TextEditingController teamNumController;
-  final void Function()? continueAction;
+  final FocusNode usernameFocusNode;
+  final FocusNode teamNumberFocusNode;
+  final void Function() continueAction;
 
   const UsernameInput({
     super.key,
     required this.usernameController,
     required this.teamNumController,
+    required this.usernameFocusNode,
+    required this.teamNumberFocusNode,
     required this.continueAction,
   });
 
@@ -145,6 +164,8 @@ class _UsernameInputState extends State<UsernameInput> {
             LengthLimitingTextInputFormatter(32),
           ],
           textInputAction: TextInputAction.next,
+          autofocus: true,
+          focusNode: widget.usernameFocusNode,
         ),
         LargeTextField(
           controller: widget.teamNumController,
@@ -154,32 +175,38 @@ class _UsernameInputState extends State<UsernameInput> {
             FilteringTextInputFormatter.digitsOnly,
           ],
           keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.continueAction,
+          onSubmitted: tryLogin(),
+          focusNode: widget.teamNumberFocusNode,
         ),
         FilledButton(
-          onPressed: widget.usernameController.text.isNotEmpty &&
-                  widget.teamNumController.text.isNotEmpty
-              ? () async {
-                  ServerResponse<void> response = await serverLogin(
-                    team: int.parse(widget.teamNumController.text),
-                    username: widget.usernameController.text,
-                  );
-                  if (!context.mounted) return;
-
-                  if (!response.success) {
-                    displaySnackbar(context, response.toString());
-                    return;
-                  }
-
-                  hideSnackbar(context);
-                  setState(() {
-                    widget.continueAction?.call();
-                  });
-                }
-              : null,
+          onPressed: tryLogin(),
           child: const Text('Next'),
         ),
       ],
     );
+  }
+
+  void Function([String?])? tryLogin() {
+    if (widget.usernameController.text.isEmpty ||
+        widget.teamNumController.text.isEmpty) return null;
+
+    return ([String? _]) {
+      serverLogin(
+        team: int.parse(widget.teamNumController.text),
+        username: widget.usernameController.text,
+      ).then((response) {
+        if (!context.mounted) return;
+
+        if (!response.success) {
+          displaySnackbar(context, response.toString());
+          return;
+        }
+
+        hideSnackbar(context);
+        widget.continueAction.call();
+      });
+    };
   }
 }
 
@@ -187,6 +214,7 @@ class PasswordInput extends StatefulWidget {
   final String username;
   final int teamNum;
   final TextEditingController passwordController;
+  final FocusNode focusNode;
   final void Function() previousAction;
   final void Function(AuthResponse auth) loginAction;
 
@@ -195,6 +223,7 @@ class PasswordInput extends StatefulWidget {
     required this.username,
     required this.teamNum,
     required this.passwordController,
+    required this.focusNode,
     required this.previousAction,
     required this.loginAction,
   });
@@ -214,27 +243,12 @@ class _PasswordInputState extends State<PasswordInput> {
           hintText: 'Password',
           obscureText: true,
           autofocus: true,
+          focusNode: widget.focusNode,
+          textInputAction: TextInputAction.done,
+          onSubmitted: tryAuth(context),
         ),
         FilledButton(
-          onPressed: widget.passwordController.text.isEmpty
-              ? null
-              : () {
-                  LoadingOverlay.of(context).show();
-
-                  serverAuthenticate(
-                    password: widget.passwordController.text,
-                  ).then((response) {
-                    LoadingOverlay.of(context).hide();
-
-                    if (!response.success) {
-                      displaySnackbar(context, response.toString());
-                      return;
-                    }
-
-                    AuthResponse auth = response.value!;
-                    widget.loginAction.call(auth);
-                  });
-                },
+          onPressed: tryAuth(context),
           child: const Text('Log In'),
         ),
         TextButton(
@@ -243,5 +257,27 @@ class _PasswordInputState extends State<PasswordInput> {
         ),
       ],
     );
+  }
+
+  void Function([String?])? tryAuth(BuildContext context) {
+    if (widget.passwordController.text.isEmpty) return null;
+
+    return ([String? _]) {
+      LoadingOverlay.of(context).show();
+
+      serverAuthenticate(
+        password: widget.passwordController.text,
+      ).then((response) {
+        LoadingOverlay.of(context).hide();
+
+        if (!response.success) {
+          displaySnackbar(context, response.toString());
+          return;
+        }
+
+        AuthResponse auth = response.value!;
+        widget.loginAction.call(auth);
+      });
+    };
   }
 }
