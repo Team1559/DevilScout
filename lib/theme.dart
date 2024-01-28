@@ -58,21 +58,6 @@ final lightTheme = ThemeData(
       ),
     ),
   ),
-  iconButtonTheme: const IconButtonThemeData(
-    style: ButtonStyle(
-      minimumSize: MaterialStatePropertyAll(
-        Size(48.0, 48.0),
-      ),
-      maximumSize: MaterialStatePropertyAll(
-        Size(double.infinity, 48.0),
-      ),
-      shape: MaterialStatePropertyAll(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-      ),
-    ),
-  ),
   dividerColor: Colors.transparent,
 );
 

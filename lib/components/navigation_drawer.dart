@@ -183,7 +183,10 @@ class NavDrawer extends StatelessWidget {
                                 style: Theme.of(context)
                                     .textTheme
                                     .labelLarge
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
                               ),
                             ),
                           ),
@@ -202,22 +205,31 @@ class NavDrawer extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 80.0,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.settings,
+                        IconButton(
+                          icon: const Icon(
+                            Icons.settings,
+                          ),
+                          style: ButtonStyle(
+                            minimumSize: const MaterialStatePropertyAll(
+                              Size(80.0, 48.0),
                             ),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Theme.of(context).colorScheme.surface),
+                            maximumSize: const MaterialStatePropertyAll(
+                              Size(double.infinity, 48.0),
                             ),
-                            onPressed: () =>
-                                pushStatefulIfInactive<SettingsPageState>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsPage(),
+                            shape: const MaterialStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
                               ),
+                            ),
+                            backgroundColor: MaterialStatePropertyAll(
+                                Theme.of(context).colorScheme.surface),
+                          ),
+                          onPressed: () =>
+                              pushStatefulIfInactive<SettingsPageState>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsPage(),
                             ),
                           ),
                         ),
