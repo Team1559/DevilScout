@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/components/menu_scaffold.dart';
-import '/pages/manage.dart';
+import '/components/no_event_set.dart';
 import '/pages/scout_match.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
-import '/server/users.dart';
 import '/theme.dart';
 
 class MatchSelectPage extends StatefulWidget {
@@ -16,17 +15,8 @@ class MatchSelectPage extends StatefulWidget {
   State<MatchSelectPage> createState() => MatchSelectPageState();
 }
 
-class MatchSelectPageState extends State<MatchSelectPage>
-    with SingleTickerProviderStateMixin {
-  static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
-
-  late final AnimationController drawerAnimation = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 500),
-  );
-  double iconAnimationPosition = 0;
-
-  bool loaded = false;
+class MatchSelectPageState extends State<MatchSelectPage> {
+  bool _loaded = false;
 
   @override
   void initState() {
@@ -36,7 +26,7 @@ class MatchSelectPageState extends State<MatchSelectPage>
     Future.wait([
       serverGetCurrentEvent(),
       serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() => loaded = true));
+    ]).whenComplete(() => setState(() => _loaded = true));
 
     // Preload the list of teams
     serverGetCurrentEventTeamList();
@@ -50,38 +40,8 @@ class MatchSelectPageState extends State<MatchSelectPage>
       body: Builder(
         builder: (context) {
           if (!Team.current!.hasEventKey) {
-            return SafeArea(
-              minimum: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'No event set',
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    if (User.current!.isAdmin)
-                      FilledButton(
-                        child: const Text('Go to team management'),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ManagementPage(),
-                            ),
-                          );
-                        },
-                      )
-                    else
-                      Text(
-                        'Ask your team admins to configure',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      )
-                  ],
-                ),
-              ),
-            );
-          } else if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
+            return const NoEventSetWidget();
+          } else if (EventMatch.currentEventSchedule.isEmpty && !_loaded) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -89,40 +49,47 @@ class MatchSelectPageState extends State<MatchSelectPage>
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: EventMatch.currentEventSchedule.length,
-              itemBuilder: _matchCard,
+              itemBuilder: (context, index) => MatchCard(
+                match: EventMatch.currentEventSchedule[index],
+              ),
             ),
           );
         },
       ),
     );
   }
+}
 
-  Widget _matchCard(BuildContext context, int index) {
-    EventMatch match = EventMatch.currentEventSchedule[index];
+class MatchCard extends StatelessWidget {
+  static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
+
+  final EventMatch match;
+
+  const MatchCard({super.key, required this.match});
+
+  @override
+  Widget build(BuildContext context) {
+    Color? alliance;
+    if (match.blue.contains(Team.current!.number)) {
+      alliance = Colors.blue;
+    } else if (match.red.contains(Team.current!.number)) {
+      alliance = Colors.red;
+    }
+
     return Opacity(
       opacity: match.completed ? 0.5 : 1,
       child: Card(
         child: ExpansionTile(
-          leading: Builder(builder: (context) {
-            int team = Team.current!.number;
-            Color? alliance;
-            if (match.blue.contains(team)) {
-              alliance = Colors.blue;
-            } else if (match.red.contains(team)) {
-              alliance = Colors.red;
-            }
-
-            return Visibility(
-              visible: alliance != null,
-              maintainSize: true,
-              maintainState: true,
-              maintainAnimation: true,
-              child: Icon(
-                Icons.star,
-                color: alliance,
-              ),
-            );
-          }),
+          leading: Visibility(
+            visible: alliance != null,
+            maintainSize: true,
+            maintainState: true,
+            maintainAnimation: true,
+            child: Icon(
+              Icons.star,
+              color: alliance,
+            ),
+          ),
           title: Text(
             match.name,
             style: Theme.of(context).textTheme.titleSmall,
@@ -192,40 +159,51 @@ class MatchSelectPageState extends State<MatchSelectPage>
           color: isRed ? frcRed : frcBlue,
           padding: const EdgeInsets.symmetric(vertical: 8),
           alignment: Alignment.center,
-          child: Text('$team'),
+          child: Text(
+            '$team',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ),
       ),
       onTap: () async {
-        if (match.completed) {
-          bool cancel = await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Match Already Completed'),
-              content: const Text(
-                'Are you sure you want to scout this match?',
+        if (!match.completed) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MatchScoutPage(
+                match: match,
+                team: team,
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Back'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Continue'),
-                )
-              ],
             ),
           );
-          if (cancel || !context.mounted) return;
+          return;
         }
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchScoutPage(
-              match: match,
-              team: team,
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Match Already Completed'),
+            content: const Text(
+              'Are you sure you want to scout this match?',
             ),
+            actions: [
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: const Text('Back'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchScoutPage(
+                      match: match,
+                      team: team,
+                    ),
+                  ),
+                ),
+                child: const Text('Continue'),
+              ),
+            ],
           ),
         );
       },
