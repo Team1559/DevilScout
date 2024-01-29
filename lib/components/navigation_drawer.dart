@@ -121,7 +121,7 @@ class NavDrawer extends StatelessWidget {
                     child: Text(
                       'Admin',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.tertiary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -157,7 +157,7 @@ class NavDrawer extends StatelessWidget {
                     Theme.of(context).colorScheme.surface,
                   ),
                 ),
-                onPressed: () => pushStatefulIfInactive<SettingsPageState>(
+                onPressed: pushStatefulIfInactive<SettingsPageState>(
                   context: context,
                   builder: (context) => const SettingsPage(),
                 ),
@@ -167,8 +167,10 @@ class NavDrawer extends StatelessWidget {
                 child: FilledButton.icon(
                   icon: const Icon(Icons.logout),
                   label: const Text('Log Out'),
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.red),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                      Theme.of(context).colorScheme.error,
+                    ),
                   ),
                   onPressed: () {
                     serverLogout().whenComplete(saveSession);
