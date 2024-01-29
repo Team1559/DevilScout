@@ -96,7 +96,7 @@ class NavDrawer extends StatelessWidget {
     );
   }
 
-  Padding bottom(BuildContext context) {
+  Widget bottom(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(

@@ -41,57 +41,84 @@ class SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: Builder(builder: (context) {
-        if (settings == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+      body: SafeArea(
+        minimum: const EdgeInsets.all(16),
+        child: Builder(builder: (context) {
+          if (settings == null) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        return ListView(
-          children: [
-            ListTile(
-              title: const Text('Edit User'),
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  isDismissible: true,
-                  builder: (context) => UserEditDialog(
-                    user: User.current,
-                    showAdmin: User.current!.isAdmin,
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Use Device Theme'),
-              trailing: Checkbox(
-                value: settings!.theme == ThemeMode.system,
-                onChanged: (value) => setState(() {
-                  settings!.theme =
-                      value! ? ThemeMode.system : ThemeModeHelper.current();
-                }),
+          return ListView(
+            children: [
+              FilledButton.icon(
+                label: const Text('Edit User'),
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    isDismissible: true,
+                    builder: (context) => UserEditDialog(
+                      user: User.current,
+                      showAdmin: User.current!.isAdmin,
+                    ),
+                  );
+                },
               ),
-            ),
-            Opacity(
-              opacity: settings!.theme == ThemeMode.system ? .5 : 1,
-              child: ListTile(
-                title: const Text('Dark Mode'),
+              ListTile(
+                title: Text(
+                  'Use Device Theme',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 trailing: Checkbox(
-                  value: settings!.theme.resolve() == ThemeMode.dark,
-                  onChanged: settings!.theme == ThemeMode.system
-                      ? null
-                      : (value) => setState(() {
-                            settings!.theme =
-                                value! ? ThemeMode.dark : ThemeMode.light;
-                          }),
+                  value: settings!.theme == ThemeMode.system,
+                  onChanged: (value) => setState(() {
+                    settings!.theme =
+                        value! ? ThemeMode.system : ThemeModeHelper.current();
+                  }),
+                ),
+                onTap: () => setState(
+                  () {
+                    settings!.theme = settings!.theme != ThemeMode.system
+                        ? ThemeMode.system
+                        : ThemeModeHelper.current();
+                  },
                 ),
               ),
-            ),
-          ],
-        );
-      }),
+              Opacity(
+                opacity: settings!.theme == ThemeMode.system ? .5 : 1,
+                child: ListTile(
+                  title: Text(
+                    'Dark Mode',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  trailing: Checkbox(
+                    value: settings!.theme.resolve() == ThemeMode.dark,
+                    onChanged: settings!.theme == ThemeMode.system
+                        ? null
+                        : (value) => setState(() {
+                              settings!.theme =
+                                  value! ? ThemeMode.dark : ThemeMode.light;
+                            }),
+                  ),
+                  onTap: settings!.theme == ThemeMode.system
+                      ? null
+                      : () => setState(
+                            () {
+                              settings!.theme =
+                                  settings!.theme != ThemeMode.dark
+                                      ? ThemeMode.dark
+                                      : ThemeMode.light;
+                            },
+                          ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
       drawer: const NavDrawer(),
     );
   }

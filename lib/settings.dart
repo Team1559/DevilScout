@@ -43,7 +43,7 @@ class AppSettings with ChangeNotifier, WidgetsBindingObserver {
     _writeToFile();
   }
 
-  AppSettings({ThemeMode theme = ThemeMode.light}) : _theme = theme {
+  AppSettings({ThemeMode theme = ThemeMode.system}) : _theme = theme {
     WidgetsBinding.instance.addObserver(this);
   }
 

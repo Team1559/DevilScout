@@ -105,18 +105,25 @@ class _UserEditDialogState extends State<UserEditDialog> {
                   ),
                   if (widget.showAdmin)
                     ListTile(
-                      title: const Text('Administrator'),
+                      title: Text(
+                        'Administrator',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                       trailing: Checkbox(
                         value: isAdmin,
                         onChanged: (value) {
-                          if (value!) {
+                          if (value! == (widget.user != User.current)) {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Are you sure?'),
-                                content: const Text(
-                                  'This user will have administrator access, which you cannot revoke.',
-                                ),
+                                content: widget.user != User.current
+                                    ? const Text(
+                                        'This user will have administrator access, which you cannot revoke.',
+                                      )
+                                    : const Text(
+                                        "If you revoke your administrator privileges, you won't be able to manage your team's event or users.",
+                                      ),
                                 actions: [
                                   TextButton(
                                     onPressed: Navigator.of(context).pop,
@@ -124,7 +131,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      setState(() => isAdmin = true);
+                                      setState(() => isAdmin = !isAdmin);
                                       Navigator.pop(context);
                                     },
                                     child: const Text('Continue'),
@@ -133,7 +140,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
                               ),
                             );
                           } else {
-                            setState(() => isAdmin = false);
+                            setState(() => isAdmin = !isAdmin);
                           }
                         },
                       ),
@@ -219,7 +226,8 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (widget.user != null &&
         fullName == widget.user!.fullName &&
         username == widget.user!.username &&
-        password.isEmpty) {
+        password.isEmpty &&
+        isAdmin == widget.user?.isAdmin) {
       return false;
     }
 

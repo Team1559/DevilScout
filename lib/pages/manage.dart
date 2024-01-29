@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '/components/navigation_drawer.dart';
 import '/components/user_edit_dialog.dart';
@@ -129,12 +130,15 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
           )
         ],
       ),
-      body: ListView.builder(
+      body: Scrollbar(
         controller: scrollController,
-        shrinkWrap: true,
-        itemCount: results.length,
-        itemBuilder: (context, index) => EventCard(
-          event: results[index],
+        child: ListView.builder(
+          controller: scrollController,
+          shrinkWrap: true,
+          itemCount: results.length,
+          itemBuilder: (context, index) => EventCard(
+            event: results[index],
+          ),
         ),
       ),
     );
@@ -166,6 +170,9 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
 }
 
 class EventCard extends StatelessWidget {
+  static final DateFormat _dateFormat = DateFormat('MMMM d');
+  static final DateFormat _dayOnlyFormat = DateFormat('d');
+
   final Event event;
 
   const EventCard({super.key, required this.event});
@@ -174,8 +181,14 @@ class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(event.name),
-        subtitle: Text(event.location),
+        title: Text(
+          event.name,
+          style: Theme.of(context).textTheme.titleSmall,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle:
+            Text('${event.location}\n${formatDates(event.start, event.end)}'),
+        isThreeLine: true,
         onTap: () => showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -209,6 +222,18 @@ class EventCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String formatDates(DateTime start, DateTime end) {
+    if (start == end) {
+      return _dateFormat.format(start);
+    }
+
+    if (start.month == end.month) {
+      return '${_dateFormat.format(start)} to ${_dayOnlyFormat.format(end)}';
+    }
+
+    return '${_dateFormat.format(start)} to ${_dateFormat.format(end)}';
   }
 }
 
