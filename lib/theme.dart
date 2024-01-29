@@ -74,6 +74,7 @@ final lightTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.black,
     ),
+    scrolledUnderElevation: 0.0,
   ),
 );
 
@@ -97,11 +98,12 @@ final darkTheme = ThemeData(
   filledButtonTheme: _filledButtonTheme,
   dividerColor: Colors.transparent,
   appBarTheme: const AppBarTheme(
-    backgroundColor: const Color(0xFF262626),
+    backgroundColor: Color(0xFF262626),
     foregroundColor: Colors.white,
     elevation: 0,
     iconTheme: IconThemeData(
       color: Colors.white,
     ),
+    scrolledUnderElevation: 0.0,
   ),
 );
