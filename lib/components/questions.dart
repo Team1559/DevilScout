@@ -240,6 +240,7 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
         Text(
           question.prompt,
           style: Theme.of(context).textTheme.titleLarge,
+          textAlign: TextAlign.center,
         ),
         QuestionWidget.of(
           config: question,
@@ -475,10 +476,6 @@ class NumberQuestion extends QuestionWidget<NumberConfig> {
     required super.listener,
   });
 
-  int defaultValue() {
-    return (config.min + config.max) ~/ 2;
-  }
-
   @override
   State<NumberQuestion> createState() => _NumberQuestionState();
 }
@@ -492,19 +489,25 @@ class _NumberQuestionState extends QuestionWidgetState<int?, NumberQuestion> {
   void initState() {
     super.initState();
     WidgetsBinding.instance
-        .addPostFrameCallback((_) => setValue(widget.defaultValue()));
+        .addPostFrameCallback((_) => setValue(widget.config.defaultValue));
   }
 
   @override
   Widget build(BuildContext context) {
-    return NumberPicker(
-      axis: Axis.horizontal,
-      minValue: widget.config.min,
-      maxValue: widget.config.max,
-      value: value ?? widget.defaultValue(),
-      itemCount: 7,
-      itemWidth: 50,
-      onChanged: setValue,
+    return Row(
+      children: [
+        const Icon(Icons.keyboard_arrow_left),
+        NumberPicker(
+          axis: Axis.horizontal,
+          minValue: widget.config.min,
+          maxValue: widget.config.max,
+          value: value ?? widget.config.defaultValue,
+          itemCount: 5,
+          itemWidth: 50,
+          onChanged: setValue,
+        ),
+        const Icon(Icons.keyboard_arrow_right),
+      ],
     );
   }
 }

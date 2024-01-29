@@ -110,11 +110,16 @@ class NumberConfig extends QuestionConfig {
   /// The maximum permitted response (inclusive)
   final int max;
 
+  /// The value to show by default
+  @JsonKey(name: 'default')
+  final int defaultValue;
+
   const NumberConfig({
     required super.prompt,
     required super.key,
     required this.min,
     required this.max,
+    required this.defaultValue,
   });
 }
 
