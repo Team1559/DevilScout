@@ -236,11 +236,13 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
   Widget question(BuildContext context, QuestionConfig question) {
     return Column(
       children: [
-        const SizedBox(height: 16),
-        Text(
-          question.prompt,
-          style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.center,
+        Padding(
+          padding: const EdgeInsets.only(top: 24, bottom: 8),
+          child: Text(
+            question.prompt,
+            style: Theme.of(context).textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
         ),
         QuestionWidget.of(
           config: question,
@@ -349,6 +351,11 @@ class _BooleanQuestionState
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
+      style: ButtonStyle(
+        textStyle: MaterialStatePropertyAll(
+          Theme.of(context).textTheme.titleSmall,
+        ),
+      ),
       emptySelectionAllowed: true,
       showSelectedIcon: false,
       segments: const [
@@ -438,19 +445,21 @@ class _MultipleChoiceQuestionState
 
   void _set(index, selected) {
     if (selected != active[index]) {
-      setState(() {
-        active[index] = selected;
-      });
-
-      if (selected) {
-        value.add(index);
-      } else {
-        value.remove(index);
-      }
-      value.sort();
-
-      widget.listener.call();
+      _toggle(index);
     }
+  }
+
+  void _toggle(index) {
+    setState(() => active[index] = !active[index]);
+
+    if (active[index]) {
+      value.add(index);
+    } else {
+      value.remove(index);
+    }
+    value.sort();
+
+    widget.listener.call();
   }
 
   @override
@@ -458,10 +467,17 @@ class _MultipleChoiceQuestionState
     return Column(
       children: List.generate(
         widget.config.options.length,
-        (index) => CheckboxListTile(
-          title: Text(widget.config.options[index]),
-          value: active[index],
-          onChanged: (value) => _set(index, value),
+        (index) => ListTile(
+          dense: true,
+          title: Text(
+            widget.config.options[index],
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          trailing: Checkbox(
+            value: active[index],
+            onChanged: (b) => _set(index, b),
+          ),
+          onTap: () => _toggle(index),
         ),
       ),
     );
@@ -496,17 +512,28 @@ class _NumberQuestionState extends QuestionWidgetState<int?, NumberQuestion> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.keyboard_arrow_left),
+        IconButton(
+          icon: const Icon(Icons.keyboard_arrow_left),
+          onPressed: value == null || value! <= widget.config.min
+              ? null
+              : () => setValue(value! - 1),
+        ),
         NumberPicker(
+          selectedTextStyle: Theme.of(context).textTheme.titleMedium,
           axis: Axis.horizontal,
           minValue: widget.config.min,
           maxValue: widget.config.max,
           value: value ?? widget.config.defaultValue,
           itemCount: 5,
-          itemWidth: 50,
+          itemWidth: 40,
           onChanged: setValue,
         ),
-        const Icon(Icons.keyboard_arrow_right),
+        IconButton(
+          icon: const Icon(Icons.keyboard_arrow_right),
+          onPressed: value == null || value! >= widget.config.max
+              ? null
+              : () => setValue(value! + 1),
+        ),
       ],
     );
   }
@@ -530,6 +557,11 @@ class _RangeQuestionState extends QuestionWidgetState<int?, RangeQuestion> {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton(
+      style: ButtonStyle(
+        textStyle: MaterialStatePropertyAll(
+          Theme.of(context).textTheme.titleSmall,
+        ),
+      ),
       emptySelectionAllowed: true,
       selected: value == null ? {} : {value},
       onSelectionChanged: (set) {
@@ -624,17 +656,23 @@ class _SingleChoiceQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton(
-      hint: const Text('Select one'),
-      items: List.generate(
+    return Column(
+      children: List.generate(
         widget.config.options.length,
-        (index) => DropdownMenuItem(
-          value: index,
-          child: Text(widget.config.options[index]),
+        (index) => ListTile(
+          dense: true,
+          title: Text(
+            widget.config.options[index],
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          trailing: Radio(
+            value: index,
+            groupValue: value,
+            onChanged: setValue,
+          ),
+          onTap: () => setValue(index),
         ),
       ),
-      value: value,
-      onChanged: setValue,
     );
   }
 }
