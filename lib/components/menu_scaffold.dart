@@ -31,8 +31,8 @@ class MenuScaffold extends StatefulWidget {
 
 class _MenuScaffoldState extends State<MenuScaffold>
     with SingleTickerProviderStateMixin {
-  static const Duration fadeDuration = Duration(milliseconds: 300);
-  static const Duration iconDuration = Duration(milliseconds: 200);
+  static const Duration fadeDuration = Duration(milliseconds: 200);
+  static const Duration iconDuration = Duration(milliseconds: 250);
 
   late final AnimationController iconAnimation = AnimationController(
     duration: iconDuration,
@@ -83,7 +83,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
           duration: fadeDuration,
           transitionBuilder: transitionBuilder,
           child: Text(
-            menuVisible ? 'Devil Scout' : widget.title ?? '',
+            menuVisible ? '' : widget.title ?? '',
             key: menuVisible ? const Key('Menu Title') : null,
             style: Theme.of(context).textTheme.titleLarge,
           ),
@@ -101,11 +101,14 @@ class _MenuScaffoldState extends State<MenuScaffold>
             ),
           ),
         ),
-        leading: IconButton(
-          onPressed: toggleMenu,
-          icon: AnimatedIcon(
-            icon: AnimatedIcons.menu_close,
-            progress: iconAnimation,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14),
+          child: IconButton(
+            onPressed: toggleMenu,
+            icon: AnimatedIcon(
+              icon: AnimatedIcons.menu_close,
+              progress: iconAnimation,
+            ),
           ),
         ),
       ),
@@ -125,8 +128,8 @@ class _MenuScaffoldState extends State<MenuScaffold>
   Widget navigationMenu(BuildContext context) {
     return SafeArea(
       minimum: const EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 16,
+        horizontal: 28,
+        vertical: 18,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,99 +191,96 @@ class _MenuScaffoldState extends State<MenuScaffold>
   }
 
   Widget bottom(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                User.current!.fullName,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(width: 2),
-              if (User.current!.isAdmin)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: Text(
-                      'Admin',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.tertiary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              User.current!.fullName,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.left,
+            ),
+            const SizedBox(width: 2),
+            if (User.current!.isAdmin)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  child: Text(
+                    'Admin',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${Team.current!.number} | ${Team.current!.name}',
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.left,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.settings),
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '${Team.current!.number} | ${Team.current!.name}',
+          style: Theme.of(context).textTheme.bodyLarge,
+          textAlign: TextAlign.left,
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              style: ButtonStyle(
+                minimumSize: const MaterialStatePropertyAll(
+                  Size(80, 48),
+                ),
+                maximumSize: const MaterialStatePropertyAll(
+                  Size(double.infinity, 48),
+                ),
+                shape: const MaterialStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
+                backgroundColor: MaterialStatePropertyAll(
+                  Theme.of(context).colorScheme.surface,
+                ),
+              ),
+              onPressed: pushStatefulIfInactive<SettingsPageState>(
+                context: context,
+                builder: (context) => const SettingsPage(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.icon(
+                icon: const Icon(Icons.logout),
+                label: const Text('Log Out'),
                 style: ButtonStyle(
-                  minimumSize: const MaterialStatePropertyAll(
-                    Size(80, 48),
-                  ),
-                  maximumSize: const MaterialStatePropertyAll(
-                    Size(double.infinity, 48),
-                  ),
-                  shape: const MaterialStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
                   backgroundColor: MaterialStatePropertyAll(
-                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.error,
                   ),
                 ),
-                onPressed: pushStatefulIfInactive<SettingsPageState>(
-                  context: context,
-                  builder: (context) => const SettingsPage(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Log Out'),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(
-                      Theme.of(context).colorScheme.error,
+                onPressed: () {
+                  serverLogout().whenComplete(saveSession);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
                     ),
-                  ),
-                  onPressed: () {
-                    serverLogout().whenComplete(saveSession);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                ),
+                  );
+                },
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -290,19 +290,15 @@ class _MenuScaffoldState extends State<MenuScaffold>
     required List<Widget> children,
   }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
             vertical: 8,
-            horizontal: 10,
           ),
           child: Column(
             children: children,

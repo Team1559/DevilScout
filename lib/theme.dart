@@ -67,6 +67,14 @@ final lightTheme = ThemeData(
   textTheme: _textTheme,
   filledButtonTheme: _filledButtonTheme,
   dividerColor: Colors.transparent,
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFFFAFAFA),
+    foregroundColor: Colors.black,
+    elevation: 0,
+    iconTheme: IconThemeData(
+      color: Colors.black,
+    ),
+  ),
 );
 
 final darkTheme = ThemeData(
@@ -88,4 +96,12 @@ final darkTheme = ThemeData(
   textTheme: _textTheme,
   filledButtonTheme: _filledButtonTheme,
   dividerColor: Colors.transparent,
+  appBarTheme: const AppBarTheme(
+    backgroundColor: const Color(0xFF262626),
+    foregroundColor: Colors.white,
+    elevation: 0,
+    iconTheme: IconThemeData(
+      color: Colors.white,
+    ),
+  ),
 );
