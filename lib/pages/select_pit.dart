@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/components/navigation_drawer.dart';
+import '/components/menu_scaffold.dart';
 import '/pages/manage.dart';
 import '/pages/scout_pit.dart';
 import '/server/events.dart';
@@ -29,24 +29,9 @@ class PitSelectPageState extends State<PitSelectPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Team'),
-        bottom: Event.currentEvent == null
-            ? null
-            : PreferredSize(
-                preferredSize: Size.zero,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    Event.currentEvent!.name,
-                    style: Theme.of(context).textTheme.titleSmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-      ),
-      drawer: const NavDrawer(),
+    return MenuScaffold(
+      title: 'Select Team',
+      subtitle: Event.currentEvent?.name,
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return Center(

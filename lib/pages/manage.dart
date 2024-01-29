@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '/components/navigation_drawer.dart';
+import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
@@ -12,18 +12,9 @@ class ManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage'),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: Text(
-            Team.current!.name,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
-      ),
-      drawer: const NavDrawer(),
+    return MenuScaffold(
+      title: 'Manage',
+      subtitle: Team.current!.name,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),

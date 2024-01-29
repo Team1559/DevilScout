@@ -11,87 +11,178 @@ import '/server/session_file.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
 
-class NavDrawer extends StatelessWidget {
-  const NavDrawer({super.key});
+class MenuScaffold extends StatefulWidget {
+  final Widget? body;
+  final String? title;
+  final String? subtitle;
+  final List<Widget>? actions;
+
+  const MenuScaffold({
+    super.key,
+    this.body,
+    this.title,
+    this.subtitle,
+    this.actions,
+  });
+
+  @override
+  State<MenuScaffold> createState() => _MenuScaffoldState();
+}
+
+class _MenuScaffoldState extends State<MenuScaffold>
+    with SingleTickerProviderStateMixin {
+  static const Duration fadeDuration = Duration(milliseconds: 300);
+  static const Duration iconDuration = Duration(milliseconds: 200);
+
+  late final AnimationController iconAnimation = AnimationController(
+    duration: iconDuration,
+    vsync: this,
+  );
+
+  bool menuVisible = false;
+
+  Widget transitionBuilder(Widget child, Animation<double> animation) =>
+      FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+
+  @override
+  void dispose() {
+    super.dispose();
+    iconAnimation.dispose();
+  }
+
+  void showMenu() {
+    if (menuVisible) return;
+
+    setState(() => menuVisible = true);
+    iconAnimation.animateTo(1);
+  }
+
+  void hideMenu() {
+    if (!menuVisible) return;
+
+    setState(() => menuVisible = false);
+    iconAnimation.animateBack(0);
+  }
+
+  void toggleMenu() {
+    if (menuVisible) {
+      hideMenu();
+    } else {
+      showMenu();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      width: double.infinity,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.background,
-          title: Text(
-            'Devil Scout',
+    return Scaffold(
+      appBar: AppBar(
+        title: AnimatedSwitcher(
+          duration: fadeDuration,
+          transitionBuilder: transitionBuilder,
+          child: Text(
+            menuVisible ? 'Devil Scout' : widget.title ?? '',
+            key: menuVisible ? const Key('Menu Title') : null,
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: Navigator.of(context).pop,
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.zero,
+          child: AnimatedSwitcher(
+            duration: fadeDuration,
+            transitionBuilder: transitionBuilder,
+            child: Text(
+              menuVisible ? '' : widget.subtitle ?? '',
+              key: menuVisible ? const Key('Menu Subtitle') : null,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
         ),
-        body: SafeArea(
-          minimum: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              section(context: context, title: 'Scout', children: [
-                menuItem(
-                  context: context,
-                  title: 'Matches',
-                  icon: const Icon(Icons.event),
-                  onTap: pushStatefulIfInactive<MatchSelectPageState>(
-                    context: context,
-                    builder: (context) => const MatchSelectPage(),
-                  ),
-                ),
-                menuItem(
-                  context: context,
-                  title: 'Pits',
-                  icon: const Icon(Icons.assignment),
-                  onTap: pushStatefulIfInactive<PitSelectPageState>(
-                    context: context,
-                    builder: (context) => const PitSelectPage(),
-                  ),
-                ),
-                menuItem(
-                  context: context,
-                  title: 'Drive Team',
-                  icon: const Icon(Icons.sports_esports),
-                  onTap: pushStatefulIfInactive<DriveTeamSelectPageState>(
-                    context: context,
-                    builder: (context) => const DriveTeamSelectPage(),
-                  ),
-                ),
-              ]),
-              section(context: context, title: 'Analyze', children: [
-                menuItem(
-                  context: context,
-                  title: 'Teams',
-                  icon: const Icon(Icons.query_stats),
-                  onTap: () {},
-                ),
-              ]),
-              if (User.current!.isAdmin)
-                section(context: context, title: 'Admin', children: [
-                  menuItem(
-                    context: context,
-                    title: 'Manage Team ${Team.current!.number}',
-                    icon: const Icon(Icons.manage_accounts),
-                    onTap: pushStatelessIfInactive<ManagementPage>(
-                      context: context,
-                      builder: (context) => const ManagementPage(),
-                    ),
-                  ),
-                ]),
-              const Spacer(),
-              bottom(context),
-            ],
+        leading: IconButton(
+          onPressed: toggleMenu,
+          icon: AnimatedIcon(
+            icon: AnimatedIcons.menu_close,
+            progress: iconAnimation,
           ),
         ),
+      ),
+      body: AnimatedSwitcher(
+        duration: fadeDuration,
+        transitionBuilder: transitionBuilder,
+        child: menuVisible
+            ? Builder(
+                builder: navigationMenu,
+                key: const Key('NavigationMenu'),
+              )
+            : widget.body,
+      ),
+    );
+  }
+
+  Widget navigationMenu(BuildContext context) {
+    return SafeArea(
+      minimum: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          section(context: context, title: 'Scout', children: [
+            menuItem(
+              context: context,
+              title: 'Matches',
+              icon: const Icon(Icons.event),
+              onTap: pushStatefulIfInactive<MatchSelectPageState>(
+                context: context,
+                builder: (context) => const MatchSelectPage(),
+              ),
+            ),
+            menuItem(
+              context: context,
+              title: 'Pits',
+              icon: const Icon(Icons.assignment),
+              onTap: pushStatefulIfInactive<PitSelectPageState>(
+                context: context,
+                builder: (context) => const PitSelectPage(),
+              ),
+            ),
+            menuItem(
+              context: context,
+              title: 'Drive Team',
+              icon: const Icon(Icons.sports_esports),
+              onTap: pushStatefulIfInactive<DriveTeamSelectPageState>(
+                context: context,
+                builder: (context) => const DriveTeamSelectPage(),
+              ),
+            ),
+          ]),
+          section(context: context, title: 'Analyze', children: [
+            menuItem(
+              context: context,
+              title: 'Teams',
+              icon: const Icon(Icons.query_stats),
+              onTap: () {},
+            ),
+          ]),
+          if (User.current!.isAdmin)
+            section(context: context, title: 'Admin', children: [
+              menuItem(
+                context: context,
+                title: 'Manage Team ${Team.current!.number}',
+                icon: const Icon(Icons.manage_accounts),
+                onTap: pushStatelessIfInactive<ManagementPage>(
+                  context: context,
+                  builder: (context) => const ManagementPage(),
+                ),
+              ),
+            ]),
+          const Spacer(),
+          bottom(context),
+        ],
       ),
     );
   }
@@ -242,14 +333,14 @@ class NavDrawer extends StatelessWidget {
     required Widget Function(BuildContext) builder,
   }) {
     STATE? parent = context.findAncestorStateOfType<STATE>();
-    if (parent == null) {
-      return () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: builder),
-          );
-    } else {
-      return Navigator.of(context).pop;
+    if (parent != null) {
+      return hideMenu;
     }
+
+    return () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: builder),
+        );
   }
 
   void Function() pushStatelessIfInactive<WIDGET extends Widget>({
@@ -257,13 +348,13 @@ class NavDrawer extends StatelessWidget {
     required Widget Function(BuildContext) builder,
   }) {
     WIDGET? parent = context.findAncestorWidgetOfExactType<WIDGET>();
-    if (parent == null) {
-      return () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: builder),
-          );
-    } else {
-      return Navigator.of(context).pop;
+    if (parent != null) {
+      return hideMenu;
     }
+
+    return () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: builder),
+        );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '/components/navigation_drawer.dart';
 import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
@@ -38,12 +37,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        leading: IconButton(
-          onPressed: Navigator.of(context).maybePop,
-          icon: const Icon(Icons.arrow_back),
-        ),
       ),
-      drawer: const NavDrawer(),
       body: QuestionDisplay(
         pages: QuestionConfig.pitQuestions,
         submitAction: (data) => serverSubmitPitData(

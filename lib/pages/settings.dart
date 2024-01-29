@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/components/navigation_drawer.dart';
+import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/server/users.dart';
 import '/settings.dart';
@@ -37,10 +37,8 @@ class SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+    return MenuScaffold(
+      title: 'Settings',
       body: SafeArea(
         minimum: const EdgeInsets.all(16),
         child: Builder(builder: (context) {
@@ -119,7 +117,6 @@ class SettingsPageState extends State<SettingsPage> {
           );
         }),
       ),
-      drawer: const NavDrawer(),
     );
   }
 }
