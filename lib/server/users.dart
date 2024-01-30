@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
-import 'session.dart';
+import '/server/server.dart';
+import '/server/session.dart';
 
 part 'users.g.dart';
 
@@ -9,19 +9,19 @@ part 'users.g.dart';
 @JsonSerializable(createToJson: false)
 class User {
   /// The current user's information, if authenticated
-  static User? currentUser;
+  static User? current;
   static final Etag _currentUserEtag = Etag();
 
   /// The list of all registered users, after request via [serverGetAllUsers]
-  static List<User> allUsers = List.empty();
+  static List<User> allUsers = List.empty(growable: true);
   static final Etag _allUsersEtag = Etag();
 
   /// Erase all cached user information (for logout)
   static void clear() {
-    currentUser = null;
+    current = null;
     _currentUserEtag.clear();
 
-    allUsers = List.empty();
+    allUsers = List.empty(growable: true);
     _allUsersEtag.clear();
   }
 
@@ -62,6 +62,7 @@ Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
       path: 'teams/${Session.current!.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
+      callback: (users) => User.allUsers = List.of(users),
     );
 
 /// Get a user. Requires ADMIN if not the same user.
@@ -126,7 +127,7 @@ Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
       path: 'users/${Session.current!.user}',
       method: 'GET',
       decoder: User.fromJson,
-      callback: (user) => User.currentUser = user,
+      callback: (user) => User.current = user,
       etag: User._currentUserEtag,
     );
 
@@ -142,7 +143,7 @@ Future<ServerResponse<User>> serverEditCurrentUser({
       path: 'users/${Session.current!.user}',
       method: 'PATCH',
       decoder: User.fromJson,
-      callback: (user) => User.currentUser = user,
+      callback: (user) => User.current = user,
       etag: User._currentUserEtag,
       payload: {
         if (username != null) 'username': username,

@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
+import '/server/server.dart';
 
 part 'questions.g.dart';
 
@@ -64,7 +64,7 @@ sealed class QuestionConfig {
 
   /// Decode a registered config type from JSON, depending on its 'type' field
   factory QuestionConfig.fromJson(Map<String, dynamic> json) =>
-      $enumDecode(_$QuestionTypeEnumMap, json['type'])._parser.call(json);
+      $enumDecode(_$QuestionTypeEnumMap, json['type'])._parser(json);
 }
 
 /// Configuration for a boolean question. Responses are either `true` or `false`.
@@ -110,11 +110,16 @@ class NumberConfig extends QuestionConfig {
   /// The maximum permitted response (inclusive)
   final int max;
 
+  /// The value to show by default
+  @JsonKey(name: 'default')
+  final int defaultValue;
+
   const NumberConfig({
     required super.prompt,
     required super.key,
     required this.min,
     required this.max,
+    required this.defaultValue,
   });
 }
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 
-import 'session.dart';
+import '/server/session.dart';
 
 /// A response from the Devil Scout Server. Responses return in one of three states:
 ///
@@ -33,7 +33,7 @@ class ServerResponse<T> {
   @override
   String toString() {
     if (success) {
-      return value?.toString() ?? '[Success, no value]';
+      return value?.runtimeType.toString() ?? '[Success, no value]';
     } else {
       return message ?? '[Error, no message]';
     }
@@ -54,7 +54,8 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverApiUri = Uri.parse('https://scouting.victorrobotics.org/api/v1/');
+final Uri _serverApiUri =
+    Uri.parse('https://scouting.victorrobotics.org/api/v1/');
 final Client _httpClient = Client();
 
 /// A generic method to access a server API endpoint. Clients are recommended
@@ -106,14 +107,17 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   }
 
   if (response.statusCode >= 400) {
-    String body = await response.stream.bytesToString();
-    return ServerResponse.errorFromJson(body);
+    if (response.headers['content-type']?.contains('json') ?? false) {
+      String body = await response.stream.bytesToString();
+      return ServerResponse.errorFromJson(body);
+    }
+    return ServerResponse.error('Error contacting server, try again');
   } else if (decoder == null || response.statusCode == 304) {
     return ServerResponse.success();
   }
 
   String body = await response.stream.bytesToString();
-  R result = decoder.call(jsonDecode(body));
+  R result = decoder(jsonDecode(body));
 
   etag?._update(response.headers);
   callback?.call(result);

@@ -1,7 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
-import 'teams.dart';
+import '/server/server.dart';
+import '/server/session.dart';
+import '/server/teams.dart';
 
 part 'events.g.dart';
 
@@ -66,10 +67,12 @@ class FrcTeam {
 @JsonSerializable(createToJson: false)
 class EventMatch {
   static List<EventMatch> currentEventSchedule = List.empty();
+  static List<EventMatch> currentTeamSchedule = List.empty();
   static final Etag _currentEventScheduleEtag = Etag();
 
   static void clear() {
     currentEventSchedule = List.empty();
+    currentTeamSchedule = List.empty();
     _currentEventScheduleEtag.clear();
   }
 
@@ -97,6 +100,8 @@ class EventMatch {
 
   factory EventMatch.fromJson(Map<String, dynamic> json) =>
       _$EventMatchFromJson(json);
+
+  bool containsTeam(int team) => blue.contains(team) || red.contains(team);
 }
 
 @JsonEnum(valueField: '_json')
@@ -158,14 +163,14 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
     );
 
 Future<ServerResponse<Event>> serverGetCurrentEvent() {
-  if (Team.currentTeam == null || Team.currentTeam!.eventKey == '') {
+  if (Team.current == null || Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}',
+    path: 'events/${Team.current!.eventKey}',
     method: 'GET',
     decoder: Event.fromJson,
     callback: (event) => Event.currentEvent = event,
@@ -174,30 +179,36 @@ Future<ServerResponse<Event>> serverGetCurrentEvent() {
 }
 
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
-  if (Team.currentTeam!.eventKey == '') {
+  if (Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}/matches',
+    path: 'events/${Team.current!.eventKey}/matches',
     method: 'GET',
     decoder: listOf(EventMatch.fromJson),
-    callback: (schedule) => EventMatch.currentEventSchedule = schedule,
+    callback: (schedule) {
+      EventMatch.currentEventSchedule = schedule;
+      EventMatch.currentTeamSchedule = List.of(
+        schedule.where((match) => match.containsTeam(Session.current!.team)),
+        growable: false,
+      );
+    },
     etag: EventMatch._currentEventScheduleEtag,
   );
 }
 
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() {
-  if (Team.currentTeam!.eventKey == '') {
+  if (Team.current!.eventKey == '') {
     return Future.value(
       ServerResponse.error('Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.currentTeam!.eventKey}/teams',
+    path: 'events/${Team.current!.eventKey}/teams',
     method: 'GET',
     decoder: listOf(FrcTeam.fromJson),
     callback: (teams) => FrcTeam.currentEventTeams = teams,

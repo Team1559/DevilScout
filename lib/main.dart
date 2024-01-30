@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '/pages/home.dart';
-
-part 'theme.dart';
+import '/pages/load_session.dart';
+import '/settings.dart';
+import '/theme.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,30 +14,40 @@ class MainApp extends StatefulWidget {
 
   @override
   State<MainApp> createState() => MainAppState();
-
-  static MainAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<MainAppState>()!;
 }
 
 class MainAppState extends State<MainApp> {
-  ThemeMode _themeMode = ThemeMode.light;
+  AppSettings? settings;
+
+  @override
+  void initState() {
+    super.initState();
+    getSettings().then((value) => setState(() {
+          settings = value;
+          settings!.addListener(_listener);
+        }));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    settings?.removeListener(_listener);
+  }
+
+  void _listener() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
-      home: const HomePage(),
+      home: const LoadSessionPage(),
       theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: _themeMode,
+      themeMode: settings?.theme,
       debugShowCheckedModeBanner: false,
     );
   }
-
-  void setThemeMode(ThemeMode themeMode) {
-    setState(() {
-      _themeMode = themeMode;
-    });
-  }
-
-  bool isDarkTheme() => _themeMode == ThemeMode.dark;
 }

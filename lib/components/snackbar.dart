@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 
-void displaySnackbar(BuildContext context, String message) {
-  hideSnackbar(context);
+void snackbarError(BuildContext context, String message) {
+  hideError(context);
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Center(child: Text(message)),
+      backgroundColor: Theme.of(context).colorScheme.error,
+      content: Center(
+        child: Text(
+          message,
+          style: Theme.of(context)
+              .textTheme
+              .labelLarge!
+              .copyWith(color: Theme.of(context).colorScheme.onError),
+        ),
+      ),
     ),
   );
 }
 
-void hideSnackbar(BuildContext context) {
+void hideError(BuildContext context) {
   ScaffoldMessenger.of(context).clearSnackBars();
 }

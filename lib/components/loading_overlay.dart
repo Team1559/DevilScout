@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 class LoadingOverlay extends StatefulWidget {
   final Widget child;
-  final bool showByDefault;
 
-  const LoadingOverlay(
-      {super.key, required this.child, this.showByDefault = false});
+  const LoadingOverlay({
+    super.key,
+    required this.child,
+  });
 
   @override
   State<LoadingOverlay> createState() => LoadingOverlayState();
@@ -16,18 +17,14 @@ class LoadingOverlay extends StatefulWidget {
 }
 
 class LoadingOverlayState extends State<LoadingOverlay> {
-  late bool _loading = widget.showByDefault;
+  bool _loading = false;
 
   void show() {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
   }
 
   void hide() {
-    setState(() {
-      _loading = false;
-    });
+    setState(() => _loading = false);
   }
 
   @override
@@ -35,18 +32,23 @@ class LoadingOverlayState extends State<LoadingOverlay> {
     return Stack(
       children: [
         widget.child,
-        if (_loading)
-          const Opacity(
-            opacity: 0.5,
-            child: ModalBarrier(
-              dismissible: false,
-              color: Colors.black,
-            ),
+        Visibility(
+          visible: _loading,
+          child: const Stack(
+            children: [
+              Opacity(
+                opacity: 0.5,
+                child: ModalBarrier(
+                  dismissible: false,
+                  color: Colors.black,
+                ),
+              ),
+              Center(
+                child: CircularProgressIndicator(),
+              ),
+            ],
           ),
-        if (_loading)
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
+        ),
       ],
     );
   }

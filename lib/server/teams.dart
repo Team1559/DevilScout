@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import 'server.dart';
-import 'session.dart';
+import '/server/server.dart';
+import '/server/session.dart';
 
 part 'teams.g.dart';
 
@@ -9,7 +9,7 @@ part 'teams.g.dart';
 @JsonSerializable(createToJson: false)
 class Team {
   /// The current team's information, if authenticated
-  static Team? currentTeam;
+  static Team? current;
   static final Etag _currentTeamEtag = Etag();
 
   /// The list of all registered teams, after request via [serverGetAllTeams]
@@ -18,7 +18,7 @@ class Team {
 
   /// Erase all cached team information (for logout)
   static void clear() {
-    currentTeam = null;
+    current = null;
     _currentTeamEtag.clear();
 
     allTeams = List.empty();
@@ -57,7 +57,7 @@ Future<ServerResponse<Team>> serverGetCurrentTeam() => serverRequest(
       path: 'teams/${Session.current!.team}',
       method: 'GET',
       decoder: Team.fromJson,
-      callback: (team) => Team.currentTeam = team,
+      callback: (team) => Team.current = team,
       etag: Team._currentTeamEtag,
     );
 
@@ -72,7 +72,7 @@ Future<ServerResponse<Team>> serverEditCurrentTeam({
       method: 'PATCH',
       decoder: Team.fromJson,
       etag: Team._currentTeamEtag,
-      callback: (team) => Team.currentTeam = team,
+      callback: (team) => Team.current = team,
       payload: {
         if (name != null) 'name': name,
         if (eventKey != null) 'eventKey': eventKey,
