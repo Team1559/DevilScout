@@ -117,7 +117,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   }
 
   String body = await response.stream.bytesToString();
-  R result = decoder.call(jsonDecode(body));
+  R result = decoder(jsonDecode(body));
 
   etag?._update(response.headers);
   callback?.call(result);

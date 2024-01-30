@@ -204,7 +204,7 @@ class _UsernameInputState extends State<UsernameInput> {
         }
 
         hideError(context);
-        widget.continueAction.call();
+        widget.continueAction();
       });
     };
   }

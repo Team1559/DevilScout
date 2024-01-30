@@ -279,7 +279,7 @@ class _RosterPanelState extends State<RosterPanel> {
                 ),
               ),
             ),
-            onPressed: () => showModalBottomSheet(
+            onPressed: () => showModalBottomSheet<User>(
               context: context,
               isScrollControlled: true,
               isDismissible: true,
@@ -313,7 +313,7 @@ class _RosterPanelState extends State<RosterPanel> {
           icon: const Icon(Icons.edit),
           onPressed: user.isAdmin
               ? null
-              : () => showModalBottomSheet(
+              : () => showModalBottomSheet<User>(
                     context: context,
                     isScrollControlled: true,
                     isDismissible: true,

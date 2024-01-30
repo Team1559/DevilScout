@@ -109,7 +109,7 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   }
 
   void _submit() {
-    widget.submitAction.call(responses).then((response) {
+    widget.submitAction(responses).then((response) {
       if (!context.mounted) return;
 
       Navigator.pop(context);
@@ -319,15 +319,15 @@ sealed class QuestionWidgetState<T, W extends QuestionWidget> extends State<W> {
   void initState() {
     super.initState();
     if (value != null) {
-      widget.valueSetter.call(value);
+      widget.valueSetter(value);
     }
   }
 
   void setValue(T newValue) {
     if (value != newValue) {
       value = newValue;
-      widget.valueSetter.call(newValue);
-      widget.listener.call();
+      widget.valueSetter(newValue);
+      widget.listener();
     }
   }
 }
@@ -459,7 +459,7 @@ class _MultipleChoiceQuestionState
     }
     value.sort();
 
-    widget.listener.call();
+    widget.listener();
   }
 
   @override

@@ -64,7 +64,7 @@ sealed class QuestionConfig {
 
   /// Decode a registered config type from JSON, depending on its 'type' field
   factory QuestionConfig.fromJson(Map<String, dynamic> json) =>
-      $enumDecode(_$QuestionTypeEnumMap, json['type'])._parser.call(json);
+      $enumDecode(_$QuestionTypeEnumMap, json['type'])._parser(json);
 }
 
 /// Configuration for a boolean question. Responses are either `true` or `false`.

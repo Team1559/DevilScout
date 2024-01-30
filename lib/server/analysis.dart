@@ -24,7 +24,7 @@ sealed class Statistic {
   const Statistic();
 
   factory Statistic.fromJson(Map<String, dynamic> json) =>
-      $enumDecode(_$StatisticTypeEnumMap, json['type']).parser.call(json);
+      $enumDecode(_$StatisticTypeEnumMap, json['type'])._parser(json);
 }
 
 @JsonEnum(fieldRename: FieldRename.screamingSnake, alwaysCreate: true)
@@ -33,9 +33,9 @@ enum StatisticType {
   boolean(_$BooleanStatisticFromJson),
   percentage(_$PercentageStatisticFromJson);
 
-  final Statistic Function(Map<String, dynamic>) parser;
+  final Statistic Function(Map<String, dynamic>) _parser;
 
-  const StatisticType(this.parser);
+  const StatisticType(this._parser);
 }
 
 @JsonSerializable(createToJson: false)
