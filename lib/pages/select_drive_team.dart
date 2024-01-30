@@ -46,7 +46,6 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
 
         return Scrollbar(
           child: ListView.builder(
-            shrinkWrap: true,
             itemCount: EventMatch.currentTeamSchedule.length,
             itemBuilder: (context, index) => MatchCard(
               match: EventMatch.currentTeamSchedule[index],

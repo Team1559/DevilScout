@@ -47,7 +47,6 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
           return Scrollbar(
             child: ListView.builder(
-              shrinkWrap: true,
               itemCount: EventMatch.currentEventSchedule.length,
               itemBuilder: (context, index) => MatchCard(
                 match: EventMatch.currentEventSchedule[index],

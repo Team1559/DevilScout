@@ -40,7 +40,6 @@ class PitSelectPageState extends State<PitSelectPage> {
 
         return Scrollbar(
           child: ListView.builder(
-            shrinkWrap: true,
             itemCount: FrcTeam.currentEventTeams.length,
             itemBuilder: (context, index) => TeamCard(
               team: FrcTeam.currentEventTeams[index],
