@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
+import '/components/team_card.dart';
 import '/pages/scout_match.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
@@ -111,73 +112,36 @@ class MatchSelectPageState extends State<MatchSelectPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (int i = 0; i < match.blue.length; i++)
-              teamCard(
-                context: context,
-                match: match,
-                index: i,
-                isRed: false,
+              TeamCard(
+                teamNum: match.blue[i],
+                color: Theme.of(context).colorScheme.frcBlue,
+                label: (i + 1).toString(),
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchScoutPage(
+                      match: match,
+                      team: match.blue[i],
+                    ),
+                  ),
+                ),
               ),
             for (int i = 0; i < match.red.length; i++)
-              teamCard(
-                context: context,
-                match: match,
-                index: i,
-                isRed: true,
+              TeamCard(
+                teamNum: match.blue[i],
+                color: Theme.of(context).colorScheme.frcRed,
+                label: (i + 1).toString(),
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MatchScoutPage(
+                      match: match,
+                      team: match.blue[i],
+                    ),
+                  ),
+                ),
               ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget teamCard({
-    required BuildContext context,
-    required EventMatch match,
-    required int index,
-    required bool isRed,
-  }) {
-    int teamNum = isRed ? match.red[index] : match.blue[index];
-    FrcTeam? team = FrcTeam.currentEventTeams
-        .where((team) => team.number == teamNum)
-        .firstOrNull;
-    return Card(
-      color: isRed
-          ? Theme.of(context).colorScheme.frcRed
-          : Theme.of(context).colorScheme.frcBlue,
-      child: ListTile(
-        minLeadingWidth: 10,
-        leading: Text(
-          (index + 1).toString(),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        title: Text(
-          team?.name ?? '???',
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        subtitle: team == null
-            ? null
-            : Text(
-                team.location,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.fade,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-        trailing: Text(
-          teamNum.toString(),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        onTap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchScoutPage(
-              match: match,
-              team: teamNum,
-            ),
-          ),
         ),
       ),
     );
