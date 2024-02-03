@@ -44,7 +44,6 @@ const FilledButtonThemeData _filledButtonTheme = FilledButtonThemeData(
 
 const Color _primary = Color(0xFF3063FF);
 const Color _secondary = Color(0xFF83B9FC);
-const Color _tertiary = Color(0xFFFFD900);
 
 final lightTheme = ThemeData(
   colorScheme: const ColorScheme(
@@ -53,8 +52,6 @@ final lightTheme = ThemeData(
     onPrimary: Colors.white,
     secondary: _secondary,
     onSecondary: Colors.black,
-    tertiary: _tertiary,
-    onTertiary: Colors.black,
     error: Color(0xFFF44336),
     onError: Colors.white,
     background: Color(0xFFFAFAFA),
@@ -87,8 +84,6 @@ final darkTheme = ThemeData(
     onPrimary: Colors.white,
     secondary: _secondary,
     onSecondary: Colors.black,
-    tertiary: _tertiary,
-    onTertiary: Colors.black,
     error: Color(0xFFB71C1C),
     onError: Colors.white,
     background: Color(0xFF262626),
@@ -115,11 +110,11 @@ final darkTheme = ThemeData(
 
 extension MoreColors on ColorScheme {
   Color get frcRed => ThemeModeHelper.current() == ThemeMode.dark
-      ? const Color(0xFFAA4444)
-      : const Color(0xFFFF9999);
+      ? const Color(0xFFAA3333)
+      : const Color(0xFFFF7777);
   Color get frcBlue => ThemeModeHelper.current() == ThemeMode.dark
-      ? const Color(0xFF4444AA)
-      : const Color(0xFF9999FF);
+      ? const Color(0xFF223399)
+      : const Color(0xFF5F7FFF);
 }
 
 extension ThemeModeHelper on ThemeMode {

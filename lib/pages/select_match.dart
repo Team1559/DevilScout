@@ -66,11 +66,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
           return Scrollbar(
             child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  // top: 20,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ListView(children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
@@ -82,12 +78,14 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                   for (EventMatch match in uncompletedMatches)
                     MatchCard(
                       match: match,
+                      transparency: true,
                       onTap: (match) => showMatchDialog(context, match),
                     ),
                   if (_showingCompleted)
                     for (EventMatch match in completedMatches)
                       MatchCard(
                         match: match,
+                        transparency: true,
                         onTap: (match) => showMatchDialog(context, match),
                       ),
                   if (!_showingCompleted)

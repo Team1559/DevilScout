@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
 import '/pages/scout_drive_team.dart';
 import '/server/events.dart';
-import '/server/session.dart';
 import '/server/teams.dart';
-import '/theme.dart';
 
 class DriveTeamSelectPage extends StatefulWidget {
   const DriveTeamSelectPage({super.key});
@@ -44,64 +42,25 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
         }
 
         return Scrollbar(
-          child: ListView.builder(
-            itemCount: EventMatch.currentTeamSchedule.length,
-            itemBuilder: (context, index) => MatchCard(
-              match: EventMatch.currentTeamSchedule[index],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: ListView.builder(
+              itemCount: EventMatch.currentTeamSchedule.length,
+              itemBuilder: (context, index) => MatchCard(
+                match: EventMatch.currentTeamSchedule[index],
+                onTap: (match) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DriveTeamScoutPage(
+                      match: match,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         );
       }),
-    );
-  }
-}
-
-class MatchCard extends StatelessWidget {
-  static final DateFormat timeFormat = DateFormat('EEEE\nh:mm a');
-
-  final EventMatch match;
-
-  const MatchCard({super.key, required this.match});
-
-  @override
-  Widget build(BuildContext context) {
-    List<int> partners = List.of(
-        match.blue.contains(Team.current!.number) ? match.blue : match.red)
-      ..remove(Team.current!.number)
-      ..sort();
-    String partnersStr = partners.toString();
-    partnersStr = partnersStr.substring(1, partnersStr.length - 1);
-    return Card(
-      child: ListTile(
-        leading: Builder(
-          builder: (context) => Icon(
-            Icons.star,
-            color: match.blue.contains(Session.current!.team)
-                ? Theme.of(context).colorScheme.frcBlue
-                : Theme.of(context).colorScheme.frcRed,
-          ),
-        ),
-        title: Text(
-          match.name,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        subtitle: Text(
-          partnersStr,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        trailing: Text(
-          timeFormat.format(match.time),
-          textAlign: TextAlign.end,
-        ),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DriveTeamScoutPage(
-              match: match,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
