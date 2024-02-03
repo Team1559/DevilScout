@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-const Color frcBlue = Color(0xFF0066B4);
-const Color frcRed = Color(0xFFED1B25);
+import 'package:flutter/scheduler.dart';
 
 const TextStyle _headingOverrides = TextStyle(
   fontFamily: 'Montserrat',
@@ -61,7 +59,7 @@ final lightTheme = ThemeData(
     onError: Colors.white,
     background: Color(0xFFFAFAFA),
     onBackground: Color(0xFF494949),
-    surface: Color(0xFFE4E4E4),
+    surface: Color.fromARGB(255, 236, 235, 235),
     onSurface: Colors.black,
   ),
   textTheme: _textTheme,
@@ -75,6 +73,10 @@ final lightTheme = ThemeData(
       color: Colors.black,
     ),
     scrolledUnderElevation: 0.0,
+  ),
+  cardTheme: const CardTheme(
+    surfaceTintColor: Colors.transparent,
+    elevation: 0,
   ),
 );
 
@@ -106,4 +108,26 @@ final darkTheme = ThemeData(
     ),
     scrolledUnderElevation: 0.0,
   ),
+  cardTheme: const CardTheme(
+    surfaceTintColor: Colors.transparent,
+  ),
 );
+
+extension MoreColors on ColorScheme {
+  Color get frcRed => ThemeModeHelper.current() == ThemeMode.dark
+      ? const Color(0xFFAA4444)
+      : const Color(0xFFFF9999);
+  Color get frcBlue => ThemeModeHelper.current() == ThemeMode.dark
+      ? const Color(0xFF4444AA)
+      : const Color(0xFF9999FF);
+}
+
+extension ThemeModeHelper on ThemeMode {
+  ThemeMode resolve() => this == ThemeMode.system ? current() : this;
+
+  static ThemeMode current() =>
+      switch (SchedulerBinding.instance.platformDispatcher.platformBrightness) {
+        Brightness.light => ThemeMode.light,
+        Brightness.dark => ThemeMode.dark,
+      };
+}
