@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-const Color frcBlue = Color(0xFF0066B4);
-const Color frcRed = Color(0xFFED1B25);
+const Color frcBlue = Color(0xFF9999FF);
+const Color frcRed = Color(0xFFFF9999);
 
 const TextStyle _headingOverrides = TextStyle(
   fontFamily: 'Montserrat',
@@ -61,7 +61,7 @@ final lightTheme = ThemeData(
     onError: Colors.white,
     background: Color(0xFFFAFAFA),
     onBackground: Color(0xFF494949),
-    surface: Color(0xFFE4E4E4),
+    surface: Color.fromARGB(255, 236, 235, 235),
     onSurface: Colors.black,
   ),
   textTheme: _textTheme,
@@ -75,6 +75,10 @@ final lightTheme = ThemeData(
       color: Colors.black,
     ),
     scrolledUnderElevation: 0.0,
+  ),
+  cardTheme: const CardTheme(
+    surfaceTintColor: Colors.transparent,
+    elevation: 0,
   ),
 );
 
@@ -105,5 +109,8 @@ final darkTheme = ThemeData(
       color: Colors.white,
     ),
     scrolledUnderElevation: 0.0,
+  ),
+  cardTheme: const CardTheme(
+    surfaceTintColor: Colors.transparent,
   ),
 );

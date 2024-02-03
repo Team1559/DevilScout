@@ -88,29 +88,27 @@ class _MenuScaffoldState extends State<MenuScaffold>
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: AnimatedSwitcher(
-            duration: fadeDuration,
-            transitionBuilder: transitionBuilder,
-            child: Text(
-              menuVisible ? '' : widget.subtitle ?? '',
-              key: menuVisible ? const Key('Menu Subtitle') : null,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+        // bottom: PreferredSize(
+        //   preferredSize: Size.zero,
+        //   child: AnimatedSwitcher(
+        //     duration: fadeDuration,
+        //     transitionBuilder: transitionBuilder,
+        //     child: Text(
+        //       menuVisible ? '' : widget.subtitle ?? '',
+        //       key: menuVisible ? const Key('Menu Subtitle') : null,
+        //       overflow: TextOverflow.ellipsis,
+        //       style: Theme.of(context).textTheme.titleSmall,
+        //     ),
+        //   ),
+        // ),
+        leading: IconButton(
+          onPressed: toggleMenu,
+          icon: AnimatedIcon(
+            icon: AnimatedIcons.menu_close,
+            progress: iconAnimation,
           ),
         ),
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
-          child: IconButton(
-            onPressed: toggleMenu,
-            icon: AnimatedIcon(
-              icon: AnimatedIcons.menu_close,
-              progress: iconAnimation,
-            ),
-          ),
-        ),
+        leadingWidth: 72,
       ),
       body: AnimatedSwitcher(
         duration: fadeDuration,
