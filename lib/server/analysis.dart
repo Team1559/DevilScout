@@ -16,11 +16,13 @@ class TeamStatistics {
   }
 
   final int team;
-  final List<StatisticsPage> data;
+
+  @JsonKey(name: 'data')
+  final List<StatisticsPage> pages;
 
   const TeamStatistics({
     required this.team,
-    required this.data,
+    required this.pages,
   });
 
   factory TeamStatistics.fromJson(Map<String, dynamic> json) =>
@@ -169,7 +171,7 @@ class WltStatistic extends Statistic {
   });
 }
 
-Future<ServerResponse<List<TeamStatistics>>> serverGetTeamsAnalysis() =>
+Future<ServerResponse<List<TeamStatistics>>> serverGetCurrentEventTeamAnalysis() =>
     serverRequest(
       path: 'analysis/${Team.current!.eventKey}/teams',
       method: 'GET',

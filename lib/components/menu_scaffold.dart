@@ -1,3 +1,4 @@
+import 'package:devil_scout/pages/select_team.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login.dart';
@@ -168,7 +169,10 @@ class _MenuScaffoldState extends State<MenuScaffold>
               context: context,
               title: 'Teams',
               icon: const Icon(Icons.query_stats),
-              onTap: () {},
+              onTap: pushStatefulIfInactive<TeamAnalysisSelectPageState>(
+                context: context,
+                builder: (context) => const TeamAnalysisSelectPage(),
+              ),
             ),
           ]),
           if (User.current!.isAdmin)
