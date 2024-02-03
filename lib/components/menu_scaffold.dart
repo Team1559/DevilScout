@@ -15,14 +15,12 @@ import '/server/users.dart';
 class MenuScaffold extends StatefulWidget {
   final Widget? body;
   final String? title;
-  final String? subtitle;
   final List<Widget>? actions;
 
   const MenuScaffold({
     super.key,
     this.body,
     this.title,
-    this.subtitle,
     this.actions,
   });
 
@@ -89,29 +87,15 @@ class _MenuScaffoldState extends State<MenuScaffold>
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: AnimatedSwitcher(
-            duration: fadeDuration,
-            transitionBuilder: transitionBuilder,
-            child: Text(
-              menuVisible ? '' : widget.subtitle ?? '',
-              key: menuVisible ? const Key('Menu Subtitle') : null,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+        leading: IconButton(
+          onPressed: toggleMenu,
+          icon: AnimatedIcon(
+            icon: AnimatedIcons.menu_close,
+            progress: iconAnimation,
           ),
         ),
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
-          child: IconButton(
-            onPressed: toggleMenu,
-            icon: AnimatedIcon(
-              icon: AnimatedIcons.menu_close,
-              progress: iconAnimation,
-            ),
-          ),
-        ),
+        actions: widget.actions,
+        leadingWidth: 72,
       ),
       body: AnimatedSwitcher(
         duration: fadeDuration,

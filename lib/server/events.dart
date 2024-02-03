@@ -102,6 +102,26 @@ class EventMatch {
       _$EventMatchFromJson(json);
 
   bool containsTeam(int team) => blue.contains(team) || red.contains(team);
+
+  int compareTo(EventMatch other) {
+    if (completed != other.completed) {
+      return completed ? 1 : -1;
+    }
+
+    if (level != other.level) {
+      return level.index - other.level.index;
+    }
+
+    if (set != other.set) {
+      return set - other.set;
+    }
+
+    if (number != other.number) {
+      return number - other.number;
+    }
+
+    return time.compareTo(other.time);
+  }
 }
 
 @JsonEnum(valueField: '_json')

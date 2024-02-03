@@ -32,7 +32,6 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
   Widget build(BuildContext context) {
     return MenuScaffold(
       title: 'Select Team',
-      subtitle: Event.currentEvent?.name,
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();

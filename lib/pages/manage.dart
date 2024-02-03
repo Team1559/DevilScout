@@ -14,7 +14,6 @@ class ManagementPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuScaffold(
       title: 'Manage',
-      subtitle: Team.current!.name,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
