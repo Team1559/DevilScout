@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:synchronized/synchronized.dart';
@@ -65,14 +64,4 @@ class AppSettings with ChangeNotifier, WidgetsBindingObserver {
           file.writeAsString(json);
         });
       });
-}
-
-extension ThemeModeHelper on ThemeMode {
-  ThemeMode resolve() => this == ThemeMode.system ? current() : this;
-
-  static ThemeMode current() =>
-      switch (SchedulerBinding.instance.platformDispatcher.platformBrightness) {
-        Brightness.light => ThemeMode.light,
-        Brightness.dark => ThemeMode.dark,
-      };
 }

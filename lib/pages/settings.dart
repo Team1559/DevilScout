@@ -4,6 +4,7 @@ import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/server/users.dart';
 import '/settings.dart';
+import '/theme.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

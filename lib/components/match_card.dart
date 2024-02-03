@@ -89,7 +89,9 @@ class MatchCard extends StatelessWidget {
         bottom: isRed ? 0 : 1,
       ),
       child: Container(
-        color: isRed ? frcRed : frcBlue,
+        color: isRed
+            ? Theme.of(context).colorScheme.frcRed
+            : Theme.of(context).colorScheme.frcBlue,
         padding: const EdgeInsets.symmetric(vertical: 8),
         alignment: Alignment.center,
         child: Text(
