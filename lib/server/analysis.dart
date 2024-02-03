@@ -7,6 +7,14 @@ part 'analysis.g.dart';
 
 @JsonSerializable(createToJson: false)
 class TeamStatistics {
+  static List<TeamStatistics> currentList = List.empty();
+  static final Etag _currentEtag = Etag();
+
+  static void clear() {
+    currentList = List.empty();
+    _currentEtag.clear();
+  }
+
   final int team;
   final List<StatisticsPage> data;
 
@@ -165,5 +173,7 @@ Future<ServerResponse<List<TeamStatistics>>> serverGetTeamsAnalysis() =>
     serverRequest(
       path: 'analysis/${Team.current!.eventKey}/teams',
       method: 'GET',
+      etag: TeamStatistics._currentEtag,
       decoder: listOf(TeamStatistics.fromJson),
+      callback: (stats) => TeamStatistics.currentList = stats,
     );

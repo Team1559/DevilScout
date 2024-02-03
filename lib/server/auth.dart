@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:devil_scout/server/analysis.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '/server/events.dart';
@@ -259,6 +260,7 @@ Future<ServerResponse<void>> serverLogout() => serverRequest(
       FrcTeam.clear();
       EventMatch.clear();
       QuestionConfig.clear();
+      TeamStatistics.clear();
     });
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
