@@ -20,13 +20,14 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
   @override
   void initState() {
     super.initState();
-
-    Future.wait([
-      serverGetCurrentEvent(),
-      serverGetCurrentEventTeamList(),
-      serverGetCurrentEventTeamAnalysis(),
-    ]).whenComplete(() => setState(() => loaded = true));
+    refresh();
   }
+
+  Future<void> refresh() => Future.wait([
+        serverGetCurrentEvent(),
+        serverGetCurrentEventTeamList(),
+        serverGetCurrentEventTeamAnalysis(),
+      ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +41,15 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
         }
 
         return Scrollbar(
-          child: ListView.builder(
-            itemCount: TeamStatistics.currentList.length,
-            itemBuilder: (context, index) => TeamCard(
-              statistics: TeamStatistics.currentList[index],
-              team: FrcTeam.currentEventTeams.singleWhere(
-                (t) => t.number == TeamStatistics.currentList[index].team,
+          child: RefreshIndicator(
+            onRefresh: refresh,
+            child: ListView.builder(
+              itemCount: TeamStatistics.currentList.length,
+              itemBuilder: (context, index) => TeamCard(
+                statistics: TeamStatistics.currentList[index],
+                team: FrcTeam.currentEventTeams.singleWhere(
+                  (t) => t.number == TeamStatistics.currentList[index].team,
+                ),
               ),
             ),
           ),
