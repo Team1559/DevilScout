@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
+import '/components/team_card.dart';
 import '/pages/scout_match.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
@@ -25,21 +26,18 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   @override
   void initState() {
     super.initState();
-
-    // Update event information for UI
     loadMatches();
-
-    Future.wait([
-      serverGetCurrentEvent(),
-      serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() {
-          loadMatches();
-          _loaded = true;
-        }));
-
-    // Preload the list of teams
-    serverGetCurrentEventTeamList();
+    refresh();
   }
+
+  Future<void> refresh() => Future.wait([
+        serverGetCurrentEvent(),
+        serverGetCurrentEventSchedule(),
+        serverGetCurrentEventTeamList(),
+      ]).whenComplete(() => setState(() {
+            loadMatches();
+            _loaded = true;
+          }));
 
   void loadMatches() {
     uncompletedMatches = EventMatch.currentEventSchedule
@@ -66,11 +64,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
           return Scrollbar(
             child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  // top: 20,
-                ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: RefreshIndicator(
+                onRefresh: refresh,
                 child: ListView(children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
@@ -82,105 +78,85 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                   for (EventMatch match in uncompletedMatches)
                     MatchCard(
                       match: match,
-                      onTap: (match) => showMatchDialog(context, match),
+                      transparency: true,
+                      onTap: (match) => showDialog(
+                        context: context,
+                        builder: (context) => TeamSelectDialog(match: match),
+                      ),
                     ),
                   if (_showingCompleted)
                     for (EventMatch match in completedMatches)
                       MatchCard(
                         match: match,
-                        onTap: (match) => showMatchDialog(context, match),
+                        transparency: true,
+                        onTap: (match) => showDialog(
+                          context: context,
+                          builder: (context) => TeamSelectDialog(match: match),
+                        ),
                       ),
                   if (!_showingCompleted)
                     TextButton(
                       onPressed: () => setState(() => _showingCompleted = true),
                       child: const Text('Show Completed'),
                     ),
-                ])),
+                ]),
+              ),
+            ),
           );
         },
       ),
     );
   }
+}
 
-  void showMatchDialog(BuildContext context, EventMatch match) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        surfaceTintColor: Colors.transparent,
-        contentPadding: const EdgeInsets.all(12),
-        title: const Text('Select Team'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < match.blue.length; i++)
-              teamCard(
-                context: context,
-                match: match,
-                index: i,
-                isRed: false,
-              ),
-            for (int i = 0; i < match.red.length; i++)
-              teamCard(
-                context: context,
-                match: match,
-                index: i,
-                isRed: true,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+class TeamSelectDialog extends StatelessWidget {
+  final EventMatch match;
 
-  Widget teamCard({
-    required BuildContext context,
-    required EventMatch match,
-    required int index,
-    required bool isRed,
-  }) {
-    int teamNum = isRed ? match.red[index] : match.blue[index];
-    FrcTeam? team = FrcTeam.currentEventTeams
-        .where((team) => team.number == teamNum)
-        .firstOrNull;
-    return Card(
-      color: isRed
-          ? Theme.of(context).colorScheme.frcRed
-          : Theme.of(context).colorScheme.frcBlue,
-      child: ListTile(
-        minLeadingWidth: 10,
-        leading: Text(
-          (index + 1).toString(),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        title: Text(
-          team?.name ?? '???',
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        subtitle: team == null
-            ? null
-            : Text(
-                team.location,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.fade,
-                style: Theme.of(context).textTheme.labelMedium,
+  const TeamSelectDialog({
+    super.key,
+    required this.match,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      surfaceTintColor: Colors.transparent,
+      contentPadding: const EdgeInsets.all(12),
+      title: Text(match.name),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (int i = 0; i < match.blue.length; i++)
+            TeamCard(
+              teamNum: match.blue[i],
+              color: Theme.of(context).colorScheme.frcBlue,
+              label: (i + 1).toString(),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MatchScoutPage(
+                    match: match,
+                    team: match.blue[i],
+                  ),
+                ),
               ),
-        trailing: Text(
-          teamNum.toString(),
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        onTap: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MatchScoutPage(
-              match: match,
-              team: teamNum,
             ),
-          ),
-        ),
+          for (int i = 0; i < match.red.length; i++)
+            TeamCard(
+              teamNum: match.red[i],
+              color: Theme.of(context).colorScheme.frcRed,
+              label: (i + 1).toString(),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MatchScoutPage(
+                    match: match,
+                    team: match.blue[i],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

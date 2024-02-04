@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '/server/events.dart';
+import '/server/teams.dart';
 import '/theme.dart';
 
 class MatchCard extends StatelessWidget {
@@ -9,15 +10,21 @@ class MatchCard extends StatelessWidget {
 
   final EventMatch match;
   final void Function(EventMatch)? onTap;
+  final bool transparency;
 
-  const MatchCard({super.key, required this.match, this.onTap});
+  const MatchCard({
+    super.key,
+    required this.match,
+    this.onTap,
+    this.transparency = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onTap?.call(match),
       child: Opacity(
-        opacity: match.completed ? 0.5 : 1,
+        opacity: transparency && match.completed ? 0.5 : 1,
         child: Card(
           child: Column(
             children: [
@@ -26,9 +33,24 @@ class MatchCard extends StatelessWidget {
                   match.name,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                trailing: Text(
-                  timeFormat.format(match.time),
-                  textAlign: TextAlign.end,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (match.containsTeam(Team.current!.number))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          Icons.star,
+                          color: match.red.contains(Team.current!.number)
+                              ? Theme.of(context).colorScheme.frcRed
+                              : Theme.of(context).colorScheme.frcBlue,
+                        ),
+                      ),
+                    Text(
+                      timeFormat.format(match.time),
+                      textAlign: TextAlign.end,
+                    ),
+                  ],
                 ),
               ),
               Padding(
