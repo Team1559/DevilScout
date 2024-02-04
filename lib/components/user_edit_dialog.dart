@@ -56,9 +56,9 @@ class _UserEditDialogState extends State<UserEditDialog> {
       ),
       child: SafeArea(
         minimum: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        child: ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           children: [
             Row(
               children: [
