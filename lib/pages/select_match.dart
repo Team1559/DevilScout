@@ -79,14 +79,20 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                     MatchCard(
                       match: match,
                       transparency: true,
-                      onTap: (match) => showMatchDialog(context, match),
+                      onTap: (match) => showDialog(
+                        context: context,
+                        builder: (context) => TeamSelectDialog(match: match),
+                      ),
                     ),
                   if (_showingCompleted)
                     for (EventMatch match in completedMatches)
                       MatchCard(
                         match: match,
                         transparency: true,
-                        onTap: (match) => showMatchDialog(context, match),
+                        onTap: (match) => showDialog(
+                          context: context,
+                          builder: (context) => TeamSelectDialog(match: match),
+                        ),
                       ),
                   if (!_showingCompleted)
                     TextButton(
@@ -101,49 +107,56 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       ),
     );
   }
+}
 
-  void showMatchDialog(BuildContext context, EventMatch match) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        surfaceTintColor: Colors.transparent,
-        contentPadding: const EdgeInsets.all(12),
-        title: const Text('Select Team'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < match.blue.length; i++)
-              TeamCard(
-                teamNum: match.blue[i],
-                color: Theme.of(context).colorScheme.frcBlue,
-                label: (i + 1).toString(),
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MatchScoutPage(
-                      match: match,
-                      team: match.blue[i],
-                    ),
+class TeamSelectDialog extends StatelessWidget {
+  final EventMatch match;
+
+  const TeamSelectDialog({
+    super.key,
+    required this.match,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      surfaceTintColor: Colors.transparent,
+      contentPadding: const EdgeInsets.all(12),
+      title: Text(match.name),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (int i = 0; i < match.blue.length; i++)
+            TeamCard(
+              teamNum: match.blue[i],
+              color: Theme.of(context).colorScheme.frcBlue,
+              label: (i + 1).toString(),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MatchScoutPage(
+                    match: match,
+                    team: match.blue[i],
                   ),
                 ),
               ),
-            for (int i = 0; i < match.red.length; i++)
-              TeamCard(
-                teamNum: match.blue[i],
-                color: Theme.of(context).colorScheme.frcRed,
-                label: (i + 1).toString(),
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MatchScoutPage(
-                      match: match,
-                      team: match.blue[i],
-                    ),
+            ),
+          for (int i = 0; i < match.red.length; i++)
+            TeamCard(
+              teamNum: match.red[i],
+              color: Theme.of(context).colorScheme.frcRed,
+              label: (i + 1).toString(),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MatchScoutPage(
+                    match: match,
+                    team: match.blue[i],
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
