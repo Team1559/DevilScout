@@ -93,8 +93,10 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
   @override
   void initState() {
     super.initState();
-    serverGetAllEvents().whenComplete(updateResults);
+    refresh();
   }
+
+  Future<void> refresh() => serverGetAllEvents().whenComplete(updateResults);
 
   @override
   Widget build(BuildContext context) {
@@ -122,12 +124,15 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
       ),
       body: Scrollbar(
         controller: scrollController,
-        child: ListView.builder(
-          controller: scrollController,
-          shrinkWrap: true,
-          itemCount: results.length,
-          itemBuilder: (context, index) => EventCard(
-            event: results[index],
+        child: RefreshIndicator(
+          onRefresh: refresh,
+          child: ListView.builder(
+            controller: scrollController,
+            shrinkWrap: true,
+            itemCount: results.length,
+            itemBuilder: (context, index) => EventCard(
+              event: results[index],
+            ),
           ),
         ),
       ),
@@ -238,8 +243,11 @@ class _RosterPanelState extends State<RosterPanel> {
   @override
   void initState() {
     super.initState();
-    serverGetUsers().whenComplete(() => setState(() {}));
+    refresh();
   }
+
+  Future<void> refresh() =>
+      serverGetUsers().whenComplete(() => setState(() {}));
 
   @override
   Widget build(BuildContext context) {
@@ -259,10 +267,13 @@ class _RosterPanelState extends State<RosterPanel> {
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: Scrollbar(
-                child: ListView.builder(
-                  itemCount: User.allUsers.length,
-                  itemBuilder: (context, index) =>
-                      _userCard(User.allUsers[index], context),
+                child: RefreshIndicator(
+                  onRefresh: refresh,
+                  child: ListView.builder(
+                    itemCount: User.allUsers.length,
+                    itemBuilder: (context, index) =>
+                        _userCard(User.allUsers[index], context),
+                  ),
                 ),
               ),
             ),

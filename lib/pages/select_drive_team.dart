@@ -20,15 +20,14 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
   @override
   void initState() {
     super.initState();
-
-    Future.wait([
-      serverGetCurrentEvent(),
-      serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() => loaded = true));
-
-    // Preload list of teams
-    serverGetCurrentEventTeamList();
+    refresh();
   }
+
+  Future<void> refresh() => Future.wait([
+        serverGetCurrentEvent(),
+        serverGetCurrentEventSchedule(),
+        serverGetCurrentEventTeamList(),
+      ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
@@ -44,15 +43,18 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
         return Scrollbar(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ListView.builder(
-              itemCount: EventMatch.currentTeamSchedule.length,
-              itemBuilder: (context, index) => MatchCard(
-                match: EventMatch.currentTeamSchedule[index],
-                onTap: (match) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DriveTeamScoutPage(
-                      match: match,
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                itemCount: EventMatch.currentTeamSchedule.length,
+                itemBuilder: (context, index) => MatchCard(
+                  match: EventMatch.currentTeamSchedule[index],
+                  onTap: (match) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DriveTeamScoutPage(
+                        match: match,
+                      ),
                     ),
                   ),
                 ),

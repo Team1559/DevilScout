@@ -20,12 +20,13 @@ class PitSelectPageState extends State<PitSelectPage> {
   @override
   void initState() {
     super.initState();
-
-    Future.wait([
-      serverGetCurrentEvent(),
-      serverGetCurrentEventTeamList(),
-    ]).whenComplete(() => setState(() => loaded = true));
+    refresh();
   }
+
+  Future<void> refresh() => Future.wait([
+        serverGetCurrentEvent(),
+        serverGetCurrentEventTeamList(),
+      ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
@@ -34,27 +35,30 @@ class PitSelectPageState extends State<PitSelectPage> {
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();
-        } else if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
+        } else if (FrcTeam.currentEventTeams.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
         return Scrollbar(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ListView.builder(
-              itemCount: FrcTeam.currentEventTeams.length,
-              itemBuilder: (context, index) {
-                FrcTeam team = FrcTeam.currentEventTeams[index];
-                return TeamCard(
-                  teamNum: team.number,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PitScoutPage(team: team),
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                itemCount: FrcTeam.currentEventTeams.length,
+                itemBuilder: (context, index) {
+                  FrcTeam team = FrcTeam.currentEventTeams[index];
+                  return TeamCard(
+                    teamNum: team.number,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PitScoutPage(team: team),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         );

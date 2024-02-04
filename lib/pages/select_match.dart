@@ -26,21 +26,18 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   @override
   void initState() {
     super.initState();
-
-    // Update event information for UI
     loadMatches();
-
-    Future.wait([
-      serverGetCurrentEvent(),
-      serverGetCurrentEventSchedule(),
-    ]).whenComplete(() => setState(() {
-          loadMatches();
-          _loaded = true;
-        }));
-
-    // Preload the list of teams
-    serverGetCurrentEventTeamList();
+    refresh();
   }
+
+  Future<void> refresh() => Future.wait([
+        serverGetCurrentEvent(),
+        serverGetCurrentEventSchedule(),
+        serverGetCurrentEventTeamList(),
+      ]).whenComplete(() => setState(() {
+            loadMatches();
+            _loaded = true;
+          }));
 
   void loadMatches() {
     uncompletedMatches = EventMatch.currentEventSchedule
@@ -67,7 +64,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
           return Scrollbar(
             child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: RefreshIndicator(
+                onRefresh: refresh,
                 child: ListView(children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
@@ -94,7 +93,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                       onPressed: () => setState(() => _showingCompleted = true),
                       child: const Text('Show Completed'),
                     ),
-                ])),
+                ]),
+              ),
+            ),
           );
         },
       ),
