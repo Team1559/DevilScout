@@ -58,6 +58,7 @@ final lightTheme = ThemeData(
     onBackground: Color(0xFF494949),
     surface: Color.fromARGB(255, 236, 235, 235),
     onSurface: Colors.black,
+    surfaceTint: Colors.transparent,
   ),
   textTheme: _textTheme,
   filledButtonTheme: _filledButtonTheme,
@@ -69,7 +70,7 @@ final lightTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.black,
     ),
-    scrolledUnderElevation: 0.0,
+    scrolledUnderElevation: 0,
   ),
   cardTheme: const CardTheme(
     surfaceTintColor: Colors.transparent,
@@ -90,6 +91,7 @@ final darkTheme = ThemeData(
     onBackground: Color(0xFFDDDDDD),
     surface: Color(0xFF404040),
     onSurface: Color(0xFFDDDDDD),
+    surfaceTint: Colors.transparent,
   ),
   textTheme: _textTheme,
   filledButtonTheme: _filledButtonTheme,
@@ -101,10 +103,7 @@ final darkTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.white,
     ),
-    scrolledUnderElevation: 0.0,
-  ),
-  cardTheme: const CardTheme(
-    surfaceTintColor: Colors.transparent,
+    scrolledUnderElevation: 0,
   ),
 );
 

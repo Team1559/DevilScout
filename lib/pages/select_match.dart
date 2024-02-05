@@ -120,7 +120,6 @@ class TeamSelectDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      surfaceTintColor: Colors.transparent,
       contentPadding: const EdgeInsets.all(12),
       title: Text(match.name),
       content: Column(
