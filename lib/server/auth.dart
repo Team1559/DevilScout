@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:devil_scout/server/analysis.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '/server/analysis.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
 import '/server/server.dart';

@@ -38,22 +38,25 @@ class _AnalysisDisplayState extends State<AnalysisDisplay> {
               }),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              FilledButton(
-                onPressed: currentPage == 0 ? null : _previousPage,
-                child: const Text('Previous'),
-              ),
-              const SizedBox(width: 16),
-              FilledButton(
-                onPressed: currentPage == widget.data.pages.length - 1
-                    ? null
-                    : _nextPage,
-                child: const Text('Next'),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                FilledButton(
+                  onPressed: currentPage == 0 ? null : _previousPage,
+                  child: const Text('Previous'),
+                ),
+                const SizedBox(width: 16),
+                FilledButton(
+                  onPressed: currentPage == widget.data.pages.length - 1
+                      ? null
+                      : _nextPage,
+                  child: const Text('Next'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -103,14 +106,14 @@ class _StatisticsDisplayPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             for (int i = 0; i < statistics.length; i++)
-              statistic(context, statistics[i]),
+              _statistic(context, statistics[i]),
           ],
         ),
       ),
     );
   }
 
-  Widget statistic(BuildContext context, Statistic statistic) {
+  Widget _statistic(BuildContext context, Statistic statistic) {
     return Column(
       children: [
         Padding(
@@ -260,16 +263,16 @@ class OprStatisticWidget extends StatisticWidget<OprStatistic> {
         const SizedBox(width: 8),
         Column(
           children: [
-            Text(formatValue(statistic.opr)),
-            Text(formatValue(statistic.dpr)),
-            Text(formatValue(statistic.ccwm)),
+            Text(_formatValue(statistic.opr)),
+            Text(_formatValue(statistic.dpr)),
+            Text(_formatValue(statistic.ccwm)),
           ],
         ),
       ],
     );
   }
 
-  String formatValue(double? value) {
+  String _formatValue(double? value) {
     if (value == null) return '-';
     return value.toStringAsPrecision(3);
   }

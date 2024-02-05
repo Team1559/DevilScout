@@ -70,7 +70,7 @@ final lightTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.black,
     ),
-    scrolledUnderElevation: 0.0,
+    scrolledUnderElevation: 0,
   ),
   cardTheme: const CardTheme(
     surfaceTintColor: Colors.transparent,
@@ -103,7 +103,7 @@ final darkTheme = ThemeData(
     iconTheme: IconThemeData(
       color: Colors.white,
     ),
-    scrolledUnderElevation: 0.0,
+    scrolledUnderElevation: 0,
   ),
 );
 

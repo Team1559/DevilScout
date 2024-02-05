@@ -1,4 +1,3 @@
-import 'package:devil_scout/pages/select_team.dart';
 import 'package:flutter/material.dart';
 
 import '/pages/login.dart';
@@ -6,6 +5,7 @@ import '/pages/manage.dart';
 import '/pages/select_drive_team.dart';
 import '/pages/select_match.dart';
 import '/pages/select_pit.dart';
+import '/pages/select_team.dart';
 import '/pages/settings.dart';
 import '/server/auth.dart';
 import '/server/session_file.dart';
@@ -40,7 +40,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
 
   bool menuVisible = false;
 
-  Widget transitionBuilder(Widget child, Animation<double> animation) =>
+  Widget _transitionBuilder(Widget child, Animation<double> animation) =>
       FadeTransition(
         opacity: animation,
         child: child,
@@ -80,7 +80,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
       appBar: AppBar(
         title: AnimatedSwitcher(
           duration: fadeDuration,
-          transitionBuilder: transitionBuilder,
+          transitionBuilder: _transitionBuilder,
           child: Text(
             menuVisible ? '' : widget.title ?? '',
             key: menuVisible ? const Key('Menu Title') : null,
@@ -99,10 +99,10 @@ class _MenuScaffoldState extends State<MenuScaffold>
       ),
       body: AnimatedSwitcher(
         duration: fadeDuration,
-        transitionBuilder: transitionBuilder,
+        transitionBuilder: _transitionBuilder,
         child: menuVisible
             ? Builder(
-                builder: navigationMenu,
+                builder: _navigationMenu,
                 key: const Key('NavigationMenu'),
               )
             : widget.body,
@@ -110,7 +110,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
     );
   }
 
-  Widget navigationMenu(BuildContext context) {
+  Widget _navigationMenu(BuildContext context) {
     return SafeArea(
       minimum: const EdgeInsets.symmetric(
         horizontal: 28,
@@ -119,66 +119,66 @@ class _MenuScaffoldState extends State<MenuScaffold>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          section(context: context, title: 'Scout', children: [
-            menuItem(
+          _section(context: context, title: 'Scout', children: [
+            _menuItem(
               context: context,
               title: 'Matches',
               icon: const Icon(Icons.event),
-              onTap: pushStatefulIfInactive<MatchSelectPageState>(
+              onTap: _pushStatefulIfInactive<MatchSelectPageState>(
                 context: context,
                 builder: (context) => const MatchSelectPage(),
               ),
             ),
-            menuItem(
+            _menuItem(
               context: context,
               title: 'Pits',
               icon: const Icon(Icons.assignment),
-              onTap: pushStatefulIfInactive<PitSelectPageState>(
+              onTap: _pushStatefulIfInactive<PitSelectPageState>(
                 context: context,
                 builder: (context) => const PitSelectPage(),
               ),
             ),
-            menuItem(
+            _menuItem(
               context: context,
               title: 'Drive Team',
               icon: const Icon(Icons.sports_esports),
-              onTap: pushStatefulIfInactive<DriveTeamSelectPageState>(
+              onTap: _pushStatefulIfInactive<DriveTeamSelectPageState>(
                 context: context,
                 builder: (context) => const DriveTeamSelectPage(),
               ),
             ),
           ]),
-          section(context: context, title: 'Analyze', children: [
-            menuItem(
+          _section(context: context, title: 'Analyze', children: [
+            _menuItem(
               context: context,
               title: 'Teams',
               icon: const Icon(Icons.query_stats),
-              onTap: pushStatefulIfInactive<TeamAnalysisSelectPageState>(
+              onTap: _pushStatefulIfInactive<TeamAnalysisSelectPageState>(
                 context: context,
                 builder: (context) => const TeamAnalysisSelectPage(),
               ),
             ),
           ]),
           if (User.current!.isAdmin)
-            section(context: context, title: 'Admin', children: [
-              menuItem(
+            _section(context: context, title: 'Admin', children: [
+              _menuItem(
                 context: context,
                 title: 'Manage Team ${Team.current!.number}',
                 icon: const Icon(Icons.manage_accounts),
-                onTap: pushStatelessIfInactive<ManagementPage>(
+                onTap: _pushStatelessIfInactive<ManagementPage>(
                   context: context,
                   builder: (context) => const ManagementPage(),
                 ),
               ),
             ]),
           const Spacer(),
-          bottom(context),
+          _bottom(context),
         ],
       ),
     );
   }
 
-  Widget bottom(BuildContext context) {
+  Widget _bottom(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -240,7 +240,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
                   Theme.of(context).colorScheme.surface,
                 ),
               ),
-              onPressed: pushStatefulIfInactive<SettingsPageState>(
+              onPressed: _pushStatefulIfInactive<SettingsPageState>(
                 context: context,
                 builder: (context) => const SettingsPage(),
               ),
@@ -272,7 +272,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
     );
   }
 
-  Widget section({
+  Widget _section({
     required BuildContext context,
     required String title,
     required List<Widget> children,
@@ -296,7 +296,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
     );
   }
 
-  Widget menuItem({
+  Widget _menuItem({
     required BuildContext context,
     required String title,
     required Icon icon,
@@ -312,7 +312,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
     );
   }
 
-  void Function() pushStatefulIfInactive<STATE extends State>({
+  void Function() _pushStatefulIfInactive<STATE extends State>({
     required BuildContext context,
     required Widget Function(BuildContext) builder,
   }) {
@@ -327,7 +327,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
         );
   }
 
-  void Function() pushStatelessIfInactive<WIDGET extends Widget>({
+  void Function() _pushStatelessIfInactive<WIDGET extends Widget>({
     required BuildContext context,
     required Widget Function(BuildContext) builder,
   }) {

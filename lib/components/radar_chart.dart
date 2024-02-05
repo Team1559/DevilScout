@@ -72,13 +72,70 @@ class RadarChartPainter extends CustomPainter {
     double scale = radius / widget.max;
     double angle = 2 * pi / widget.features.length;
 
-    drawAxis(canvas, center, radius * scaleFactor);
-    drawTicks(canvas, center, radius * scaleFactor, scale * scaleFactor);
-    drawGraph(canvas, center, radius * scaleFactor, scale * scaleFactor, angle);
-    drawLabels(canvas, center, radius);
+    _drawAxis(canvas, center, radius * scaleFactor);
+    _drawTicks(canvas, center, radius * scaleFactor, scale * scaleFactor);
+    _drawGraph(
+        canvas, center, radius * scaleFactor, scale * scaleFactor, angle);
+    _drawLabels(canvas, center, radius);
   }
 
-  void drawGraph(
+  void _drawAxis(Canvas canvas, Offset center, double radius) {
+    double angle = 2 * pi / widget.features.length;
+
+    widget.features.asMap().forEach((index, feature) {
+      double xAngle = cos(angle * index - halfPi);
+      double yAngle = sin(angle * index - halfPi);
+
+      Offset featureOffset = Offset(
+        center.dx + radius * xAngle,
+        center.dy + radius * yAngle,
+      );
+
+      canvas.drawLine(
+        center,
+        featureOffset,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..isAntiAlias = true
+          ..color = widget.axisColor
+          ..strokeWidth = 1,
+      );
+    });
+  }
+
+  void _drawTicks(Canvas canvas, Offset center, double radius, double scale) {
+    if (widget.tickSize == 0) return;
+
+    List<String> tickLabels =
+        List.generate(widget.max.ceil() + 1, (index) => index.toString());
+
+    Path path = Path();
+
+    tickLabels.asMap().forEach((index, tick) {
+      double tickRadius = scale * index;
+      double sliceSize = 2 * pi / widget.features.length;
+
+      for (int i = 0; i <= widget.features.length; i++) {
+        double cosine = cos(sliceSize * i - RadarChartPainter.halfPi);
+        double sine = sin(sliceSize * i - RadarChartPainter.halfPi);
+        double x = tickRadius * cosine + center.dx;
+        double y = tickRadius * sine + center.dy;
+        path.moveTo(x + sine * widget.tickSize, y - cosine * widget.tickSize);
+        path.lineTo(x - sine * widget.tickSize, y + cosine * widget.tickSize);
+      }
+    });
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..isAntiAlias = true
+        ..color = widget.tickColor
+        ..strokeWidth = widget.tickWidth,
+    );
+  }
+
+  void _drawGraph(
     Canvas canvas,
     Offset center,
     double radius,
@@ -113,63 +170,7 @@ class RadarChartPainter extends CustomPainter {
     );
   }
 
-  void drawTicks(Canvas canvas, Offset center, double radius, double scale) {
-    if (widget.tickSize == 0) return;
-
-    List<String> tickLabels =
-        List.generate(widget.max.ceil() + 1, (index) => index.toString());
-
-    Path path = Path();
-
-    tickLabels.asMap().forEach((index, tick) {
-      double tickRadius = scale * index;
-      double sliceSize = 2 * pi / widget.features.length;
-
-      for (int i = 0; i <= widget.features.length; i++) {
-        double cosine = cos(sliceSize * i - RadarChartPainter.halfPi);
-        double sine = sin(sliceSize * i - RadarChartPainter.halfPi);
-        double x = tickRadius * cosine + center.dx;
-        double y = tickRadius * sine + center.dy;
-        path.moveTo(x + sine * widget.tickSize, y - cosine * widget.tickSize);
-        path.lineTo(x - sine * widget.tickSize, y + cosine * widget.tickSize);
-      }
-    });
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..isAntiAlias = true
-        ..color = widget.tickColor
-        ..strokeWidth = widget.tickWidth,
-    );
-  }
-
-  void drawAxis(Canvas canvas, Offset center, double radius) {
-    double angle = 2 * pi / widget.features.length;
-
-    widget.features.asMap().forEach((index, feature) {
-      double xAngle = cos(angle * index - halfPi);
-      double yAngle = sin(angle * index - halfPi);
-
-      Offset featureOffset = Offset(
-        center.dx + radius * xAngle,
-        center.dy + radius * yAngle,
-      );
-
-      canvas.drawLine(
-        center,
-        featureOffset,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..isAntiAlias = true
-          ..color = widget.axisColor
-          ..strokeWidth = 1,
-      );
-    });
-  }
-
-  void drawLabels(Canvas canvas, Offset center, double radius) {
+  void _drawLabels(Canvas canvas, Offset center, double radius) {
     double anglePerSlice = 2 * pi / widget.features.length;
 
     widget.features.asMap().forEach((index, feature) {

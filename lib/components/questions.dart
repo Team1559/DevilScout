@@ -58,22 +58,25 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
               }),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              FilledButton(
-                onPressed: currentPage == 0 ? null : _previousPage,
-                child: const Text('Previous'),
-              ),
-              const SizedBox(width: 16),
-              FilledButton(
-                onPressed: _submitButtonAction(),
-                child: currentPage == widget.pages.length - 1
-                    ? const Text('Submit')
-                    : const Text('Next'),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                FilledButton(
+                  onPressed: currentPage == 0 ? null : _previousPage,
+                  child: const Text('Previous'),
+                ),
+                const SizedBox(width: 16),
+                FilledButton(
+                  onPressed: _submitButtonAction(),
+                  child: currentPage == widget.pages.length - 1
+                      ? const Text('Submit')
+                      : const Text('Next'),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -105,8 +105,11 @@ class PieChartStatistic extends Statistic {
   final int total;
   final List<PieChartSlice>? slices;
 
-  const PieChartStatistic(
-      {required super.name, required this.total, required this.slices});
+  const PieChartStatistic({
+    required super.name,
+    required this.total,
+    required this.slices,
+  });
 }
 
 @JsonSerializable(createToJson: false)
@@ -171,11 +174,11 @@ class WltStatistic extends Statistic {
   });
 }
 
-Future<ServerResponse<List<TeamStatistics>>> serverGetCurrentEventTeamAnalysis() =>
-    serverRequest(
-      path: 'analysis/${Team.current!.eventKey}/teams',
-      method: 'GET',
-      etag: TeamStatistics._currentEtag,
-      decoder: listOf(TeamStatistics.fromJson),
-      callback: (stats) => TeamStatistics.currentList = stats,
-    );
+Future<ServerResponse<List<TeamStatistics>>>
+    serverGetCurrentEventTeamAnalysis() => serverRequest(
+          path: 'analysis/${Team.current!.eventKey}/teams',
+          method: 'GET',
+          etag: TeamStatistics._currentEtag,
+          decoder: listOf(TeamStatistics.fromJson),
+          callback: (stats) => TeamStatistics.currentList = stats,
+        );
