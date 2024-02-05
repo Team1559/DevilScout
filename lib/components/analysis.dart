@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 import '/components/radar_chart.dart';
 import '/server/analysis.dart';
@@ -171,7 +172,52 @@ class BooleanStatisticWidget extends StatisticWidget<BooleanStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a BooleanStatistic');
+    if (statistic.percent == null) {
+      return const Text('No Data');
+    }
+
+    return PieChart(
+      dataMap: {
+        'Yes': statistic.percent!,
+        'No': 1 - statistic.percent!,
+      },
+      animationDuration: Duration.zero,
+      chartType: ChartType.ring,
+      chartRadius: MediaQuery.of(context).size.width * 0.5,
+      colorList: const [
+        Colors.green,
+        Colors.red,
+      ],
+      initialAngleInDegree: 270,
+      chartLegendSpacing: 24,
+      legendOptions: const LegendOptions(
+        legendPosition: LegendPosition.left,
+      ),
+      chartValuesOptions: ChartValuesOptions(
+        chartValueBackgroundColor: Theme.of(context).colorScheme.surface,
+        chartValueStyle:
+            Theme.of(context).textTheme.titleSmall ?? defaultChartValueStyle,
+      ),
+      formatChartValues: (d) {
+        if (d <= 0) {
+          return '0%';
+        } else if (d < 0.001) {
+          return '< 0.1%';
+        } else if (d < 0.01) {
+          return '${(d * 100).toStringAsFixed(1)}%';
+        }
+
+        if (d >= 1) {
+          return '100%';
+        } else if (d > 0.999) {
+          return '> 99.9%';
+        } else if (d > 0.99) {
+          return '${(d * 100).toStringAsFixed(1)}%';
+        }
+
+        return '${(d * 100).toStringAsFixed(0)}%';
+      },
+    );
   }
 }
 
@@ -230,11 +276,42 @@ class OprStatisticWidget extends StatisticWidget<OprStatistic> {
 }
 
 class PieChartStatisticWidget extends StatisticWidget<PieChartStatistic> {
+  static const List<Color> colors = [
+    Colors.red,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+  ];
+
   const PieChartStatisticWidget({super.key, required super.statistic});
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a PieChartStatistic');
+    if (statistic.slices == null) {
+      return const Text('No Data');
+    }
+
+    return PieChart(
+      dataMap: {
+        for (PieChartSlice slice in statistic.slices!)
+          slice.label: slice.count?.toDouble() ?? 0
+      },
+      animationDuration: Duration.zero,
+      chartType: ChartType.ring,
+      chartRadius: MediaQuery.of(context).size.width * 0.5,
+      colorList: colors,
+      initialAngleInDegree: 270,
+      chartLegendSpacing: 24,
+      legendOptions: const LegendOptions(
+        legendPosition: LegendPosition.left,
+      ),
+      chartValuesOptions: ChartValuesOptions(
+        chartValueBackgroundColor: Theme.of(context).colorScheme.surface,
+        chartValueStyle:
+            Theme.of(context).textTheme.titleSmall ?? defaultChartValueStyle,
+        decimalPlaces: 0,
+      ),
+    );
   }
 }
 
@@ -254,8 +331,9 @@ class RadarStatisticWidget extends StatisticWidget<RadarStatistic> {
             .toList(growable: false),
         graphColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
         graphStrokeColor: Theme.of(context).colorScheme.primary,
-        axisColor: Colors.white60,
-        tickColor: Colors.white54,
+        axisColor: Theme.of(context).colorScheme.onBackground,
+        tickColor: Theme.of(context).colorScheme.onBackground,
+        labelTextStyle: Theme.of(context).textTheme.titleSmall,
         tickSize: 5,
       ),
     );

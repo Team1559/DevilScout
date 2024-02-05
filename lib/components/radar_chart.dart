@@ -54,7 +54,7 @@ class RadarChart extends StatelessWidget {
 
 class RadarChartPainter extends CustomPainter {
   static const halfPi = pi / 2;
-  static const scaleFactor = 0.9;
+  static const scaleFactor = 0.8;
 
   final RadarChart widget;
 
@@ -184,7 +184,7 @@ class RadarChartPainter extends CustomPainter {
       canvas.save();
       canvas.translate(center.dx, center.dy);
       canvas.rotate(angle);
-      canvas.translate(0, -radius);
+      canvas.translate(0, -radius * 0.9);
 
       if (angle > halfPi && angle < 3 * halfPi) {
         canvas.rotate(pi);
