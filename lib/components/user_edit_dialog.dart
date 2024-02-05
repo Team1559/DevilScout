@@ -56,30 +56,33 @@ class _UserEditDialogState extends State<UserEditDialog> {
       ),
       child: SafeArea(
         minimum: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        child: ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           children: [
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context, widget.user),
-                ),
-                const Spacer(),
-                Text(
-                  widget.user == null ? 'Add User' : 'Edit User',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                IconButton.filled(
-                  onPressed:
-                      _areFieldsValid() ? () => _tryEditUser(context) : null,
-                  icon: const Icon(Icons.check),
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 4),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context, widget.user),
+                  ),
+                  const Spacer(),
+                  Text(
+                    widget.user == null ? 'Add User' : 'Edit User',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const Spacer(),
+                  IconButton.filled(
+                    onPressed:
+                        _areFieldsValid() ? () => _tryEditUser(context) : null,
+                    icon: const Icon(Icons.check),
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 4),
+                ],
+              ),
             ),
             SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
