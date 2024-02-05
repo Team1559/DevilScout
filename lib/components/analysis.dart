@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/radar_chart.dart';
 import '/server/analysis.dart';
 
 class AnalysisDisplay extends StatefulWidget {
@@ -206,7 +207,22 @@ class RadarStatisticWidget extends StatisticWidget<RadarStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a RadarStatistic');
+    double size = MediaQuery.of(context).size.width * 0.7;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: RadarChart(
+        max: statistic.max,
+        features: statistic.points
+            .map((e) => RadarChartPoint(label: e.label, value: e.value ?? 0))
+            .toList(growable: false),
+        graphColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+        graphStrokeColor: Theme.of(context).colorScheme.primary,
+        axisColor: Colors.white60,
+        tickColor: Colors.white54,
+        tickSize: 5,
+      ),
+    );
   }
 }
 
@@ -225,7 +241,7 @@ class StringStatisticWidget extends StatisticWidget<StringStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a StringStatistic');
+    return Text(statistic.value ?? '-');
   }
 }
 
