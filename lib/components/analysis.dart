@@ -180,7 +180,18 @@ class NumberStatisticWidget extends StatisticWidget<NumberStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a NumberStatistic');
+    return Column(
+      children: [
+        Text(
+          statistic.mean?.toString() ?? '-',
+          style: Theme.of(context).textTheme.displaySmall,
+        ),
+        Text(
+          'Std dev ${statistic.stddev ?? '-'}  Max: ${statistic.max ?? '-'}',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ],
+    );
   }
 }
 
@@ -189,7 +200,32 @@ class OprStatisticWidget extends StatisticWidget<OprStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a OprStatistic');
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('OPR:'),
+            Text('DPR:'),
+            Text('CCWM:'),
+          ],
+        ),
+        const SizedBox(width: 8),
+        Column(
+          children: [
+            Text(formatValue(statistic.opr)),
+            Text(formatValue(statistic.dpr)),
+            Text(formatValue(statistic.ccwm)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String formatValue(double? value) {
+    if (value == null) return '-';
+    return value.toStringAsPrecision(3);
   }
 }
 
@@ -232,7 +268,24 @@ class RankingPointsStatisticWidget
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a RankingPointsStatistic');
+    if (statistic.points == null) {
+      return const Text('No Data');
+    }
+
+    return Row(
+      children: [
+        Column(
+          children: statistic.points!.keys
+              .map((e) => Text(e))
+              .toList(growable: false),
+        ),
+        Column(
+          children: statistic.points!.values
+              .map((e) => Text(e.toString()))
+              .toList(growable: false),
+        ),
+      ],
+    );
   }
 }
 
@@ -250,6 +303,26 @@ class WltStatisticWidget extends StatisticWidget<WltStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return const Text('This is a WtlStatistic');
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Wins:'),
+            Text('Losses:'),
+            Text('Ties:'),
+          ],
+        ),
+        const SizedBox(width: 8),
+        Column(
+          children: [
+            Text(statistic.wins.toString()),
+            Text(statistic.losses.toString()),
+            Text(statistic.ties.toString()),
+          ],
+        ),
+      ],
+    );
   }
 }
