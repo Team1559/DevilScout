@@ -1,13 +1,13 @@
 # DevilScout
 
-A mobile app for collecting scouting data at FRC competitions by Team 1559. Built using Flutter, it runs on both iOS and Android devices, and is designed with future expansion in mind. Features (will) include:
+A mobile app for collecting scouting data at FRC competitions, built by Team 1559. Using the Flutter framework, it runs on both iOS and Android devices, and is designed with future expansion in mind. Features include:
 - Live data collection from matches and pits
 - Additional data powered by [The Blue Alliance](https://thebluealliance.com)
-- Analysis summaries for teams and matches
-- Custom centralized database server
+- Team analysis summaries
 - Management by team admins
 - Secure authentication
-- And more to come in the future! See our [GitHub Project](https://github.com/orgs/Team1559/projects/5)
+- Custom centralized database servers
+- And more to come in the future!
 
 ## Building
 
