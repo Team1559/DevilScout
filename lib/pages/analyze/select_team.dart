@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
-import '/pages/analyze_team.dart';
+import '/pages/analyze/analyze_team.dart';
 import '/server/analysis.dart';
 import '/server/events.dart';
 import '/server/teams.dart';

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '/pages/login.dart';
-import '/pages/manage.dart';
-import '/pages/select_drive_team.dart';
-import '/pages/select_match.dart';
-import '/pages/select_pit.dart';
-import '/pages/select_team.dart';
-import '/pages/settings.dart';
+import '/pages/analyze/select_team.dart';
+import '/pages/login/login.dart';
+import '/pages/management/manage.dart';
+import '/pages/scout/select_drive_team.dart';
+import '/pages/scout/select_match.dart';
+import '/pages/scout/select_pit.dart';
+import '/pages/settings/settings.dart';
 import '/server/auth.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
