@@ -1,7 +1,10 @@
+import 'package:devil_scout/pages/settings/legal.dart';
+import 'package:devil_scout/pages/settings/technical.dart';
 import 'package:flutter/material.dart';
 
 import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
+import '/pages/settings/about.dart';
 import '/server/users.dart';
 import '/settings.dart';
 import '/theme.dart';
@@ -112,6 +115,36 @@ class SettingsPageState extends State<SettingsPage> {
                                       : ThemeMode.light;
                             },
                           ),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  'About',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutPage()),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  'Technical',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TechnicalPage()),
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  'Legal',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LegalPage()),
                 ),
               ),
             ],
