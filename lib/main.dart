@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '/pages/load_session.dart';
+import '/pages/login/load_session.dart';
 import '/settings.dart';
 import '/theme.dart';
 

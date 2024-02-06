@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '/components/text_field.dart';
 import '/components/loading_overlay.dart';
 import '/components/snackbar.dart';
-import '/pages/select_match.dart';
+import '/components/text_field.dart';
+import '/pages/scout/select_match.dart';
 import '/server/auth.dart';
 import '/server/session.dart';
 import '/server/session_file.dart';

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
-import '/pages/scout_drive_team.dart';
+import '/components/team_card.dart';
+import '/pages/scout/scout_pit.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 
-class DriveTeamSelectPage extends StatefulWidget {
-  const DriveTeamSelectPage({super.key});
+class PitSelectPage extends StatefulWidget {
+  const PitSelectPage({super.key});
 
   @override
-  State<DriveTeamSelectPage> createState() => DriveTeamSelectPageState();
+  State<PitSelectPage> createState() => PitSelectPageState();
 }
 
-class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
+class PitSelectPageState extends State<PitSelectPage> {
   bool loaded = false;
 
   @override
@@ -25,18 +25,17 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
 
   Future<void> refresh() => Future.wait([
         serverGetCurrentEvent(),
-        serverGetCurrentEventSchedule(),
         serverGetCurrentEventTeamList(),
       ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
     return MenuScaffold(
-      title: 'Select Match',
+      title: 'Select Team',
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();
-        } else if (EventMatch.currentTeamSchedule.isEmpty && !loaded) {
+        } else if (FrcTeam.currentEventTeams.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -46,18 +45,19 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
             child: RefreshIndicator(
               onRefresh: refresh,
               child: ListView.builder(
-                itemCount: EventMatch.currentTeamSchedule.length,
-                itemBuilder: (context, index) => MatchCard(
-                  match: EventMatch.currentTeamSchedule[index],
-                  onTap: (match) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DriveTeamScoutPage(
-                        match: match,
+                itemCount: FrcTeam.currentEventTeams.length,
+                itemBuilder: (context, index) {
+                  FrcTeam team = FrcTeam.currentEventTeams[index];
+                  return TeamCard(
+                    teamNum: team.number,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PitScoutPage(team: team),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),

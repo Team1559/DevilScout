@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/pages/manage.dart';
+import '/pages/management/manage.dart';
 import '/server/users.dart';
 
 class NoEventSetWidget extends StatelessWidget {

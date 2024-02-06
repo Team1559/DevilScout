@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '/components/snackbar.dart';
 import '/components/text_field.dart';
-import '/pages/login.dart';
+import '/pages/login/login.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
 import '/server/session_file.dart';

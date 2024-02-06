@@ -4,7 +4,7 @@ import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
 import '/components/team_card.dart';
-import '/pages/scout_match.dart';
+import '/pages/scout/scout_match.dart';
 import '/server/events.dart';
 import '/server/teams.dart';
 import '/theme.dart';

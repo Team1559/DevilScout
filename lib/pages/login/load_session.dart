@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '/pages/login.dart';
-import '/pages/select_match.dart';
+import '/pages/login/login.dart';
+import '/pages/scout/select_match.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
 import '/server/users.dart';
