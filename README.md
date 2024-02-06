@@ -16,3 +16,9 @@ Requires Flutter SDK v3.1.5 or higher. Dart packages will be downloaded automati
 ## Usage
 
 See our [wiki](https://github.com/Team1559/DevilScout/wiki) for guides, instructions, and other assistance.
+
+## Screenshots
+
+| Main Menu | Match Select | Questions |
+|-|-|-|
+| ![Screenshot of Main Menu](https://github.com/Team1559/DevilScout/assets/89086035/3ca4cbf7-5858-45e1-b8ee-32963d2a4a4a) | ![Screenshot of Match Select](https://github.com/Team1559/DevilScout/assets/89086035/12109250-f9eb-431c-a2d1-6fad0d93be59) | ![Screenshot of Questions](https://github.com/Team1559/DevilScout/assets/89086035/0aa8f7ca-e3e9-46da-b4b6-bca24cb95c5d) |
