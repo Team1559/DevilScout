@@ -70,9 +70,21 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                 child: ListView(children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                    child: Text(
-                      Event.currentEvent!.name,
-                      style: Theme.of(context).textTheme.titleLarge,
+                    child: Column(
+                      children: [
+                        Text(
+                          Event.currentEvent!.name,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        if (EventMatch.currentEventSchedule.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'No matches',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   for (EventMatch match in uncompletedMatches)
@@ -94,7 +106,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                           builder: (context) => TeamSelectDialog(match: match),
                         ),
                       ),
-                  if (!_showingCompleted)
+                  if (!_showingCompleted && completedMatches.isNotEmpty)
                     TextButton(
                       onPressed: () => setState(() => _showingCompleted = true),
                       child: const Text('Show Completed'),
