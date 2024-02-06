@@ -54,7 +54,7 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri _serverApiUri =
+final Uri serverApiUri =
     Uri.parse('https://scouting.victorrobotics.org/api/v1/');
 final Client _httpClient = Client();
 
@@ -84,7 +84,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   Etag? etag,
   Object? payload,
 }) async {
-  Request request = Request(method, _serverApiUri.resolve(path));
+  Request request = Request(method, serverApiUri.resolve(path));
 
   if (Session.current != null) {
     request.headers.addAll({'X-DS-SESSION-KEY': Session.current!.key});

@@ -1,10 +1,10 @@
-import 'package:devil_scout/pages/settings/legal.dart';
-import 'package:devil_scout/pages/settings/technical.dart';
 import 'package:flutter/material.dart';
 
 import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/pages/settings/about.dart';
+import '/pages/settings/legal.dart';
+import '/pages/settings/technical.dart';
 import '/server/users.dart';
 import '/settings.dart';
 import '/theme.dart';
