@@ -64,7 +64,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
           return Scrollbar(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: RefreshIndicator(
                 onRefresh: refresh,
                 child: ListView(children: [
