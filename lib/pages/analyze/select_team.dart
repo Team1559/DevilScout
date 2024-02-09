@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
+import '/components/team_card.dart';
 import '/pages/analyze/analyze_team.dart';
 import '/server/analysis.dart';
 import '/server/events.dart';
@@ -41,59 +42,28 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
         }
 
         return Scrollbar(
-          child: RefreshIndicator(
-            onRefresh: refresh,
-            child: ListView.builder(
-              itemCount: TeamStatistics.currentList.length,
-              itemBuilder: (context, index) => TeamCard(
-                statistics: TeamStatistics.currentList[index],
-                team: FrcTeam.currentEventTeams.singleWhere(
-                  (t) => t.number == TeamStatistics.currentList[index].team,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                itemCount: TeamStatistics.currentList.length,
+                itemBuilder: (context, index) => TeamCard(
+                  teamNum: TeamStatistics.currentList[index].team,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TeamAnalysisPage(
+                        statistics: TeamStatistics.currentList[index],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         );
       }),
-    );
-  }
-}
-
-class TeamCard extends StatelessWidget {
-  final FrcTeam team;
-  final TeamStatistics statistics;
-
-  const TeamCard({super.key, required this.team, required this.statistics});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        trailing: Text(
-          '${team.number}',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        title: Text(
-          team.name,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        subtitle: Text(
-          team.location,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TeamAnalysisPage(statistics: statistics),
-          ),
-        ),
-      ),
     );
   }
 }

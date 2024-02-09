@@ -1,87 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 
+import '/components/horizontal_view.dart';
 import '/components/radar_chart.dart';
 import '/server/analysis.dart';
 
-class AnalysisDisplay extends StatefulWidget {
-  final TeamStatistics data;
-
-  const AnalysisDisplay({super.key, required this.data});
+class AnalysisDisplay extends HorizontalPageView<StatisticsPage> {
+  const AnalysisDisplay({super.key, required super.pages});
 
   @override
   State<AnalysisDisplay> createState() => _AnalysisDisplayState();
 }
 
-class _AnalysisDisplayState extends State<AnalysisDisplay> {
-  final PageController controller = PageController();
-
-  int currentPage = 0;
-
+class _AnalysisDisplayState
+    extends HorizontalPageViewState<StatisticsPage, AnalysisDisplay> {
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      minimum: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            child: PageView(
-              controller: controller,
-              onPageChanged: (page) => setState(() => currentPage = page),
-              children: List.generate(widget.data.pages.length, (index) {
-                StatisticsPage page = widget.data.pages[index];
-                return _StatisticsDisplayPage(
-                  title: page.title,
-                  statistics: page.statistics,
-                );
-              }),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                FilledButton(
-                  onPressed: currentPage == 0 ? null : _previousPage,
-                  child: const Text('Previous'),
-                ),
-                const SizedBox(width: 16),
-                FilledButton(
-                  onPressed: currentPage == widget.data.pages.length - 1
-                      ? null
-                      : _nextPage,
-                  child: const Text('Next'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _nextPage() {
-    if (currentPage != widget.data.pages.length - 1) {
-      setState(() => currentPage++);
-      _gotoPage();
-    }
-  }
-
-  void _previousPage() {
-    if (currentPage != 0) {
-      setState(() => currentPage--);
-      _gotoPage();
-    }
-  }
-
-  void _gotoPage() {
-    controller.animateToPage(
-      currentPage,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
+  Widget buildPage(StatisticsPage page) {
+    return _StatisticsDisplayPage(
+      title: page.title,
+      statistics: page.statistics,
     );
   }
 }
@@ -94,21 +31,19 @@ class _StatisticsDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ListView(
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineLarge,
-              textAlign: TextAlign.center,
-            ),
-            for (int i = 0; i < statistics.length; i++)
-              _statistic(context, statistics[i]),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: ListView(
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          for (int i = 0; i < statistics.length; i++)
+            _statistic(context, statistics[i]),
+        ],
       ),
     );
   }

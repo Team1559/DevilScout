@@ -24,7 +24,7 @@ class TeamAnalysisPage extends StatelessWidget {
           ),
         ),
       ),
-      body: AnalysisDisplay(data: statistics),
+      body: AnalysisDisplay(pages: statistics.pages),
     );
   }
 }

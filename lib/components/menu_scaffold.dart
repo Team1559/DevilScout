@@ -327,7 +327,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
         );
   }
 
-  void Function() _pushStatelessIfInactive<WIDGET extends Widget>({
+  void Function() _pushStatelessIfInactive<WIDGET extends StatelessWidget>({
     required BuildContext context,
     required Widget Function(BuildContext) builder,
   }) {
