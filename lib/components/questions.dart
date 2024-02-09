@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
+import '/components/horizontal_view.dart';
 import '/components/snackbar.dart';
 import '/server/questions.dart';
 import '/server/server.dart';
 
-class QuestionDisplay extends StatefulWidget {
-  final List<QuestionPage> pages;
+class QuestionDisplay extends HorizontalPageView<QuestionPage> {
   final Future<ServerResponse<void>> Function(Map<String, Map<String, dynamic>>)
       submitAction;
 
   const QuestionDisplay({
     super.key,
-    required this.pages,
+    required super.pages,
     required this.submitAction,
-  });
+  }) : super(lastPageButtonLabel: 'Submit');
 
   @override
-  State<QuestionDisplay> createState() => _QuestionDisplayState();
+  State<QuestionDisplay> createState() => _QuestionDisplay2State();
 }
 
-class _QuestionDisplayState extends State<QuestionDisplay> {
-  final PageController controller = PageController();
-  late final Map<String, Map<String, dynamic>> responses;
-
-  int currentPage = 0;
+class _QuestionDisplay2State
+    extends HorizontalPageViewState<QuestionPage, QuestionDisplay> {
+  final Map<String, Map<String, dynamic>> responses = {};
 
   @override
-  void initState() {
-    super.initState();
-    responses = {};
+  Widget buildPage(QuestionPage page) {
+    return _QuestionDisplayPage(
+      sectionTitle: page.title,
+      questions: page.questions,
+      responses: responses.putIfAbsent(page.key, () => {}),
+      listener: _listener,
+    );
   }
 
   void _listener() {
@@ -37,56 +39,8 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      minimum: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            child: PageView(
-              controller: controller,
-              onPageChanged: (page) => setState(() => currentPage = page),
-              children: List.generate(widget.pages.length, (index) {
-                QuestionPage page = widget.pages[index];
-                return _QuestionDisplayPage(
-                  sectionTitle: page.title,
-                  questions: page.questions,
-                  responses: responses.putIfAbsent(page.key, () => {}),
-                  listener: _listener,
-                );
-              }),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                FilledButton(
-                  onPressed: currentPage == 0 ? null : _previousPage,
-                  child: const Text('Previous'),
-                ),
-                const SizedBox(width: 16),
-                FilledButton(
-                  onPressed: _submitButtonAction(),
-                  child: currentPage == widget.pages.length - 1
-                      ? const Text('Submit')
-                      : const Text('Next'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void Function()? _submitButtonAction() {
-    if (currentPage != widget.pages.length - 1) {
-      return _nextPage;
-    } else if (!_allQuestionsAnswered()) {
+  void Function()? lastPageButtonAction() {
+    if (!_allQuestionsAnswered()) {
       return null;
     }
 
@@ -147,32 +101,6 @@ class _QuestionDisplayState extends State<QuestionDisplay> {
     });
   }
 
-  void _nextPage() {
-    if (currentPage != widget.pages.length - 1) {
-      setState(() {
-        currentPage++;
-      });
-      _gotoPage();
-    }
-  }
-
-  void _previousPage() {
-    if (currentPage != 0) {
-      setState(() {
-        currentPage--;
-      });
-      _gotoPage();
-    }
-  }
-
-  void _gotoPage() {
-    controller.animateToPage(
-      currentPage,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
-    );
-  }
-
   bool _allQuestionsAnswered() {
     for (QuestionPage page in widget.pages) {
       if (!responses.containsKey(page.key)) {
@@ -217,21 +145,19 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
   Widget build(BuildContext context) {
     super.build(context); // required by KeepAlive
 
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ListView(
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              widget.sectionTitle,
-              style: Theme.of(context).textTheme.headlineLarge,
-              textAlign: TextAlign.center,
-            ),
-            for (int i = 0; i < widget.questions.length; i++)
-              question(context, widget.questions[i]),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: ListView(
+        children: [
+          const SizedBox(height: 16),
+          Text(
+            widget.sectionTitle,
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          for (int i = 0; i < widget.questions.length; i++)
+            question(context, widget.questions[i]),
+        ],
       ),
     );
   }
