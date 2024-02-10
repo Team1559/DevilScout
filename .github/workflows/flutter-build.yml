@@ -18,6 +18,8 @@ jobs:
       run: flutter pub get
     - name: Generate source files
       run: dart run build_runner build --delete-conflicting-outputs
+    - name: Generate app icons
+      run: dart run flutter_launcher_icons
     - name: Build for iOS
       run: flutter build ios --release --no-codesign
 
@@ -40,5 +42,7 @@ jobs:
       run: flutter pub get
     - name: Generate source files
       run: dart run build_runner build --delete-conflicting-outputs
+    - name: Generate app icons
+      run: dart run flutter_launcher_icons
     - name: Build for Android
       run: flutter build appbundle --release
