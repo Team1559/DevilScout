@@ -27,8 +27,9 @@ jobs:
       uses: dkershner6/switch-case-action@v1
       id: platform-build-command
       with:
-        conditionals: |
+        conditionals-with-values: |
           ${{ matrix.platform == 'iOS' }} => flutter build ios --release --no-codesign
           ${{ matrix.platform == 'Android' }} => flutter build appbundle --release
+        default: ''
     - name: Build for ${{ matrix.platform }}
       run: ${{ steps.platform-build-command.outputs.value }}
