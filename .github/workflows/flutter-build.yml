@@ -19,10 +19,16 @@ jobs:
       with:
         channel: 'stable'
         cache: true
-    - name: Download dart packages
+    - name: Download dart dependencies
       run: flutter pub get
     - name: Generate source files
       run: dart run build_runner build --delete-conflicting-outputs
+    - name: Set up JDK 11
+      if: matrix.platform == 'Android'
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
     - name: Get build command for ${{ matrix.platform }}
       uses: dkershner6/switch-case-action@v1
       id: platform-build-command
@@ -31,11 +37,5 @@ jobs:
           ${{ matrix.platform == 'iOS' }} => flutter build ios --release --no-codesign
           ${{ matrix.platform == 'Android' }} => flutter build appbundle --release
         default: ''
-    - name: Set up JDK 11
-      if: matrix.platform == 'Android'
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '11'
     - name: Build for ${{ matrix.platform }}
       run: ${{ steps.platform-build-command.outputs.value }}
