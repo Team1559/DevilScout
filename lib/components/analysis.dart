@@ -43,6 +43,7 @@ class _StatisticsDisplayPage extends StatelessWidget {
           ),
           for (int i = 0; i < statistics.length; i++)
             _statistic(context, statistics[i]),
+          const SizedBox(height: 16),
         ],
       ),
     );
