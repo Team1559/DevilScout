@@ -162,7 +162,7 @@ class TeamSelectDialog extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => MatchScoutPage(
                     match: match,
-                    team: match.blue[i],
+                    team: match.red[i],
                   ),
                 ),
               ),
