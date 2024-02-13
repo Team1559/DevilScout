@@ -157,6 +157,7 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
           ),
           for (int i = 0; i < widget.questions.length; i++)
             question(context, widget.questions[i]),
+          const SizedBox(height: 16),
         ],
       ),
     );
