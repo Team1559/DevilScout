@@ -23,6 +23,8 @@ jobs:
       run: flutter pub get
     - name: Generate source files
       run: dart run build_runner build --delete-conflicting-outputs
+    - name: Generate app icons
+      run: dart run flutter_launcher_icons
     - name: Set up JDK 11
       if: matrix.platform == 'Android'
       uses: actions/setup-java@v3

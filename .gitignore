@@ -140,3 +140,6 @@ app.*.symbols
 # CUSTOM ADDITIONS
 *.g.dart
 lib/server/test.dart
+ios/Runner/Assets.xcassets/AppIcon.appiconset/*
+!ios/Runner/Assets.xcassets/AppIcon.appiconset/README.md
+android/app/src/main/res/mipmap*
