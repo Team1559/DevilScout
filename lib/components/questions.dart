@@ -586,21 +586,49 @@ class _SingleChoiceQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        widget.config.options.length,
-        (index) => ListTile(
-          dense: true,
-          title: Text(
-            widget.config.options[index],
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          trailing: Radio(
-            value: index,
-            groupValue: value,
-            onChanged: setValue,
-          ),
-          onTap: () => setValue(index),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: Colors.black, width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          children: widget.config.options.asMap().entries.map((entry) {
+            int idx = entry.key;
+            String val = entry.value;
+            return Column(
+              children: [
+                if (idx != 0)
+                  const Divider(
+                    height: 2.0,
+                    color: Colors.black,
+                    thickness: 2,
+                  ),
+                InkWell(
+                  onTap: () => setValue(idx),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    color: value == idx
+                        ? Theme.of(context).colorScheme.secondary
+                        : Colors.transparent,
+                    child: ListTile(
+                      dense: true,
+                      title: Text(
+                        val,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      // trailing: Radio(
+                      //   value: idx,
+                      //   groupValue: value,
+                      //   onChanged: setValue,
+                      // ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ),
     );
