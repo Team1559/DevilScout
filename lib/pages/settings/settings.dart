@@ -78,14 +78,14 @@ class SettingsPageState extends State<SettingsPage> {
                   value: settings!.theme == ThemeMode.system,
                   onChanged: (value) => setState(() {
                     settings!.theme =
-                        value! ? ThemeMode.system : ThemeModeHelper.current();
+                        value! ? ThemeMode.system : ThemeModeHelper.platform();
                   }),
                 ),
                 onTap: () => setState(
                   () {
                     settings!.theme = settings!.theme != ThemeMode.system
                         ? ThemeMode.system
-                        : ThemeModeHelper.current();
+                        : ThemeModeHelper.platform();
                   },
                 ),
               ),
@@ -134,7 +134,8 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TechnicalPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const TechnicalPage()),
                 ),
               ),
               ListTile(

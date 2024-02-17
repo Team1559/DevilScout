@@ -25,6 +25,7 @@ class MainAppState extends State<MainApp> {
     getSettings().then((value) => setState(() {
           settings = value;
           settings!.addListener(_listener);
+          _listener();
         }));
   }
 
@@ -34,14 +35,28 @@ class MainAppState extends State<MainApp> {
     settings?.removeListener(_listener);
   }
 
-  void _listener() => setState(() {});
+  void _listener() => setState(() {
+        ThemeModeHelper.isDarkMode =
+            settings!.theme.resolve() == ThemeMode.dark;
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          systemNavigationBarColor:
+              (ThemeModeHelper.isDarkMode ? darkTheme : lightTheme)
+                  .colorScheme
+                  .background,
+        ));
+      });
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
     ]);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor:
+          (ThemeModeHelper.isDarkMode ? darkTheme : lightTheme)
+              .colorScheme
+              .background,
+    ));
     return MaterialApp(
       home: const LoadSessionPage(),
       theme: lightTheme,

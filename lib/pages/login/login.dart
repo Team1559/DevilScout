@@ -175,7 +175,7 @@ class _UsernameInputState extends State<UsernameInput> {
             const NumberTextInputFormatter(min: 0, max: 9999),
           ],
           keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.continueAction,
+          textInputAction: TextInputAction.next,
           onSubmitted: tryLogin(),
           focusNode: widget.teamNumberFocusNode,
         ),

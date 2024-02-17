@@ -53,7 +53,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   @override
   Widget build(BuildContext context) {
     return MenuScaffold(
-      title: 'Select Match',
+      title: 'DevilScout',
       body: Builder(
         builder: (context) {
           if (!Team.current!.hasEventKey) {
@@ -69,8 +69,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                 onRefresh: refresh,
                 child: ListView(children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+                    padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           Event.currentEvent!.name,

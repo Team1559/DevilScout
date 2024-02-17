@@ -145,21 +145,24 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
   Widget build(BuildContext context) {
     super.build(context); // required by KeepAlive
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: ListView(
-        children: [
-          const SizedBox(height: 16),
-          Text(
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
             widget.sectionTitle,
-            style: Theme.of(context).textTheme.headlineLarge,
+            style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
-          for (int i = 0; i < widget.questions.length; i++)
-            question(context, widget.questions[i]),
-          const SizedBox(height: 16),
-        ],
-      ),
+        ),
+        Container(
+          color: Colors.black,
+          height: 2,
+        ),
+        for (int i = 0; i < widget.questions.length; i++)
+          question(context, widget.questions[i]),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -586,21 +589,44 @@ class _SingleChoiceQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        widget.config.options.length,
-        (index) => ListTile(
-          dense: true,
-          title: Text(
-            widget.config.options[index],
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          trailing: Radio(
-            value: index,
-            groupValue: value,
-            onChanged: setValue,
-          ),
-          onTap: () => setValue(index),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(color: Colors.black, width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          children: widget.config.options.asMap().entries.map((entry) {
+            int idx = entry.key;
+            String val = entry.value;
+            return Column(
+              children: [
+                if (idx != 0)
+                  const Divider(
+                    height: 2.0,
+                    color: Colors.black,
+                    thickness: 2,
+                  ),
+                InkWell(
+                  onTap: () => setValue(idx),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    color: value == idx
+                        ? Theme.of(context).colorScheme.secondary
+                        : Colors.transparent,
+                    child: ListTile(
+                      dense: true,
+                      title: Text(
+                        val,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ),
     );

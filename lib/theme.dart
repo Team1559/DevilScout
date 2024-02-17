@@ -71,6 +71,7 @@ final lightTheme = ThemeData(
       color: Colors.black,
     ),
     scrolledUnderElevation: 0,
+    centerTitle: true,
   ),
   cardTheme: const CardTheme(
     surfaceTintColor: Colors.transparent,
@@ -104,22 +105,25 @@ final darkTheme = ThemeData(
       color: Colors.white,
     ),
     scrolledUnderElevation: 0,
+    centerTitle: true,
   ),
 );
 
 extension MoreColors on ColorScheme {
-  Color get frcRed => ThemeModeHelper.current() == ThemeMode.dark
+  Color get frcRed => ThemeModeHelper.isDarkMode
       ? const Color(0xFFAA3333)
       : const Color(0xFFFF7777);
-  Color get frcBlue => ThemeModeHelper.current() == ThemeMode.dark
+  Color get frcBlue => ThemeModeHelper.isDarkMode
       ? const Color(0xFF223399)
-      : const Color(0xFF5F7FFF);
+      : const Color(0xFF557FFF);
 }
 
 extension ThemeModeHelper on ThemeMode {
-  ThemeMode resolve() => this == ThemeMode.system ? current() : this;
+  static bool isDarkMode = false;
 
-  static ThemeMode current() =>
+  ThemeMode resolve() => this == ThemeMode.system ? platform() : this;
+
+  static ThemeMode platform() =>
       switch (SchedulerBinding.instance.platformDispatcher.platformBrightness) {
         Brightness.light => ThemeMode.light,
         Brightness.dark => ThemeMode.dark,
