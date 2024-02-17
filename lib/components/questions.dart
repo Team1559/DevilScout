@@ -145,21 +145,24 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
   Widget build(BuildContext context) {
     super.build(context); // required by KeepAlive
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: ListView(
-        children: [
-          const SizedBox(height: 16),
-          Text(
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
             widget.sectionTitle,
-            style: Theme.of(context).textTheme.headlineLarge,
+            style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
-          for (int i = 0; i < widget.questions.length; i++)
-            question(context, widget.questions[i]),
-          const SizedBox(height: 16),
-        ],
-      ),
+        ),
+        Container(
+          color: Colors.black,
+          height: 2,
+        ),
+        for (int i = 0; i < widget.questions.length; i++)
+          question(context, widget.questions[i]),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -618,11 +621,6 @@ class _SingleChoiceQuestionState
                         val,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
-                      // trailing: Radio(
-                      //   value: idx,
-                      //   groupValue: value,
-                      //   onChanged: setValue,
-                      // ),
                     ),
                   ),
                 ),

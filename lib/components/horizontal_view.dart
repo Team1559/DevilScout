@@ -24,7 +24,7 @@ abstract class HorizontalPageViewState<T, H extends HorizontalPageView<T>>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      minimum: const EdgeInsets.only(bottom: 8),
+      minimum: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -36,18 +36,33 @@ abstract class HorizontalPageViewState<T, H extends HorizontalPageView<T>>
                   (index) => buildPage(widget.pages[index])),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                FilledButton(
-                  onPressed: currentPage == 0 ? null : _previousPage,
-                  child: const Text('Previous'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              IconButton(
+                onPressed: currentPage == 0 ? null : _previousPage,
+                style: ButtonStyle(
+                  minimumSize: const MaterialStatePropertyAll(
+                    Size(80, 48),
+                  ),
+                  maximumSize: const MaterialStatePropertyAll(
+                    Size(double.infinity, 48),
+                  ),
+                  shape: const MaterialStatePropertyAll(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  backgroundColor: MaterialStatePropertyAll(
+                    Theme.of(context).colorScheme.surface,
+                  ),
                 ),
-                const SizedBox(width: 16),
-                FilledButton(
+                icon: const Icon(Icons.navigate_before_rounded, size: 32),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(
                   onPressed: currentPage == widget.pages.length - 1
                       ? lastPageButtonAction()
                       : _nextPage,
@@ -56,8 +71,8 @@ abstract class HorizontalPageViewState<T, H extends HorizontalPageView<T>>
                       ? Text(widget.lastPageButtonLabel!)
                       : const Text('Next'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

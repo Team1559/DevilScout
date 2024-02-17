@@ -30,14 +30,7 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Team ${widget.team}'),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: Text(
-            widget.match.name,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
+        title: const Text('DevilScout'),
       ),
       body: QuestionDisplay(
         pages: QuestionConfig.matchQuestions,

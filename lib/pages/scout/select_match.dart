@@ -53,7 +53,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   @override
   Widget build(BuildContext context) {
     return MenuScaffold(
-      title: 'Select Match',
+      title: 'DevilScout',
       body: Builder(
         builder: (context) {
           if (!Team.current!.hasEventKey) {
