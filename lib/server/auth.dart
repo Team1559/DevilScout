@@ -260,7 +260,7 @@ Future<ServerResponse<void>> serverLogout() => serverRequest(
       FrcTeam.clear();
       EventMatch.clear();
       QuestionConfig.clear();
-      TeamStatistics.clear();
+      EventTeamStatistics.clear();
     });
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>

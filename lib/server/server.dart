@@ -55,7 +55,7 @@ class Etag {
 }
 
 final Uri serverApiUri =
-    Uri.parse('https://scouting.victorrobotics.org/api/v1/');
+    Uri.parse('http://localhost/');
 final Client _httpClient = Client();
 
 /// A generic method to access a server API endpoint. Clients are recommended

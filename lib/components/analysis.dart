@@ -231,10 +231,8 @@ class PieChartStatisticWidget extends StatisticWidget<PieChartStatistic> {
     }
 
     return PieChart(
-      dataMap: {
-        for (PieChartSlice slice in statistic.slices!)
-          slice.label: slice.count?.toDouble() ?? 0
-      },
+      dataMap: statistic.slices!
+          .map((key, value) => MapEntry(key, value.toDouble())),
       animationDuration: Duration.zero,
       chartType: ChartType.ring,
       chartRadius: MediaQuery.of(context).size.width * 0.5,
@@ -265,8 +263,8 @@ class RadarStatisticWidget extends StatisticWidget<RadarStatistic> {
       height: size,
       child: RadarChart(
         max: statistic.max,
-        features: statistic.points
-            .map((e) => RadarChartPoint(label: e.label, value: e.value ?? 0))
+        features: statistic.points.entries
+            .map((e) => RadarChartPoint(label: e.key, value: e.value ?? 0))
             .toList(growable: false),
         graphColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
         graphStrokeColor: Theme.of(context).colorScheme.primary,

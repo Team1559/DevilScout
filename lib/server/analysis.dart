@@ -5,28 +5,29 @@ import '/server/teams.dart';
 
 part 'analysis.g.dart';
 
-@JsonSerializable(createToJson: false)
-class TeamStatistics {
-  static List<TeamStatistics> currentList = List.empty();
+class EventTeamStatistics {
+  static EventTeamStatistics? current;
   static final Etag _currentEtag = Etag();
 
   static void clear() {
-    currentList = List.empty();
+    current = null;
     _currentEtag.clear();
   }
 
-  final int team;
+  final Map<int, List<StatisticsPage>> teams;
 
-  @JsonKey(name: 'data')
-  final List<StatisticsPage> pages;
-
-  const TeamStatistics({
-    required this.team,
-    required this.pages,
+  const EventTeamStatistics({
+    required this.teams,
   });
 
-  factory TeamStatistics.fromJson(Map<String, dynamic> json) =>
-      _$TeamStatisticsFromJson(json);
+  factory EventTeamStatistics.fromJson(Map<String, dynamic> json) {
+    Map<int, List<StatisticsPage>> teams = {};
+    for (MapEntry<String, dynamic> entry in json.entries) {
+      teams[int.parse(entry.key)] =
+          listOf(StatisticsPage.fromJson).call(entry.value);
+    }
+    return EventTeamStatistics(teams: teams);
+  }
 }
 
 @JsonSerializable(createToJson: false)
@@ -76,12 +77,14 @@ class BooleanStatistic extends Statistic {
 class NumberStatistic extends Statistic {
   final double? mean;
   final double? stddev;
+  final double? min;
   final double? max;
 
   const NumberStatistic({
     required super.name,
     required this.mean,
     required this.stddev,
+    required this.min,
     required this.max,
   });
 }
@@ -102,48 +105,24 @@ class OprStatistic extends Statistic {
 
 @JsonSerializable(createToJson: false)
 class PieChartStatistic extends Statistic {
-  final int total;
-  final List<PieChartSlice>? slices;
+  final Map<String, int>? slices;
 
   const PieChartStatistic({
     required super.name,
-    required this.total,
     required this.slices,
   });
 }
 
 @JsonSerializable(createToJson: false)
-class PieChartSlice {
-  final String label;
-  final int? count;
-
-  const PieChartSlice({required this.label, required this.count});
-
-  factory PieChartSlice.fromJson(Map<String, dynamic> json) =>
-      _$PieChartSliceFromJson(json);
-}
-
-@JsonSerializable(createToJson: false)
 class RadarStatistic extends Statistic {
   final double max;
-  final List<RadarPoint> points;
+  final Map<String, double?> points;
 
   const RadarStatistic({
     required super.name,
     required this.max,
     required this.points,
   });
-}
-
-@JsonSerializable(createToJson: false)
-class RadarPoint {
-  final String label;
-  final double? value;
-
-  const RadarPoint({required this.label, required this.value});
-
-  factory RadarPoint.fromJson(Map<String, dynamic> json) =>
-      _$RadarPointFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
@@ -174,11 +153,11 @@ class WltStatistic extends Statistic {
   });
 }
 
-Future<ServerResponse<List<TeamStatistics>>>
+Future<ServerResponse<EventTeamStatistics>>
     serverGetCurrentEventTeamAnalysis() => serverRequest(
           path: 'analysis/${Team.current!.eventKey}/teams',
           method: 'GET',
-          etag: TeamStatistics._currentEtag,
-          decoder: listOf(TeamStatistics.fromJson),
-          callback: (stats) => TeamStatistics.currentList = stats,
+          etag: EventTeamStatistics._currentEtag,
+          decoder: EventTeamStatistics.fromJson,
+          callback: (stats) => EventTeamStatistics.current = stats,
         );

@@ -37,7 +37,7 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();
-        } else if (EventMatch.currentEventSchedule.isEmpty && !loaded) {
+        } else if (EventTeamStatistics.current == null && !loaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -46,19 +46,23 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: RefreshIndicator(
               onRefresh: refresh,
-              child: ListView.builder(
-                itemCount: TeamStatistics.currentList.length,
-                itemBuilder: (context, index) => TeamCard(
-                  teamNum: TeamStatistics.currentList[index].team,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TeamAnalysisPage(
-                        statistics: TeamStatistics.currentList[index],
+              child: ListView(
+                children: [
+                  for (MapEntry<int, List<StatisticsPage>> entry
+                      in EventTeamStatistics.current?.teams.entries ?? [])
+                    TeamCard(
+                      teamNum: entry.key,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeamAnalysisPage(
+                            teamNum: entry.key,
+                            statistics: entry.value,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
+                    )
+                ],
               ),
             ),
           ),
