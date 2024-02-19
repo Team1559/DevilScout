@@ -1,5 +1,7 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:git_info_plus/git_info_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '/server/server.dart';
@@ -12,8 +14,11 @@ class TechnicalPage extends StatefulWidget {
 }
 
 class _TechnicalPageState extends State<TechnicalPage> {
+  static final DateFormat _dateFormat = DateFormat('MM/dd/yyyy');
+
   PackageInfo? _packageInfo;
   BaseDeviceInfo? _deviceInfo;
+  GitCommitInfo? _gitInfo;
   bool _loading = true;
 
   @override
@@ -23,6 +28,7 @@ class _TechnicalPageState extends State<TechnicalPage> {
     Future.wait([
       DeviceInfoPlugin().deviceInfo.then((value) => _deviceInfo = value),
       PackageInfo.fromPlatform().then((value) => _packageInfo = value),
+      GitCommitInfo.current().then((value) => _gitInfo = value),
     ]).whenComplete(() => setState(() => _loading = false));
   }
 
@@ -45,6 +51,7 @@ class _TechnicalPageState extends State<TechnicalPage> {
             children: [
               heading('App Info', context),
               body(appInfo(), context),
+              body(gitInfo(), context),
               const SizedBox(height: 8),
               heading('Device Info', context),
               body(deviceInfo(), context),
@@ -74,8 +81,14 @@ class _TechnicalPageState extends State<TechnicalPage> {
 
   String appInfo() {
     return _packageInfo == null
-        ? 'Unknown version'
+        ? 'App version unavailable'
         : '${_packageInfo!.appName}\nVersion ${_packageInfo!.buildNumber}';
+  }
+
+  String gitInfo() {
+    return _gitInfo == null
+        ? 'Git metadata unavailable'
+        : '${_gitInfo!.branch} (${_gitInfo!.commitHash}) - ${_gitInfo!.commitDate == null ? '' : _dateFormat.format(_gitInfo!.commitDate!)}';
   }
 
   String deviceInfo() {
@@ -90,4 +103,26 @@ class _TechnicalPageState extends State<TechnicalPage> {
   String serverInfoStr() {
     return '$serverApiUri';
   }
+}
+
+class GitCommitInfo {
+  final String? branch;
+  final String? commitHash;
+  final DateTime? commitDate;
+
+  GitCommitInfo({
+    required this.branch,
+    required this.commitHash,
+    required this.commitDate,
+  });
+
+  static Future<GitCommitInfo> current() => Future.wait([
+        GitInfo.branchName,
+        GitInfo.lastCommitHashShort,
+        GitInfo.lastCommitDate,
+      ]).then((value) => GitCommitInfo(
+            branch: value[0] as String?,
+            commitHash: value[1] as String?,
+            commitDate: value[2] as DateTime?,
+          ));
 }

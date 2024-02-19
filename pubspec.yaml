@@ -12,6 +12,7 @@ dependencies:
   device_info_plus: ^9.1.2
   flutter:
     sdk: flutter
+  git_info_plus: ^0.0.5
   google_fonts: ^6.1.0
   http: ^1.1.0
   intl: ^0.19.0

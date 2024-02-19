@@ -45,5 +45,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>GitBranchName</key>
+	<string>undefined</string>
+	<key>GitCommitDate</key>
+	<string>undefined</string>
+	<key>GitCommitHash</key>
+	<string>undefined</string>
+	<key>GitCommitHashShort</key>
+	<string>undefined</string>
+	<key>GitCommitMessage</key>
+	<string>undefined</string>
 </dict>
 </plist>
