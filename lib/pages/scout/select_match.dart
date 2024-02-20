@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
@@ -31,9 +32,9 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   }
 
   Future<void> refresh() => Future.wait([
-        serverGetCurrentEvent(),
-        serverGetCurrentEventSchedule(),
-        serverGetCurrentEventTeamList(),
+        serverGetCurrentEvent().then(detectLogout()),
+        serverGetCurrentEventSchedule().then(detectLogout()),
+        serverGetCurrentEventTeamList().then(detectLogout()),
       ]).whenComplete(() => setState(() {
             loadMatches();
             _loaded = true;
@@ -52,6 +53,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return MenuScaffold(
       title: 'DevilScout',
       body: Builder(

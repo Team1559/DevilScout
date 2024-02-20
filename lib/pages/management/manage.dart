@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '/components/logout.dart';
 import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/server/events.dart';
@@ -96,10 +97,12 @@ class _SelectEventDialogState extends State<SelectEventDialog> {
     refresh();
   }
 
-  Future<void> refresh() => serverGetAllEvents().whenComplete(updateResults);
+  Future<void> refresh() =>
+      serverGetAllEvents().then(detectLogout()).whenComplete(updateResults);
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return Scaffold(
       appBar: AppBar(
         title: showingSearch
@@ -189,7 +192,7 @@ class EventCard extends StatelessWidget {
           builder: (context) => AlertDialog(
             title: const Text('Select event'),
             content: Text(
-              'Your entire team will be switched to ${event.name}.',
+              'Your entire team will be logged out and switched to ${event.name}.',
             ),
             actions: [
               TextButton(
@@ -198,7 +201,9 @@ class EventCard extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  serverEditCurrentTeam(eventKey: event.key).then((response) {
+                  serverEditCurrentTeam(eventKey: event.key)
+                      .then(detectLogout(context))
+                      .then((response) {
                     if (!context.mounted) return;
 
                     if (!response.success) {
@@ -206,8 +211,7 @@ class EventCard extends StatelessWidget {
                       return;
                     }
 
-                    Navigator.pop(context);
-                    Navigator.pop(context, event);
+                    pushLoginPage(context);
                   });
                 },
                 child: const Text('Select'),
@@ -247,10 +251,11 @@ class _RosterPanelState extends State<RosterPanel> {
   }
 
   Future<void> refresh() =>
-      serverGetUsers().whenComplete(() => setState(() {}));
+      serverGetUsers().then(detectLogout()).whenComplete(() => setState(() {}));
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return Container(
       decoration: BoxDecoration(
         border: Border.all(

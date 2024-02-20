@@ -185,7 +185,7 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
 Future<ServerResponse<Event>> serverGetCurrentEvent() {
   if (Team.current == null || Team.current!.eventKey == '') {
     return Future.value(
-      ServerResponse.error('Missing team/eventKey'),
+      ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 
@@ -201,7 +201,7 @@ Future<ServerResponse<Event>> serverGetCurrentEvent() {
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
   if (Team.current!.eventKey == '') {
     return Future.value(
-      ServerResponse.error('Missing team/eventKey'),
+      ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 
@@ -223,7 +223,7 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() {
   if (Team.current!.eventKey == '') {
     return Future.value(
-      ServerResponse.error('Missing team/eventKey'),
+      ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 

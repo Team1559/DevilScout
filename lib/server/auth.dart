@@ -172,7 +172,7 @@ Future<ServerResponse<void>> serverLogin({
   _LoginChallenge challenge = response.value!;
   for (int i = 0; i < 8; i++) {
     if (clientNonce[i] != challenge.nonce[i]) {
-      return ServerResponse.error('Server modified nonce');
+      return ServerResponse.error(message: 'Server modified nonce');
     }
   }
 
@@ -191,7 +191,7 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
   required String password,
 }) async {
   if (_LoginStatus.current == null) {
-    return ServerResponse.error('No previous login attempt');
+    return ServerResponse.error(message: 'No previous login attempt');
   }
   _LoginStatus login = _LoginStatus.current!;
 
@@ -240,12 +240,12 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
   AuthResponse auth = response.value!;
   for (int i = 0; i < 32; i++) {
     if (serverSignature[i] != auth.serverSignature[i]) {
-      return ServerResponse.error('Failed to authenticate server');
+      return ServerResponse.error(message: 'Failed to authenticate server');
     }
   }
 
   _LoginStatus.current = null;
-  return ServerResponse.success(auth);
+  return ServerResponse.success(value: auth);
 }
 
 /// Log out the current session, if it exists.

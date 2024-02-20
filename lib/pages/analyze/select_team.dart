@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
 import '/components/team_card.dart';
@@ -25,13 +26,14 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
   }
 
   Future<void> refresh() => Future.wait([
-        serverGetCurrentEvent(),
-        serverGetCurrentEventTeamList(),
-        serverGetCurrentEventTeamAnalysis(),
+        serverGetCurrentEvent().then(detectLogout()),
+        serverGetCurrentEventTeamList().then(detectLogout()),
+        serverGetCurrentEventTeamAnalysis().then(detectLogout()),
       ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return MenuScaffold(
       title: 'Select Team',
       body: Builder(builder: (context) {

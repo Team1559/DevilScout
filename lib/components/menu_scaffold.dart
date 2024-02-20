@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/pages/analyze/select_team.dart';
-import '/pages/login/login.dart';
 import '/pages/management/manage.dart';
 import '/pages/scout/select_drive_team.dart';
 import '/pages/scout/select_match.dart';
@@ -257,12 +257,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
                 ),
                 onPressed: () {
                   serverLogout().whenComplete(saveSession);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginPage(),
-                    ),
-                  );
+                  pushLoginPage(context);
                 },
               ),
             ),

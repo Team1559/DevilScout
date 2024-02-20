@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/pages/login/login.dart';
+import '/components/logout.dart';
 import '/pages/scout/select_match.dart';
 import '/server/session_file.dart';
 import '/server/teams.dart';
@@ -19,10 +19,7 @@ class _LoadSessionPageState extends State<LoadSessionPage> {
     super.initState();
     loadCachedSession().then((success) {
       if (!success) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        pushLoginPage(context);
         return;
       }
 

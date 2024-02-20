@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/pages/settings/about.dart';
@@ -22,7 +23,7 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    serverGetCurrentUser();
+    serverGetCurrentUser().then(detectLogout());
     getSettings().then((value) {
       setState(() => settings = value);
       settings!.addListener(_listener);
@@ -41,6 +42,7 @@ class SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return MenuScaffold(
       title: 'Settings',
       body: SafeArea(

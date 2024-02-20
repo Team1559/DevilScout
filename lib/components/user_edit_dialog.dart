@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/snackbar.dart';
 import '/components/text_field.dart';
-import '/pages/login/login.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
 import '/server/session_file.dart';
@@ -187,7 +187,8 @@ class _UserEditDialogState extends State<UserEditDialog> {
   }
 
   Future<void> deleteUser(BuildContext context) async {
-    ServerResponse<void> response = await serverDeleteUser(id: widget.user!.id);
+    ServerResponse<void> response =
+        await serverDeleteUser(id: widget.user!.id).then(detectLogout(context));
     if (!context.mounted) return;
 
     if (!response.success) {
@@ -201,13 +202,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
 
     if (widget.user == User.current) {
       serverLogout().whenComplete(saveSession);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LoginPage(),
-        ),
-      );
-      return;
+      pushLoginPage(context);
     } else {
       Navigator.pop(context);
       Navigator.pop(context);
@@ -256,7 +251,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
         username: usernameController.text,
         password: passwordController.text,
         isAdmin: isAdmin,
-      );
+      ).then(detectLogout(context));
     } else {
       response = await serverEditUser(
         id: widget.user!.id,
@@ -264,7 +259,7 @@ class _UserEditDialogState extends State<UserEditDialog> {
         fullName: fullName == widget.user!.fullName ? null : fullName,
         password: password.isEmpty ? null : password,
         isAdmin: widget.user!.isAdmin == isAdmin ? null : isAdmin,
-      );
+      ).then(detectLogout(context));
     }
     if (!context.mounted) return;
 
