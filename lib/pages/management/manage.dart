@@ -24,6 +24,7 @@ class ManagementPage extends StatelessWidget {
                 'Current Event',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
+              const SizedBox(height: 4),
               GestureDetector(
                 onTap: () => Navigator.push<Event>(
                   context,
@@ -63,6 +64,7 @@ class ManagementPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 10),
               Text(
                 'Team Roster',
                 style: Theme.of(context).textTheme.titleMedium,
@@ -259,7 +261,7 @@ class _RosterPanelState extends State<RosterPanel> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onBackground,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(10),
