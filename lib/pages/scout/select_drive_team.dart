@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/match_card.dart';
 import '/components/menu_scaffold.dart';
 import '/components/no_event_set.dart';
@@ -24,13 +25,14 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
   }
 
   Future<void> refresh() => Future.wait([
-        serverGetCurrentEvent(),
-        serverGetCurrentEventSchedule(),
-        serverGetCurrentEventTeamList(),
+        serverGetCurrentEvent().then(detectLogout()),
+        serverGetCurrentEventSchedule().then(detectLogout()),
+        serverGetCurrentEventTeamList().then(detectLogout()),
       ]).whenComplete(() => setState(() => loaded = true));
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return MenuScaffold(
       title: 'Select Match',
       body: Builder(builder: (context) {

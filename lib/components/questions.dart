@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 import '/components/horizontal_view.dart';
-import '/components/snackbar.dart';
 import '/server/questions.dart';
 import '/server/server.dart';
 
 class QuestionDisplay extends HorizontalPageView<QuestionPage> {
-  final Future<ServerResponse<void>> Function(Map<String, Map<String, dynamic>>)
-      submitAction;
+  final Future<ServerResponse<void>> Function(
+      BuildContext, Map<String, Map<String, dynamic>>) submitAction;
 
   const QuestionDisplay({
     super.key,
@@ -57,7 +56,7 @@ class _QuestionDisplay2State
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: _submit,
+                onPressed: () => _submit(context),
                 child: const Text('Submit'),
               ),
             ],
@@ -65,20 +64,11 @@ class _QuestionDisplay2State
         );
   }
 
-  void _submit() {
-    widget.submitAction(responses).then((response) {
-      if (!context.mounted) return;
+  void _submit(BuildContext context) {
+    widget.submitAction(context, responses).then((response) {
+      if (!response.success || !context.mounted) return;
 
       Navigator.pop(context);
-
-      if (!response.success) {
-        snackbarError(
-          context,
-          response.message ?? 'An error occured',
-        );
-        return;
-      }
-
       showDialog(
         context: context,
         builder: (context) => AlertDialog(

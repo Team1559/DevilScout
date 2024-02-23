@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
@@ -24,7 +25,7 @@ class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
   @override
   void initState() {
     super.initState();
-    serverGetDriveTeamQuestions().then((response) {
+    serverGetDriveTeamQuestions().then(detectLogout()).then((response) {
       if (response.value != null) {
         setState(() {});
       }
@@ -38,6 +39,7 @@ class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.match.name),
@@ -51,10 +53,10 @@ class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
               questions: QuestionConfig.driveTeamQuestions,
             ),
         ],
-        submitAction: (data) => serverSubmitDriveTeamData(
+        submitAction: (context, data) => serverSubmitDriveTeamData(
           matchKey: widget.match.key,
           partners: data,
-        ),
+        ).then(detectLogout(context)),
       ),
     );
   }

@@ -12,23 +12,24 @@ import '/server/session.dart';
 ///
 /// This class should not be instantiated by client code.
 class ServerResponse<T> {
-  final bool success;
+  final int statusCode;
   final T? value;
   final String? message;
 
   /// Constructs a non-error server response, possibly with data in [value]
-  ServerResponse.success([this.value])
-      : success = true,
-        message = null;
+  ServerResponse.success({this.statusCode = 0, this.value}) : message = null;
 
   /// Constructs a server error with a message
-  ServerResponse.error(this.message)
-      : success = false,
-        value = null;
+  ServerResponse.error({this.statusCode = -1, this.message}) : value = null;
 
   /// Constructs a server error directly from the JSON response
-  factory ServerResponse.errorFromJson(String json) =>
-      ServerResponse.error(json.isEmpty ? null : jsonDecode(json)['error']);
+  factory ServerResponse.errorFromJson(int statusCode, String json) =>
+      ServerResponse.error(
+        statusCode: statusCode,
+        message: json.isEmpty ? null : jsonDecode(json)['error'],
+      );
+
+  bool get success => statusCode < 400 && statusCode != -1;
 
   @override
   String toString() {
@@ -54,8 +55,7 @@ class Etag {
   void clear() => _value = null;
 }
 
-final Uri serverApiUri =
-    Uri.parse('https://scouting.victorrobotics.org/api/v1/');
+final Uri serverApiUri = Uri.parse('http://localhost/');
 final Client _httpClient = Client();
 
 /// A generic method to access a server API endpoint. Clients are recommended
@@ -103,17 +103,20 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   try {
     response = await _httpClient.send(request);
   } on ClientException {
-    return ServerResponse.error('Error contacting server, try again');
+    return ServerResponse.error(message: 'Error contacting server, try again');
   }
 
   if (response.statusCode >= 400) {
     if (response.headers['content-type']?.contains('json') ?? false) {
       String body = await response.stream.bytesToString();
-      return ServerResponse.errorFromJson(body);
+      return ServerResponse.errorFromJson(response.statusCode, body);
     }
-    return ServerResponse.error('Error contacting server, try again');
+    return ServerResponse.error(
+      statusCode: response.statusCode,
+      message: 'Error contacting server, try again',
+    );
   } else if (decoder == null || response.statusCode == 304) {
-    return ServerResponse.success();
+    return ServerResponse.success(statusCode: response.statusCode);
   }
 
   String body = await response.stream.bytesToString();
@@ -121,7 +124,10 @@ Future<ServerResponse<R>> serverRequest<R, T>({
 
   etag?._update(response.headers);
   callback?.call(result);
-  return ServerResponse.success(result);
+  return ServerResponse.success(
+    statusCode: response.statusCode,
+    value: result,
+  );
 }
 
 /// A helper to transform a JSON decoder for a class into a JSON decoder for a

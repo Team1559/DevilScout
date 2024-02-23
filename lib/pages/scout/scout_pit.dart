@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
@@ -18,7 +19,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
   @override
   void initState() {
     super.initState();
-    serverGetPitQuestions().then((response) {
+    serverGetPitQuestions().then(detectLogout()).then((response) {
       if (response.value != null) {
         setState(() {});
       }
@@ -27,6 +28,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Team ${widget.team.number}'),
@@ -40,11 +42,11 @@ class _PitScoutPageState extends State<PitScoutPage> {
       ),
       body: QuestionDisplay(
         pages: QuestionConfig.pitQuestions,
-        submitAction: (data) => serverSubmitPitData(
+        submitAction: (context, data) => serverSubmitPitData(
           eventKey: Event.currentEvent!.key,
           team: widget.team.number,
           data: data,
-        ),
+        ).then(detectLogout(context)),
       ),
     );
   }

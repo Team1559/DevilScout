@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/components/logout.dart';
 import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
@@ -19,7 +20,7 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
   @override
   void initState() {
     super.initState();
-    serverGetMatchQuestions().then((response) {
+    serverGetMatchQuestions().then(detectLogout()).then((response) {
       if (response.value != null) {
         setState(() {});
       }
@@ -28,17 +29,18 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    detectDelayedLogout(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('DevilScout'),
       ),
       body: QuestionDisplay(
         pages: QuestionConfig.matchQuestions,
-        submitAction: (data) => serverSubmitMatchData(
+        submitAction: (context, data) => serverSubmitMatchData(
           matchKey: widget.match.key,
           team: widget.team,
           data: data,
-        ),
+        ).then(detectLogout(context)),
       ),
     );
   }
