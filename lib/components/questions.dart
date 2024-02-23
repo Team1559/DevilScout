@@ -547,16 +547,31 @@ class _SequenceQuestionState
         Column(
           children: List.generate(
             value.length + 1,
-            (index) => DropdownButton(
-              hint: const Text('End of sequence'),
-              items: entries,
-              value: index == value.length ? null : value[index],
-              onChanged: (v) {
-                setState(() {
-                  value.length = index + 1;
-                  value[index] = v;
-                });
-              },
+            (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: DropdownButton(
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  hint: const Text('End of sequence'),
+                  items: entries,
+                  value: index == value.length ? null : value[index],
+                  onChanged: (v) {
+                    setState(() {
+                      value.length = index + 1;
+                      value[index] = v;
+                    });
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -610,7 +625,8 @@ class _SingleChoiceQuestionState
                   ),
                 InkWell(
                   onTap: () => setValue(idx),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 175),
                     padding: const EdgeInsets.all(6),
                     color: value == idx
                         ? Theme.of(context).colorScheme.secondary
