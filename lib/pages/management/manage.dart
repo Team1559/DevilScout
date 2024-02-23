@@ -256,7 +256,7 @@ class _RosterPanelState extends State<RosterPanel> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onBackground,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(10),

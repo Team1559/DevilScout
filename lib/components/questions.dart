@@ -156,7 +156,7 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
           ),
         ),
         Container(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onBackground,
           height: 2,
         ),
         for (int i = 0; i < widget.questions.length; i++)
@@ -607,7 +607,8 @@ class _SingleChoiceQuestionState
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Colors.black, width: 2),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.onBackground, width: 2),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
@@ -618,9 +619,9 @@ class _SingleChoiceQuestionState
             return Column(
               children: [
                 if (idx != 0)
-                  const Divider(
+                  Divider(
                     height: 2.0,
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onBackground,
                     thickness: 2,
                   ),
                 InkWell(
