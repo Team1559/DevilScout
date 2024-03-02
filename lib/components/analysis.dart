@@ -31,37 +31,37 @@ class _StatisticsDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: ListView(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineLarge,
-            textAlign: TextAlign.center,
-          ),
-          for (int i = 0; i < statistics.length; i++)
-            _statistic(context, statistics[i]),
-          const SizedBox(height: 16),
-        ],
-      ),
+    return ListView(
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineLarge,
+          textAlign: TextAlign.center,
+        ),
+        for (int i = 0; i < statistics.length; i++)
+          _statistic(context, statistics[i]),
+        const SizedBox(height: 80),
+      ],
     );
   }
 
   Widget _statistic(BuildContext context, Statistic statistic) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 24, bottom: 8),
-          child: Text(
-            statistic.name,
-            style: Theme.of(context).textTheme.titleLarge,
-            textAlign: TextAlign.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              statistic.name,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-        StatisticWidget.of(statistic),
-      ],
+          StatisticWidget.of(statistic),
+        ],
+      ),
     );
   }
 }

@@ -16,10 +16,10 @@ class QuestionDisplay extends HorizontalPageView<QuestionPage> {
   }) : super(lastPageButtonLabel: 'Submit');
 
   @override
-  State<QuestionDisplay> createState() => _QuestionDisplay2State();
+  State<QuestionDisplay> createState() => _QuestionDisplayState();
 }
 
-class _QuestionDisplay2State
+class _QuestionDisplayState
     extends HorizontalPageViewState<QuestionPage, QuestionDisplay> {
   final Map<String, Map<String, dynamic>> responses = {};
 
@@ -138,16 +138,12 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
     return ListView(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.only(top: 8),
           child: Text(
             widget.sectionTitle,
             style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
-        ),
-        Container(
-          color: Theme.of(context).colorScheme.onBackground,
-          height: 2,
         ),
         for (int i = 0; i < widget.questions.length; i++)
           question(context, widget.questions[i]),
@@ -157,22 +153,25 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
   }
 
   Widget question(BuildContext context, QuestionConfig question) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 24, bottom: 8),
-          child: Text(
-            question.prompt,
-            style: Theme.of(context).textTheme.titleLarge,
-            textAlign: TextAlign.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              question.prompt,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-        QuestionWidget.of(
-          config: question,
-          listener: widget.listener,
-          valueSetter: (response) => widget.responses[question.key] = response,
-        ),
-      ],
+          QuestionWidget.of(
+            config: question,
+            listener: widget.listener,
+            valueSetter: (response) => widget.responses[question.key] = response,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -387,20 +386,23 @@ class _MultipleChoiceQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        widget.config.options.length,
-        (index) => ListTile(
-          dense: true,
-          title: Text(
-            widget.config.options[index],
-            style: Theme.of(context).textTheme.titleSmall,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: List.generate(
+          widget.config.options.length,
+          (index) => ListTile(
+            dense: true,
+            title: Text(
+              widget.config.options[index],
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            trailing: Checkbox(
+              value: active[index],
+              onChanged: (b) => _set(index, b),
+            ),
+            onTap: () => _toggle(index),
           ),
-          trailing: Checkbox(
-            value: active[index],
-            onChanged: (b) => _set(index, b),
-          ),
-          onTap: () => _toggle(index),
         ),
       ),
     );
@@ -533,46 +535,49 @@ class _SequenceQuestionState
       ),
     );
 
-    return Column(
-      children: [
-        Column(
-          children: List.generate(
-            value.length + 1,
-            (index) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: DropdownButton(
-                  dropdownColor: Theme.of(context).colorScheme.surface,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  hint: const Text('End of sequence'),
-                  items: entries,
-                  value: index == value.length ? null : value[index],
-                  onChanged: (v) {
-                    setState(() {
-                      value.length = index + 1;
-                      value[index] = v;
-                    });
-                  },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Column(
+            children: List.generate(
+              value.length + 1,
+              (index) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: DropdownButton(
+                    dropdownColor: Theme.of(context).colorScheme.surface,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text('End of sequence'),
+                    items: entries,
+                    value: index == value.length ? null : value[index],
+                    onChanged: (v) {
+                      setState(() {
+                        value.length = index + 1;
+                        value[index] = v;
+                      });
+                    },
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        TextButton(
-          onPressed: () => setState(() {
-            value.length = 0;
-          }),
-          child: const Text('Reset'),
-        )
-      ],
+          TextButton(
+            onPressed: () => setState(() {
+              value.length = 0;
+            }),
+            child: const Text('Reset'),
+          )
+        ],
+      ),
     );
   }
 }
@@ -595,46 +600,49 @@ class _SingleChoiceQuestionState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.onBackground, width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Column(
-          children: widget.config.options.asMap().entries.map((entry) {
-            int idx = entry.key;
-            String val = entry.value;
-            return Column(
-              children: [
-                if (idx != 0)
-                  Divider(
-                    height: 2.0,
-                    color: Theme.of(context).colorScheme.onBackground,
-                    thickness: 2,
-                  ),
-                InkWell(
-                  onTap: () => setValue(idx),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 175),
-                    padding: const EdgeInsets.all(6),
-                    color: value == idx
-                        ? Theme.of(context).colorScheme.secondary
-                        : Colors.transparent,
-                    child: ListTile(
-                      dense: true,
-                      title: Text(
-                        val,
-                        style: Theme.of(context).textTheme.titleSmall,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(
+              color: Theme.of(context).colorScheme.onBackground, width: 2),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Column(
+            children: widget.config.options.asMap().entries.map((entry) {
+              int idx = entry.key;
+              String val = entry.value;
+              return Column(
+                children: [
+                  if (idx != 0)
+                    Divider(
+                      height: 2.0,
+                      color: Theme.of(context).colorScheme.onBackground,
+                      thickness: 2,
+                    ),
+                  InkWell(
+                    onTap: () => setValue(idx),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 175),
+                      padding: const EdgeInsets.all(6),
+                      color: value == idx
+                          ? Theme.of(context).colorScheme.secondary
+                          : Colors.transparent,
+                      child: ListTile(
+                        dense: true,
+                        title: Text(
+                          val,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          }).toList(),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

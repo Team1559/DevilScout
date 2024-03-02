@@ -43,14 +43,13 @@ const FilledButtonThemeData _filledButtonTheme = FilledButtonThemeData(
 );
 
 const Color _primary = Color(0xFF3063FF);
-const Color _secondary = Color(0xFF83B9FC);
 
 final lightTheme = ThemeData(
   colorScheme: const ColorScheme(
     brightness: Brightness.light,
     primary: _primary,
     onPrimary: Colors.white,
-    secondary: _secondary,
+    secondary: Color(0xFF83B9FC),
     onSecondary: Colors.black,
     error: Color(0xFFF44336),
     onError: Colors.white,
@@ -84,7 +83,7 @@ final darkTheme = ThemeData(
     brightness: Brightness.dark,
     primary: _primary,
     onPrimary: Colors.white,
-    secondary: _secondary,
+    secondary: Color(0xFF182860),
     onSecondary: Colors.black,
     error: Color(0xFFB71C1C),
     onError: Colors.white,
