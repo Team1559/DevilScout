@@ -84,7 +84,7 @@ final darkTheme = ThemeData(
     primary: _primary,
     onPrimary: Colors.white,
     secondary: Color(0xFF182860),
-    onSecondary: Colors.black,
+    onSecondary: Colors.white,
     error: Color(0xFFB71C1C),
     onError: Colors.white,
     background: Color(0xFF262626),

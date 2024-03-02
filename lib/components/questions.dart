@@ -147,7 +147,7 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
         ),
         for (int i = 0; i < widget.questions.length; i++)
           question(context, widget.questions[i]),
-        const SizedBox(height: 16),
+        const SizedBox(height: 80),
       ],
     );
   }
@@ -168,7 +168,8 @@ class _QuestionDisplayPageState extends State<_QuestionDisplayPage>
           QuestionWidget.of(
             config: question,
             listener: widget.listener,
-            valueSetter: (response) => widget.responses[question.key] = response,
+            valueSetter: (response) =>
+                widget.responses[question.key] = response,
           ),
         ],
       ),
@@ -531,7 +532,9 @@ class _SequenceQuestionState
       widget.config.options.length,
       (index) => DropdownMenuItem(
         value: index,
-        child: Text(widget.config.options[index]),
+        child: Text(
+          widget.config.options[index],
+        ),
       ),
     );
 
@@ -559,12 +562,11 @@ class _SequenceQuestionState
                     hint: const Text('End of sequence'),
                     items: entries,
                     value: index == value.length ? null : value[index],
-                    onChanged: (v) {
-                      setState(() {
-                        value.length = index + 1;
-                        value[index] = v;
-                      });
-                    },
+                    style: Theme.of(context).textTheme.titleSmall,
+                    onChanged: (v) => setState(() {
+                      value.length = index + 1;
+                      value[index] = v;
+                    }),
                   ),
                 ),
               ),
