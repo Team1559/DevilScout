@@ -31,18 +31,21 @@ class _StatisticsDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineLarge,
-          textAlign: TextAlign.center,
-        ),
-        for (int i = 0; i < statistics.length; i++)
-          _statistic(context, statistics[i]),
-        const SizedBox(height: 80),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ListView(
+        children: [
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineLarge,
+            textAlign: TextAlign.center,
+          ),
+          for (int i = 0; i < statistics.length; i++)
+            _statistic(context, statistics[i]),
+          const SizedBox(height: 80),
+        ],
+      ),
     );
   }
 
@@ -67,6 +70,8 @@ class _StatisticsDisplayPage extends StatelessWidget {
 }
 
 abstract class StatisticWidget<S extends Statistic> extends StatelessWidget {
+  static const Widget _noData = Text('No Data');
+
   final S statistic;
 
   factory StatisticWidget.of(
@@ -104,6 +109,64 @@ abstract class StatisticWidget<S extends Statistic> extends StatelessWidget {
     super.key,
     required this.statistic,
   });
+
+  String _formatNumber(double number) {
+    if (number.toInt() == number) {
+      return number.toStringAsFixed(0);
+    }
+
+    if (number == 0) {
+      return '0';
+    }
+
+    double magnitude = number.abs();
+
+    if (magnitude < 0.1) {
+      return number.toStringAsPrecision(1);
+    } else if (magnitude < 1) {
+      return number.toStringAsFixed(2);
+    } else if (magnitude < 10) {
+      return number.toStringAsFixed(1);
+    } else {
+      return number.toStringAsFixed(0);
+    }
+  }
+
+  String _formatNumberPrecise(double number) {
+    if (number == 0) {
+      return '0';
+    }
+
+    double magnitude = number.abs();
+
+    if (magnitude < 0.01) {
+      return number.toStringAsPrecision(1);
+    } else if (magnitude < 10) {
+      return number.toStringAsFixed(2);
+    } else if (magnitude < 100) {
+      return number.toStringAsFixed(1);
+    } else {
+      return number.toStringAsFixed(0);
+    }
+  }
+
+  String _formatPercentage(double percent) {
+    percent *= 100;
+
+    if (percent >= 100) {
+      return '100%';
+    } else if (percent <= 0) {
+      return '0%';
+    }
+
+    if (percent >= 99) {
+      return '> 99%';
+    } else if (percent <= 1) {
+      return '< 1%';
+    }
+
+    return '${percent.toStringAsFixed(0)}%';
+  }
 }
 
 class BooleanStatisticWidget extends StatisticWidget<BooleanStatistic> {
@@ -112,50 +175,34 @@ class BooleanStatisticWidget extends StatisticWidget<BooleanStatistic> {
   @override
   Widget build(BuildContext context) {
     if (statistic.percent == null) {
-      return const Text('No Data');
+      return StatisticWidget._noData;
     }
 
-    return PieChart(
-      dataMap: {
-        'Yes': statistic.percent!,
-        'No': 1 - statistic.percent!,
-      },
-      animationDuration: Duration.zero,
-      chartType: ChartType.ring,
-      chartRadius: MediaQuery.of(context).size.width * 0.5,
-      colorList: const [
-        Colors.green,
-        Colors.red,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        PieChart(
+          dataMap: {
+            'Yes': statistic.percent!,
+            'No': 1 - statistic.percent!,
+          },
+          animationDuration: Duration.zero,
+          chartType: ChartType.ring,
+          chartRadius: MediaQuery.of(context).size.width * 0.5,
+          colorList: const [
+            Colors.green,
+            Colors.red,
+          ],
+          initialAngleInDegree: 270,
+          chartLegendSpacing: 24,
+          legendOptions: const LegendOptions(showLegends: false),
+          chartValuesOptions: const ChartValuesOptions(showChartValues: false),
+        ),
+        Text(
+          _formatPercentage(statistic.percent!),
+          style: Theme.of(context).textTheme.displaySmall,
+        )
       ],
-      initialAngleInDegree: 270,
-      chartLegendSpacing: 24,
-      legendOptions: const LegendOptions(
-        legendPosition: LegendPosition.left,
-      ),
-      chartValuesOptions: ChartValuesOptions(
-        chartValueBackgroundColor: Theme.of(context).colorScheme.surface,
-        chartValueStyle:
-            Theme.of(context).textTheme.titleSmall ?? defaultChartValueStyle,
-      ),
-      formatChartValues: (d) {
-        if (d <= 0) {
-          return '0%';
-        } else if (d < 0.001) {
-          return '< 0.1%';
-        } else if (d < 0.01) {
-          return '${(d * 100).toStringAsFixed(1)}%';
-        }
-
-        if (d >= 1) {
-          return '100%';
-        } else if (d > 0.999) {
-          return '> 99.9%';
-        } else if (d > 0.99) {
-          return '${(d * 100).toStringAsFixed(1)}%';
-        }
-
-        return '${(d * 100).toStringAsFixed(0)}%';
-      },
     );
   }
 }
@@ -165,15 +212,25 @@ class NumberStatisticWidget extends StatisticWidget<NumberStatistic> {
 
   @override
   Widget build(BuildContext context) {
+    if (statistic.mean == null) {
+      return StatisticWidget._noData;
+    }
+
     return Column(
       children: [
         Text(
-          statistic.mean?.toString() ?? '-',
+          _formatNumber(statistic.mean!),
           style: Theme.of(context).textTheme.displaySmall,
         ),
-        Text(
-          'Std dev ${statistic.stddev ?? '-'}  Max: ${statistic.max ?? '-'}',
-          style: Theme.of(context).textTheme.bodyLarge,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Min ${_formatNumber(statistic.min!)}'),
+            const SizedBox(width: 8),
+            Text('Max ${_formatNumber(statistic.max!)}'),
+            const SizedBox(width: 8),
+            Text('Std Dev ${_formatNumber(statistic.stddev!)}'),
+          ],
         ),
       ],
     );
@@ -185,6 +242,10 @@ class OprStatisticWidget extends StatisticWidget<OprStatistic> {
 
   @override
   Widget build(BuildContext context) {
+    if (statistic.opr == null) {
+      return StatisticWidget._noData;
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -198,19 +259,15 @@ class OprStatisticWidget extends StatisticWidget<OprStatistic> {
         ),
         const SizedBox(width: 8),
         Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(_formatValue(statistic.opr)),
-            Text(_formatValue(statistic.dpr)),
-            Text(_formatValue(statistic.ccwm)),
+            Text(_formatNumberPrecise(statistic.opr!)),
+            Text(_formatNumberPrecise(statistic.dpr!)),
+            Text(_formatNumberPrecise(statistic.ccwm!)),
           ],
         ),
       ],
     );
-  }
-
-  String _formatValue(double? value) {
-    if (value == null) return '-';
-    return value.toStringAsPrecision(3);
   }
 }
 
@@ -227,7 +284,7 @@ class PieChartStatisticWidget extends StatisticWidget<PieChartStatistic> {
   @override
   Widget build(BuildContext context) {
     if (statistic.slices == null) {
-      return const Text('No Data');
+      return StatisticWidget._noData;
     }
 
     return PieChart(
@@ -235,13 +292,11 @@ class PieChartStatisticWidget extends StatisticWidget<PieChartStatistic> {
           .map((key, value) => MapEntry(key, value.toDouble())),
       animationDuration: Duration.zero,
       chartType: ChartType.ring,
-      chartRadius: MediaQuery.of(context).size.width * 0.5,
+      chartRadius: MediaQuery.of(context).size.shortestSide * 0.5,
       colorList: colors,
       initialAngleInDegree: 270,
       chartLegendSpacing: 24,
-      legendOptions: const LegendOptions(
-        legendPosition: LegendPosition.left,
-      ),
+      legendOptions: const LegendOptions(legendPosition: LegendPosition.bottom),
       chartValuesOptions: ChartValuesOptions(
         chartValueBackgroundColor: Theme.of(context).colorScheme.surface,
         chartValueStyle:
@@ -284,7 +339,7 @@ class RankingPointsStatisticWidget
   @override
   Widget build(BuildContext context) {
     if (statistic.points == null) {
-      return const Text('No Data');
+      return StatisticWidget._noData;
     }
 
     return Row(
@@ -293,9 +348,10 @@ class RankingPointsStatisticWidget
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: statistic.points!.keys
-              .map((e) => Text('$e: '))
+              .map((e) => Text('$e:'))
               .toList(growable: false),
         ),
+        const SizedBox(width: 8),
         Column(
           children: statistic.points!.values
               .map((e) => Text(e.toString()))
@@ -311,7 +367,10 @@ class StringStatisticWidget extends StatisticWidget<StringStatistic> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(statistic.value ?? '-');
+    return Text(
+      statistic.value ?? '-',
+      style: Theme.of(context).textTheme.bodyLarge,
+    );
   }
 }
 
