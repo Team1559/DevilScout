@@ -434,6 +434,7 @@ class _NumberQuestionState extends QuestionWidgetState<int?, NumberQuestion> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
           icon: const Icon(Icons.keyboard_arrow_left),
