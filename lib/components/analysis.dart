@@ -288,10 +288,12 @@ class RankingPointsStatisticWidget
     }
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: statistic.points!.keys
-              .map((e) => Text(e))
+              .map((e) => Text('$e: '))
               .toList(growable: false),
         ),
         Column(
