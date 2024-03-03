@@ -22,6 +22,7 @@ class MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
+    _setAndroidNavBarColor();
     getSettings().then((value) => setState(() {
           settings = value;
           settings!.addListener(_listener);
@@ -38,13 +39,16 @@ class MainAppState extends State<MainApp> {
   void _listener() => setState(() {
         ThemeModeHelper.isDarkMode =
             settings!.theme.resolve() == ThemeMode.dark;
-        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor:
-              (ThemeModeHelper.isDarkMode ? darkTheme : lightTheme)
-                  .colorScheme
-                  .background,
-        ));
+        _setAndroidNavBarColor();
       });
+
+  void _setAndroidNavBarColor() =>
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor:
+            (ThemeModeHelper.isDarkMode ? darkTheme : lightTheme)
+                .colorScheme
+                .background,
+      ));
 
   @override
   Widget build(BuildContext context) {

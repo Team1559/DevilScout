@@ -1,53 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-const TextStyle _headingOverrides = TextStyle(
-  fontFamily: 'Montserrat',
-);
-const TextStyle _bodyOverrides = TextStyle(
-  fontFamily: 'Inter',
-);
-
-const TextTheme _textTheme = TextTheme(
-  displayLarge: _headingOverrides,
-  displayMedium: _headingOverrides,
-  displaySmall: _headingOverrides,
-  headlineLarge: _headingOverrides,
-  headlineMedium: _headingOverrides,
-  headlineSmall: _headingOverrides,
-  titleLarge: _headingOverrides,
-  titleMedium: _headingOverrides,
-  titleSmall: _headingOverrides,
-  bodyLarge: _bodyOverrides,
-  bodyMedium: _bodyOverrides,
-  bodySmall: _bodyOverrides,
-  labelLarge: _bodyOverrides,
-  labelMedium: _bodyOverrides,
-  labelSmall: _bodyOverrides,
-);
-
-const FilledButtonThemeData _filledButtonTheme = FilledButtonThemeData(
-  style: ButtonStyle(
-    minimumSize: MaterialStatePropertyAll(
-      Size(120, 48),
-    ),
-    maximumSize: MaterialStatePropertyAll(
-      Size(double.infinity, 48),
-    ),
-    shape: MaterialStatePropertyAll(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-      ),
-    ),
-  ),
-);
+const TextStyle _headingFont = TextStyle(fontFamily: 'Montserrat');
+const TextStyle _bodyFont = TextStyle(fontFamily: 'Inter');
 
 const Color _primary = Color(0xFF3063FF);
 const Color _secondary = Color(0xFF83B9FC);
 
 final lightTheme = ThemeData(
-  colorScheme: const ColorScheme(
-    brightness: Brightness.light,
+  colorScheme: const ColorScheme.light(
     primary: _primary,
     onPrimary: Colors.white,
     secondary: _secondary,
@@ -56,13 +17,10 @@ final lightTheme = ThemeData(
     onError: Colors.white,
     background: Color(0xFFFAFAFA),
     onBackground: Color(0xFF494949),
-    surface: Color.fromARGB(255, 236, 235, 235),
+    surface: Color(0xFFEBEBEB),
     onSurface: Colors.black,
     surfaceTint: Colors.transparent,
   ),
-  textTheme: _textTheme,
-  filledButtonTheme: _filledButtonTheme,
-  dividerColor: Colors.transparent,
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xFFFAFAFA),
     foregroundColor: Colors.black,
@@ -73,15 +31,47 @@ final lightTheme = ThemeData(
     scrolledUnderElevation: 0,
     centerTitle: true,
   ),
+  textTheme: const TextTheme(
+    displayLarge: _headingFont,
+    displayMedium: _headingFont,
+    displaySmall: _headingFont,
+    headlineLarge: _headingFont,
+    headlineMedium: _headingFont,
+    headlineSmall: _headingFont,
+    titleLarge: _headingFont,
+    titleMedium: _headingFont,
+    titleSmall: _headingFont,
+    bodyLarge: _bodyFont,
+    bodyMedium: _bodyFont,
+    bodySmall: _bodyFont,
+    labelLarge: _bodyFont,
+    labelMedium: _bodyFont,
+    labelSmall: _bodyFont,
+  ),
+  filledButtonTheme: const FilledButtonThemeData(
+    style: ButtonStyle(
+      minimumSize: MaterialStatePropertyAll(
+        Size(120, 48),
+      ),
+      maximumSize: MaterialStatePropertyAll(
+        Size(double.infinity, 48),
+      ),
+      shape: MaterialStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+      ),
+    ),
+  ),
+  dividerColor: Colors.transparent,
   cardTheme: const CardTheme(
     surfaceTintColor: Colors.transparent,
     elevation: 0,
   ),
 );
 
-final darkTheme = ThemeData(
+final darkTheme = lightTheme.copyWith(
   colorScheme: const ColorScheme.dark(
-    brightness: Brightness.dark,
     primary: _primary,
     onPrimary: Colors.white,
     secondary: _secondary,
@@ -94,18 +84,12 @@ final darkTheme = ThemeData(
     onSurface: Color(0xFFDDDDDD),
     surfaceTint: Colors.transparent,
   ),
-  textTheme: _textTheme,
-  filledButtonTheme: _filledButtonTheme,
-  dividerColor: Colors.transparent,
-  appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF262626),
+  appBarTheme: lightTheme.appBarTheme.copyWith(
+    backgroundColor: const Color(0xFF262626),
     foregroundColor: Colors.white,
-    elevation: 0,
-    iconTheme: IconThemeData(
+    iconTheme: const IconThemeData(
       color: Colors.white,
     ),
-    scrolledUnderElevation: 0,
-    centerTitle: true,
   ),
 );
 
