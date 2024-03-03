@@ -140,21 +140,6 @@ class TeamSelectDialog extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (int i = 0; i < match.blue.length; i++)
-            TeamCard(
-              teamNum: match.blue[i],
-              color: Theme.of(context).colorScheme.frcBlue,
-              label: (i + 1).toString(),
-              onTap: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MatchScoutPage(
-                    match: match,
-                    team: match.blue[i],
-                  ),
-                ),
-              ),
-            ),
           for (int i = 0; i < match.red.length; i++)
             TeamCard(
               teamNum: match.red[i],
@@ -166,6 +151,21 @@ class TeamSelectDialog extends StatelessWidget {
                   builder: (context) => MatchScoutPage(
                     match: match,
                     team: match.red[i],
+                  ),
+                ),
+              ),
+            ),
+          for (int i = 0; i < match.blue.length; i++)
+            TeamCard(
+              teamNum: match.blue[i],
+              color: Theme.of(context).colorScheme.frcBlue,
+              label: (i + 1).toString(),
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MatchScoutPage(
+                    match: match,
+                    team: match.blue[i],
                   ),
                 ),
               ),

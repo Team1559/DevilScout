@@ -72,23 +72,23 @@ class MatchCard extends StatelessWidget {
       children: [
         TableRow(
           children: List.generate(
-            match.blue.length,
-            (index) => _teamRect(
-              context: context,
-              match: match,
-              index: index,
-              isRed: false,
-            ),
-          ),
-        ),
-        TableRow(
-          children: List.generate(
             match.red.length,
             (index) => _teamRect(
               context: context,
               match: match,
               index: index,
               isRed: true,
+            ),
+          ),
+        ),
+        TableRow(
+          children: List.generate(
+            match.blue.length,
+            (index) => _teamRect(
+              context: context,
+              match: match,
+              index: index,
+              isRed: false,
             ),
           ),
         ),
@@ -107,8 +107,8 @@ class MatchCard extends StatelessWidget {
       padding: EdgeInsets.only(
         left: index == 0 ? 0 : 1,
         right: index == alliance.length - 1 ? 0 : 1,
-        top: isRed ? 1 : 0,
-        bottom: isRed ? 0 : 1,
+        top: isRed ? 0 : 1,
+        bottom: isRed ? 1 : 0,
       ),
       child: Container(
         color: isRed
