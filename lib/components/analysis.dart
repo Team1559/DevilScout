@@ -264,7 +264,7 @@ class RadarStatisticWidget extends StatisticWidget<RadarStatistic> {
       child: RadarChart(
         max: statistic.max,
         features: statistic.points.entries
-            .map((e) => RadarChartPoint(label: e.key, value: e.value ?? 0))
+            .map((e) => RadarChartFeature(label: e.key, value: e.value ?? 0))
             .toList(growable: false),
         graphColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
         graphStrokeColor: Theme.of(context).colorScheme.primary,
