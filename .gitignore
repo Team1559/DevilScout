@@ -46,3 +46,4 @@ android/release
 android/debug
 android/profile
 android/app/bin
+pubspec.lock
