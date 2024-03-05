@@ -109,10 +109,13 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                           builder: (context) => TeamSelectDialog(match: match),
                         ),
                       ),
-                  if (!_showingCompleted && completedMatches.isNotEmpty)
+                  if (completedMatches.isNotEmpty)
                     TextButton(
-                      onPressed: () => setState(() => _showingCompleted = true),
-                      child: const Text('Show Completed'),
+                      onPressed: () => setState(
+                          () => _showingCompleted = !_showingCompleted),
+                      child: _showingCompleted
+                          ? const Text('Hide Completed')
+                          : const Text('Show Completed'),
                     ),
                 ]),
               ),
