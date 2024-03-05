@@ -7,7 +7,9 @@ import '/server/server.dart';
 
 class QuestionDisplay extends HorizontalPageView<QuestionPage> {
   final Future<ServerResponse<void>> Function(
-      BuildContext, Map<String, Map<String, dynamic>>) submitAction;
+    BuildContext,
+    Map<String, Map<String, dynamic>>,
+  ) submitAction;
 
   const QuestionDisplay({
     super.key,
@@ -45,50 +47,10 @@ class _QuestionDisplayState
 
     return () => showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Are you sure?'),
-            content: const Text(
-              "You won't be able to edit your response after submitting.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: Navigator.of(context).pop,
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => _submit(context),
-                child: const Text('Submit'),
-              ),
-            ],
+          builder: (context) => SubmitDialog(
+            submitAction: () => widget.submitAction(context, responses),
           ),
         );
-  }
-
-  void _submit(BuildContext context) {
-    widget.submitAction(context, responses).then((response) {
-      if (!response.success || !context.mounted) return;
-
-      Navigator.pop(context);
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Success!'),
-          content: const Text(
-            'Your submission was uploaded to the server, and will be processed within a few minutes.',
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Return'),
-              onPressed: () {
-                Navigator.of(context)
-                  ..pop()
-                  ..pop();
-              },
-            ),
-          ],
-        ),
-      );
-    });
   }
 
   bool _allQuestionsAnswered() {
@@ -105,6 +67,108 @@ class _QuestionDisplayState
     }
 
     return true;
+  }
+}
+
+class SubmitDialog extends StatefulWidget {
+  final Future<ServerResponse<dynamic>> Function() submitAction;
+
+  const SubmitDialog({
+    super.key,
+    required this.submitAction,
+  });
+
+  @override
+  State<SubmitDialog> createState() => _SubmitDialogState();
+}
+
+enum _SubmitState {
+  notStarted,
+  running,
+  failure,
+  success;
+}
+
+class _SubmitDialogState extends State<SubmitDialog> {
+  _SubmitState state = _SubmitState.notStarted;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Submit'),
+      content: _content(),
+      actions: _actions(),
+    );
+  }
+
+  Widget _content() {
+    return switch (state) {
+      _SubmitState.notStarted => const Text(
+          "Are you sure? You won't be able to edit your response after submitting.",
+        ),
+      _SubmitState.running => const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+          ],
+        ),
+      _SubmitState.failure => const Text(
+          'An error occurred while uploading your submission, please try again.',
+        ),
+      _SubmitState.success => const Text(
+          'Your submission was uploaded to the server, and will be processed momentarily.',
+        ),
+    };
+  }
+
+  List<Widget> _actions() {
+    return switch (state) {
+      _SubmitState.notStarted => [
+          TextButton(
+            onPressed: Navigator.of(context).pop,
+            child: const Text('Back'),
+          ),
+          TextButton(
+            onPressed: _submit,
+            child: const Text('Submit'),
+          ),
+        ],
+      _SubmitState.running => [],
+      _SubmitState.failure => [
+          TextButton(
+            onPressed: Navigator.of(context).pop,
+            child: const Text('Back'),
+          ),
+          TextButton(
+            onPressed: _submit,
+            child: const Text('Try Again'),
+          ),
+        ],
+      _SubmitState.success => [
+          TextButton(
+            onPressed: () => Navigator.of(context)
+              ..pop()
+              ..pop(),
+            child: const Text('Return'),
+          ),
+        ],
+    };
+  }
+
+  void _submit() {
+    setState(() => state = _SubmitState.running);
+
+    widget.submitAction().then((response) {
+      if (!context.mounted) return;
+
+      setState(() {
+        if (!response.success) {
+          state = _SubmitState.failure;
+        } else {
+          state = _SubmitState.success;
+        }
+      });
+    });
   }
 }
 
