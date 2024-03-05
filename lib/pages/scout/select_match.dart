@@ -55,7 +55,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
   Widget build(BuildContext context) {
     detectDelayedLogout(context);
     return MenuScaffold(
-      title: 'Match Schedule',
+      title: 'Match Scouting',
       body: Builder(
         builder: (context) {
           if (!Team.current!.hasEventKey) {

@@ -34,7 +34,7 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
   Widget build(BuildContext context) {
     detectDelayedLogout(context);
     return MenuScaffold(
-      title: 'Match Schedule',
+      title: 'Drive Team Scouting',
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();
