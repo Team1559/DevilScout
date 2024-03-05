@@ -1,73 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class LargeTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? hintText;
-  final bool obscureText;
-  final bool autocorrect;
-  final bool autofocus;
-  final FocusNode? focusNode;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextInputAction? textInputAction;
-  final TextInputType? keyboardType;
-  final void Function(String)? onChanged;
-  final void Function(String)? onSubmitted;
+class TextFieldDecoration extends InputDecoration {
+  TextFieldDecoration({
+    super.icon,
+    super.iconColor,
+    super.label,
+    super.labelText,
+    super.labelStyle,
+    super.floatingLabelStyle,
+    super.helperText,
+    super.helperStyle,
+    super.helperMaxLines,
+    super.hintText,
+    super.hintStyle,
+    super.hintTextDirection,
+    super.hintMaxLines,
+    super.hintFadeDuration,
+    super.error,
+    super.errorText,
+    super.errorStyle,
+    super.errorMaxLines,
+    super.floatingLabelBehavior,
+    super.floatingLabelAlignment,
+    super.isCollapsed,
+    super.isDense,
+    super.prefixIcon,
+    super.prefixIconConstraints,
+    super.prefix,
+    super.prefixText,
+    super.prefixStyle,
+    super.prefixIconColor,
+    super.suffixIcon,
+    super.suffix,
+    super.suffixText,
+    super.suffixStyle,
+    super.suffixIconColor,
+    super.suffixIconConstraints,
+    super.counter,
+    super.counterText,
+    super.counterStyle,
+    super.focusColor,
+    super.hoverColor,
+    super.errorBorder,
+    super.focusedErrorBorder,
+    super.disabledBorder,
+    super.border,
+    super.semanticCounterText,
+    super.alignLabelWithHint,
+    super.constraints,
+    super.contentPadding = const EdgeInsets.all(22),
+    super.filled = true,
+    super.enabled = true,
+    InputBorder? enabledBorder,
+    InputBorder? focusedBorder,
+    ColorScheme? colorScheme,
+    Color? fillColor,
+  }) : super(
+          enabledBorder: enabledBorder ??
+              TextFieldBorder(
+                borderColor: colorScheme?.onBackground ?? Colors.transparent,
+              ),
+          focusedBorder: focusedBorder ??
+              TextFieldBorder(
+                borderColor: colorScheme?.primary ?? Colors.transparent,
+                borderWidth: 2,
+              ),
+          fillColor: fillColor ?? colorScheme?.background,
+        );
+}
 
-  const LargeTextField({
-    super.key,
-    required this.controller,
-    this.hintText,
-    this.obscureText = false,
-    this.autocorrect = false,
-    this.focusNode,
-    this.autofocus = false,
-    this.textInputAction,
-    this.inputFormatters,
-    this.keyboardType,
-    this.onChanged,
-    this.onSubmitted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: TextField(
-        style: Theme.of(context).textTheme.labelLarge,
-        onChanged: onChanged,
-        controller: controller,
-        obscureText: obscureText,
-        autocorrect: autocorrect,
-        enableInteractiveSelection: !obscureText,
-        autofocus: autofocus,
-        focusNode: focusNode,
-        textInputAction: textInputAction,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
-        onSubmitted: onSubmitted,
-        decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
-            ),
-          ),
-          fillColor: Theme.of(context).colorScheme.background,
-          filled: true,
-          contentPadding: const EdgeInsets.all(22),
-          hintText: hintText,
-        ),
-      ),
-    );
-  }
+class TextFieldBorder extends OutlineInputBorder {
+  TextFieldBorder({
+    super.gapPadding,
+    super.borderRadius = const BorderRadius.all(Radius.circular(10)),
+    BorderSide? borderSide,
+    double borderWidth = 1,
+    Color borderColor = Colors.black,
+  }) : super(
+          borderSide: borderSide ??
+              BorderSide(
+                color: borderColor,
+                width: borderWidth,
+              ),
+        );
 }
 
 class NumberTextInputFormatter extends TextInputFormatter {
