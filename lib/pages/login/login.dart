@@ -120,7 +120,7 @@ class _LoginFieldsState extends State<LoginFields> {
           User.current = auth.user;
           saveSession();
 
-          hideError(context);
+          hideSnackbar(context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MatchSelectPage()),
@@ -202,18 +202,22 @@ class _UsernameInputState extends State<UsernameInput> {
         widget.teamNumController.text.isEmpty) return null;
 
     return ([String? _]) {
+      LoadingOverlay.of(context).show();
+
       serverLogin(
         team: int.parse(widget.teamNumController.text),
         username: widget.usernameController.text,
       ).then((response) {
         if (!context.mounted) return;
 
+        LoadingOverlay.of(context).hide();
+
         if (!response.success) {
           snackbarError(context, response.toString());
           return;
         }
 
-        hideError(context);
+        hideSnackbar(context);
         widget.continueAction();
       });
     };
