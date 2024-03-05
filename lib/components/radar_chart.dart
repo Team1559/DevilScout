@@ -2,27 +2,25 @@ import 'dart:math' show cos, sin, pi, min;
 
 import 'package:flutter/material.dart';
 
-class RadarChartPoint {
-  final num value;
+class RadarChartFeature {
+  final double value;
   final String? label;
 
-  const RadarChartPoint({
+  const RadarChartFeature({
     required this.value,
     this.label,
   });
 }
 
 class RadarChart extends StatelessWidget {
-  final List<RadarChartPoint> features;
+  final List<RadarChartFeature> features;
   final double max;
 
-  final TextStyle? tickTextStyle;
   final TextStyle? labelTextStyle;
   final double tickSize;
 
   final Color axisColor;
   final Color tickColor;
-  final Color backgroundColor;
   final Color graphColor;
   final Color graphStrokeColor;
   final double graphStrokeWidth;
@@ -38,10 +36,8 @@ class RadarChart extends StatelessWidget {
     this.tickWidth = 1,
     this.tickSize = 4,
     this.labelTextStyle,
-    this.tickTextStyle,
     this.axisColor = Colors.transparent,
     this.tickColor = Colors.transparent,
-    this.backgroundColor = Colors.transparent,
   });
 
   @override
@@ -174,6 +170,8 @@ class RadarChartPainter extends CustomPainter {
     double anglePerSlice = 2 * pi / widget.features.length;
 
     widget.features.asMap().forEach((index, feature) {
+      if (feature.label == null) return;
+
       TextPainter painter = TextPainter(
         text: TextSpan(text: feature.label, style: widget.labelTextStyle),
         textAlign: TextAlign.center,
