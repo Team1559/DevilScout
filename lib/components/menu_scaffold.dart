@@ -100,18 +100,21 @@ class _MenuScaffoldState extends State<MenuScaffold>
       body: AnimatedSwitcher(
         duration: fadeDuration,
         transitionBuilder: _transitionBuilder,
-        child: menuVisible
-            ? Builder(
-                builder: _navigationMenu,
-                key: const Key('NavigationMenu'),
-              )
-            : widget.body,
+        child: menuVisible ? _MainMenu(hideMenu: hideMenu) : widget.body,
       ),
     );
   }
+}
 
-  Widget _navigationMenu(BuildContext context) {
+class _MainMenu extends StatelessWidget {
+  final void Function() hideMenu;
+
+  const _MainMenu({required this.hideMenu});
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
+      key: const Key('NavigationMenu'),
       minimum: const EdgeInsets.symmetric(
         horizontal: 28,
         vertical: 18,
@@ -119,66 +122,168 @@ class _MenuScaffoldState extends State<MenuScaffold>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _section(context: context, title: 'Scout', children: [
-            _menuItem(
-              context: context,
-              title: 'Matches',
-              icon: const Icon(Icons.event),
-              onTap: _pushStatefulIfInactive<MatchSelectPageState>(
-                context: context,
-                builder: (context) => const MatchSelectPage(),
-              ),
-            ),
-            _menuItem(
-              context: context,
-              title: 'Pits',
-              icon: const Icon(Icons.assignment),
-              onTap: _pushStatefulIfInactive<PitSelectPageState>(
-                context: context,
-                builder: (context) => const PitSelectPage(),
-              ),
-            ),
-            _menuItem(
-              context: context,
-              title: 'Drive Team',
-              icon: const Icon(Icons.sports_esports),
-              onTap: _pushStatefulIfInactive<DriveTeamSelectPageState>(
-                context: context,
-                builder: (context) => const DriveTeamSelectPage(),
-              ),
-            ),
-          ]),
-          _section(context: context, title: 'Analyze', children: [
-            _menuItem(
-              context: context,
-              title: 'Teams',
-              icon: const Icon(Icons.query_stats),
-              onTap: _pushStatefulIfInactive<TeamAnalysisSelectPageState>(
-                context: context,
-                builder: (context) => const TeamAnalysisSelectPage(),
-              ),
-            ),
-          ]),
-          if (User.current!.isAdmin)
-            _section(context: context, title: 'Admin', children: [
-              _menuItem(
-                context: context,
-                title: 'Manage Team ${Team.current!.number}',
-                icon: const Icon(Icons.manage_accounts),
-                onTap: _pushStatelessIfInactive<ManagementPage>(
+          _MenuSection(
+            title: 'Scout',
+            children: [
+              _MenuItem(
+                title: 'Matches',
+                icon: const Icon(Icons.event),
+                onTap: () => _pushStatefulIfInactive<MatchSelectPageState>(
                   context: context,
-                  builder: (context) => const ManagementPage(),
+                  builder: (context) => const MatchSelectPage(),
                 ),
               ),
-            ]),
+              _MenuItem(
+                title: 'Pits',
+                icon: const Icon(Icons.assignment),
+                onTap: () => _pushStatefulIfInactive<PitSelectPageState>(
+                  context: context,
+                  builder: (context) => const PitSelectPage(),
+                ),
+              ),
+              _MenuItem(
+                title: 'Drive Team',
+                icon: const Icon(Icons.sports_esports),
+                onTap: () => _pushStatefulIfInactive<DriveTeamSelectPageState>(
+                  context: context,
+                  builder: (context) => const DriveTeamSelectPage(),
+                ),
+              ),
+            ],
+          ),
+          _MenuSection(
+            title: 'Analyze',
+            children: [
+              _MenuItem(
+                title: 'Teams',
+                icon: const Icon(Icons.query_stats),
+                onTap: () =>
+                    _pushStatefulIfInactive<TeamAnalysisSelectPageState>(
+                  context: context,
+                  builder: (context) => const TeamAnalysisSelectPage(),
+                ),
+              ),
+            ],
+          ),
+          if (User.current!.isAdmin)
+            _MenuSection(
+              title: 'Admin',
+              children: [
+                _MenuItem(
+                  title: 'Manage Team ${Team.current!.number}',
+                  icon: const Icon(Icons.manage_accounts),
+                  onTap: () => _pushStatelessIfInactive<ManagementPage>(
+                    context: context,
+                    builder: (context) => const ManagementPage(),
+                  ),
+                ),
+              ],
+            ),
           const Spacer(),
-          _bottom(context),
+          _MenuBottom(
+            onSettingsPressed: () => _pushStatefulIfInactive<SettingsPageState>(
+              context: context,
+              builder: (context) => const SettingsPage(),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _bottom(BuildContext context) {
+  void _pushStatefulIfInactive<STATE extends State>({
+    required BuildContext context,
+    required Widget Function(BuildContext) builder,
+  }) {
+    STATE? parent = context.findAncestorStateOfType<STATE>();
+    if (parent != null) {
+      hideMenu();
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: builder),
+      );
+    }
+  }
+
+  void _pushStatelessIfInactive<WIDGET extends StatelessWidget>({
+    required BuildContext context,
+    required Widget Function(BuildContext) builder,
+  }) {
+    WIDGET? parent = context.findAncestorWidgetOfExactType<WIDGET>();
+    if (parent != null) {
+      hideMenu();
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: builder),
+      );
+    }
+  }
+}
+
+class _MenuSection extends StatelessWidget {
+  static const List<Widget> emptyWidgetList = [];
+
+  final String title;
+  final List<Widget> children;
+
+  const _MenuSection({
+    required this.title,
+    this.children = emptyWidgetList,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final String title;
+  final Icon icon;
+  final void Function()? onTap;
+
+  const _MenuItem({
+    required this.icon,
+    required this.title,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      leading: icon,
+      onTap: onTap,
+    );
+  }
+}
+
+class _MenuBottom extends StatelessWidget {
+  final void Function() onSettingsPressed;
+
+  const _MenuBottom({
+    required this.onSettingsPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -240,10 +345,7 @@ class _MenuScaffoldState extends State<MenuScaffold>
                   Theme.of(context).colorScheme.surface,
                 ),
               ),
-              onPressed: _pushStatefulIfInactive<SettingsPageState>(
-                context: context,
-                builder: (context) => const SettingsPage(),
-              ),
+              onPressed: onSettingsPressed,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -265,75 +367,5 @@ class _MenuScaffoldState extends State<MenuScaffold>
         ),
       ],
     );
-  }
-
-  Widget _section({
-    required BuildContext context,
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 8,
-          ),
-          child: Column(
-            children: children,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _menuItem({
-    required BuildContext context,
-    required String title,
-    required Icon icon,
-    required void Function() onTap,
-  }) {
-    return ListTile(
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      leading: icon,
-      onTap: onTap,
-    );
-  }
-
-  void Function() _pushStatefulIfInactive<STATE extends State>({
-    required BuildContext context,
-    required Widget Function(BuildContext) builder,
-  }) {
-    STATE? parent = context.findAncestorStateOfType<STATE>();
-    if (parent != null) {
-      return hideMenu;
-    }
-
-    return () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: builder),
-        );
-  }
-
-  void Function() _pushStatelessIfInactive<WIDGET extends StatelessWidget>({
-    required BuildContext context,
-    required Widget Function(BuildContext) builder,
-  }) {
-    WIDGET? parent = context.findAncestorWidgetOfExactType<WIDGET>();
-    if (parent != null) {
-      return hideMenu;
-    }
-
-    return () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: builder),
-        );
   }
 }

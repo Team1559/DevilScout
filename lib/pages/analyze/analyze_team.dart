@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '/components/analysis.dart';
 import '/server/analysis.dart';
-import '/server/events.dart';
 
 class TeamAnalysisPage extends StatelessWidget {
   final int teamNum;
@@ -19,17 +18,6 @@ class TeamAnalysisPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Team $teamNum'),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: Text(
-            FrcTeam.currentEventTeams
-                    .where((t) => t.number == teamNum)
-                    .firstOrNull
-                    ?.name ??
-                'Unknown',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
       ),
       body: AnalysisDisplay(pages: statistics),
     );

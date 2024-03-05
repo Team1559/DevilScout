@@ -32,7 +32,7 @@ class _MatchScoutPageState extends State<MatchScoutPage> {
     detectDelayedLogout(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DevilScout'),
+        title: Text('Team ${widget.team}'),
       ),
       body: QuestionDisplay(
         pages: QuestionConfig.matchQuestions,

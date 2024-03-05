@@ -88,24 +88,44 @@ class _UserEditDialogState extends State<UserEditDialog> {
               physics: const NeverScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  LargeTextField(
+                  TextField(
                     controller: nameController,
-                    hintText: 'Full Name',
+                    style: Theme.of(context).textTheme.labelLarge,
+                    decoration: TextFieldDecoration(
+                      hintText: 'Full Name',
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
-                  LargeTextField(
+                  const SizedBox(height: 8),
+                  TextField(
                     controller: usernameController,
-                    hintText: 'Username',
+                    style: Theme.of(context).textTheme.labelLarge,
+                    decoration: TextFieldDecoration(
+                      hintText: 'Username',
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
-                  LargeTextField(
+                  const SizedBox(height: 8),
+                  TextField(
                     controller: passwordController,
-                    hintText: 'Password',
                     obscureText: true,
+                    style: Theme.of(context).textTheme.labelLarge,
+                    decoration: TextFieldDecoration(
+                      hintText: 'Password',
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
-                  LargeTextField(
+                  const SizedBox(height: 8),
+                  TextField(
                     controller: confirmPasswordController,
-                    hintText: 'Confirm Password',
                     obscureText: true,
+                    style: Theme.of(context).textTheme.labelLarge,
+                    decoration: TextFieldDecoration(
+                      hintText: 'Confirm Password',
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
+                  const SizedBox(height: 4),
                   if (widget.showAdmin)
                     ListTile(
                       title: Text(

@@ -35,7 +35,7 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
   Widget build(BuildContext context) {
     detectDelayedLogout(context);
     return MenuScaffold(
-      title: 'Analyze Teams',
+      title: 'Team Analysis',
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();
