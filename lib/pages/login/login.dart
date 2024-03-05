@@ -157,9 +157,13 @@ class _UsernameInputState extends State<UsernameInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LargeTextField(
+        TextField(
           controller: widget.usernameController,
-          hintText: 'Username',
+          style: Theme.of(context).textTheme.labelLarge,
+          decoration: TextFieldDecoration(
+            hintText: 'Username',
+            colorScheme: Theme.of(context).colorScheme,
+          ),
           inputFormatters: [
             LengthLimitingTextInputFormatter(32),
           ],
@@ -167,9 +171,14 @@ class _UsernameInputState extends State<UsernameInput> {
           autofocus: true,
           focusNode: widget.usernameFocusNode,
         ),
-        LargeTextField(
+        const SizedBox(height: 16),
+        TextField(
           controller: widget.teamNumController,
-          hintText: 'Team Number',
+          style: Theme.of(context).textTheme.labelLarge,
+          decoration: TextFieldDecoration(
+            hintText: 'Team Number',
+            colorScheme: Theme.of(context).colorScheme,
+          ),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             const NumberTextInputFormatter(min: 0, max: 9999),
@@ -179,6 +188,7 @@ class _UsernameInputState extends State<UsernameInput> {
           onSubmitted: tryLogin(),
           focusNode: widget.teamNumberFocusNode,
         ),
+        const SizedBox(height: 16),
         FilledButton(
           onPressed: tryLogin(),
           child: const Text('Next'),
@@ -238,15 +248,20 @@ class _PasswordInputState extends State<PasswordInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LargeTextField(
+        TextField(
+          style: Theme.of(context).textTheme.labelLarge,
           controller: widget.passwordController,
-          hintText: 'Password',
+          decoration: TextFieldDecoration(
+            hintText: 'Password',
+            colorScheme: Theme.of(context).colorScheme,
+          ),
           obscureText: true,
           autofocus: true,
           focusNode: widget.focusNode,
           textInputAction: TextInputAction.done,
           onSubmitted: tryAuth(context),
         ),
+        const SizedBox(height: 16),
         FilledButton(
           onPressed: tryAuth(context),
           child: const Text('Log In'),
