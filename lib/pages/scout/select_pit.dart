@@ -33,7 +33,7 @@ class PitSelectPageState extends State<PitSelectPage> {
   Widget build(BuildContext context) {
     detectDelayedLogout(context);
     return MenuScaffold(
-      title: 'Select Team',
+      title: 'Event Teams',
       body: Builder(builder: (context) {
         if (!Team.current!.hasEventKey) {
           return const NoEventSetWidget();

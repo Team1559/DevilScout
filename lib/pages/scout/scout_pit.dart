@@ -32,13 +32,6 @@ class _PitScoutPageState extends State<PitScoutPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Team ${widget.team.number}'),
-        bottom: PreferredSize(
-          preferredSize: Size.zero,
-          child: Text(
-            widget.team.name,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
       ),
       body: QuestionDisplay(
         pages: QuestionConfig.pitQuestions,
