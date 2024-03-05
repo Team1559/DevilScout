@@ -7,6 +7,24 @@ const TextStyle _bodyFont = TextStyle(fontFamily: 'Inter');
 const Color _primary = Color(0xFF3063FF);
 const Color _secondary = Color(0xFF83B9FC);
 
+const _textTheme = TextTheme(
+  displayLarge: _headingFont,
+  displayMedium: _headingFont,
+  displaySmall: _headingFont,
+  headlineLarge: _headingFont,
+  headlineMedium: _headingFont,
+  headlineSmall: _headingFont,
+  titleLarge: _headingFont,
+  titleMedium: _headingFont,
+  titleSmall: _headingFont,
+  bodyLarge: _bodyFont,
+  bodyMedium: _bodyFont,
+  bodySmall: _bodyFont,
+  labelLarge: _bodyFont,
+  labelMedium: _bodyFont,
+  labelSmall: _bodyFont,
+);
+
 final lightTheme = ThemeData(
   colorScheme: const ColorScheme.light(
     primary: _primary,
@@ -31,23 +49,7 @@ final lightTheme = ThemeData(
     scrolledUnderElevation: 0,
     centerTitle: true,
   ),
-  textTheme: const TextTheme(
-    displayLarge: _headingFont,
-    displayMedium: _headingFont,
-    displaySmall: _headingFont,
-    headlineLarge: _headingFont,
-    headlineMedium: _headingFont,
-    headlineSmall: _headingFont,
-    titleLarge: _headingFont,
-    titleMedium: _headingFont,
-    titleSmall: _headingFont,
-    bodyLarge: _bodyFont,
-    bodyMedium: _bodyFont,
-    bodySmall: _bodyFont,
-    labelLarge: _bodyFont,
-    labelMedium: _bodyFont,
-    labelSmall: _bodyFont,
-  ),
+  textTheme: _textTheme,
   filledButtonTheme: const FilledButtonThemeData(
     style: ButtonStyle(
       minimumSize: MaterialStatePropertyAll(
@@ -70,7 +72,7 @@ final lightTheme = ThemeData(
   ),
 );
 
-final darkTheme = lightTheme.copyWith(
+final darkTheme = ThemeData(
   colorScheme: const ColorScheme.dark(
     primary: _primary,
     onPrimary: Colors.white,
@@ -91,6 +93,10 @@ final darkTheme = lightTheme.copyWith(
       color: Colors.white,
     ),
   ),
+  textTheme: _textTheme,
+  filledButtonTheme: lightTheme.filledButtonTheme,
+  dividerColor: lightTheme.dividerColor,
+  cardTheme: lightTheme.cardTheme,
 );
 
 extension MoreColors on ColorScheme {
