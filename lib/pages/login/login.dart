@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter/services.dart';
+import 'package:in_app_notification/in_app_notification.dart';
 
 import '/components/loading_overlay.dart';
-import '/components/snackbar.dart';
+import '/components/notification.dart';
 import '/components/text_field.dart';
 import '/pages/scout/select_match.dart';
 import '/server/auth.dart';
@@ -120,7 +121,7 @@ class _LoginFieldsState extends State<LoginFields> {
           User.current = auth.user;
           saveSession();
 
-          hideSnackbar(context);
+          InAppNotification.dismiss(context: context);
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MatchSelectPage()),
@@ -213,11 +214,17 @@ class _UsernameInputState extends State<UsernameInput> {
         LoadingOverlay.of(context).hide();
 
         if (!response.success) {
-          snackbarError(context, response.toString());
+          showNotification(
+            context: context,
+            child: Notification(
+              level: NotificationLevel.error,
+              title: response.message ?? 'An unknown error occurred',
+            ),
+          );
           return;
         }
 
-        hideSnackbar(context);
+        InAppNotification.dismiss(context: context);
         widget.continueAction();
       });
     };
@@ -290,7 +297,13 @@ class _PasswordInputState extends State<PasswordInput> {
         LoadingOverlay.of(context).hide();
 
         if (!response.success) {
-          snackbarError(context, response.toString());
+          showNotification(
+            context: context,
+            child: Notification(
+              level: NotificationLevel.error,
+              title: response.toString(),
+            ),
+          );
           return;
         }
 

@@ -103,7 +103,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   try {
     response = await _httpClient.send(request);
   } on ClientException {
-    return ServerResponse.error(message: 'Error contacting server, try again');
+    return ServerResponse.error(message: 'Error contacting server');
   }
 
   if (response.statusCode >= 400) {
@@ -113,7 +113,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
     }
     return ServerResponse.error(
       statusCode: response.statusCode,
-      message: 'Error contacting server, try again',
+      message: 'Unable to process response',
     );
   } else if (decoder == null || response.statusCode == 304) {
     return ServerResponse.success(statusCode: response.statusCode);
