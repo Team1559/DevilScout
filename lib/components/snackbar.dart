@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 void snackbarError(BuildContext context, String message) {
-  hideError(context);
+  hideSnackbar(context);
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       backgroundColor: Theme.of(context).colorScheme.error,
@@ -18,6 +18,6 @@ void snackbarError(BuildContext context, String message) {
   );
 }
 
-void hideError(BuildContext context) {
+void hideSnackbar(BuildContext context) {
   ScaffoldMessenger.of(context).clearSnackBars();
 }
