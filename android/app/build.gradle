@@ -23,8 +23,8 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.devil_scout"
-    compileSdkVersion flutter.compileSdkVersion
+    namespace "org.victorrobotics.scouting.devilscout"
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
