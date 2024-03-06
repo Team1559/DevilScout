@@ -36,12 +36,9 @@ class LoadingOverlayState extends State<LoadingOverlay> {
           visible: _loading,
           child: const Stack(
             children: [
-              Opacity(
-                opacity: 0.5,
-                child: ModalBarrier(
-                  dismissible: false,
-                  color: Colors.black,
-                ),
+              ModalBarrier(
+                dismissible: false,
+                color: Color(0x60000000),
               ),
               Center(
                 child: CircularProgressIndicator(),
