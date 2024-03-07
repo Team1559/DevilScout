@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_notification/in_app_notification.dart';
 
 import '/pages/login/load_session.dart';
 import '/settings.dart';
@@ -61,12 +62,14 @@ class MainAppState extends State<MainApp> {
               .colorScheme
               .background,
     ));
-    return MaterialApp(
-      home: const LoadSessionPage(),
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: settings?.theme,
-      debugShowCheckedModeBanner: false,
+    return InAppNotification(
+      child: MaterialApp(
+        home: const LoadSessionPage(),
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: settings?.theme,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }

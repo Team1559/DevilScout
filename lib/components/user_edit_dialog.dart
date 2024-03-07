@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Notification;
 
 import '/components/logout.dart';
-import '/components/snackbar.dart';
+import '/components/notification.dart';
 import '/components/text_field.dart';
 import '/server/auth.dart';
 import '/server/server.dart';
@@ -212,7 +212,13 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (!context.mounted) return;
 
     if (!response.success) {
-      snackbarError(context, response.message ?? 'An error occurred');
+      showNotification(
+        context: context,
+        child: Notification(
+          level: NotificationLevel.error,
+          title: response.message ?? 'An error occurred',
+        ),
+      );
       return;
     }
 
@@ -260,7 +266,13 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (password.isNotEmpty &&
         (password.toLowerCase().contains(username.toLowerCase()) ||
             password.toLowerCase().contains(fullName.toLowerCase()))) {
-      snackbarError(context, 'Password should not contain name');
+      showNotification(
+        context: context,
+        child: const Notification(
+          level: NotificationLevel.warning,
+          title: 'Password should not contain name',
+        ),
+      );
       return;
     }
 
@@ -284,9 +296,12 @@ class _UserEditDialogState extends State<UserEditDialog> {
     if (!context.mounted) return;
 
     if (!response.success) {
-      snackbarError(
-        context,
-        response.message ?? 'An error occurred',
+      showNotification(
+        context: context,
+        child: Notification(
+          level: NotificationLevel.error,
+          title: response.message ?? 'An error occurred',
+        ),
       );
       return;
     }

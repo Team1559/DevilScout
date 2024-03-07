@@ -47,3 +47,4 @@ android/debug
 android/profile
 android/app/bin
 pubspec.lock
+ios/Podfile.lock
