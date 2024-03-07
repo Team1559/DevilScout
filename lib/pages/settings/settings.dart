@@ -4,7 +4,6 @@ import '/components/logout.dart';
 import '/components/menu_scaffold.dart';
 import '/components/user_edit_dialog.dart';
 import '/pages/settings/about.dart';
-import '/pages/settings/legal.dart';
 import '/pages/settings/technical.dart';
 import '/server/users.dart';
 import '/settings.dart';
@@ -138,16 +137,6 @@ class SettingsPageState extends State<SettingsPage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const TechnicalPage()),
-                ),
-              ),
-              ListTile(
-                title: Text(
-                  'Legal',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LegalPage()),
                 ),
               ),
             ],
