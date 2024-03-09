@@ -62,7 +62,7 @@ class User {
 
 /// Get the list of registered users on your team. Requires ADMIN.
 Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
-      path: 'teams/${Session.current!.team}/users',
+      path: 'teams/${Session.current.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
       callback: (users) => User.allUsers = List.of(users),
@@ -85,7 +85,7 @@ Future<ServerResponse<User>> serverCreateUser({
   bool isAdmin = false,
 }) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users',
+      path: 'teams/${Session.current.team}/users',
       method: 'POST',
       decoder: User.fromJson,
       payload: {
@@ -127,7 +127,7 @@ Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
 /// Get the user associated with the current session. Prefer this over
 /// [serverGetUser] for the current user.
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      path: 'users/${Session.current!.user}',
+      path: 'users/${Session.current.user}',
       method: 'GET',
       decoder: User.fromJson,
       callback: (user) => User._current = user,
@@ -143,7 +143,7 @@ Future<ServerResponse<User>> serverEditCurrentUser({
   String? password,
 }) =>
     serverRequest(
-      path: 'users/${Session.current!.user}',
+      path: 'users/${Session.current.user}',
       method: 'PATCH',
       decoder: User.fromJson,
       callback: (user) => User._current = user,
@@ -160,4 +160,4 @@ Future<ServerResponse<User>> serverEditCurrentUser({
 /// session. This should be preferred over [serverDeleteUser] for the current
 /// user.
 Future<ServerResponse<void>> serverDeleteCurrentUser() =>
-    serverDeleteUser(id: Session.current!.user);
+    serverDeleteUser(id: Session.current.user);

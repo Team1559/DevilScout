@@ -212,7 +212,7 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
     callback: (schedule) {
       EventMatch.currentEventSchedule = schedule;
       EventMatch.currentTeamSchedule = List.of(
-        schedule.where((match) => match.containsTeam(Session.current!.team)),
+        schedule.where((match) => match.containsTeam(Session.current.team)),
         growable: false,
       );
     },

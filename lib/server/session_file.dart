@@ -32,11 +32,11 @@ Future<bool> loadCachedSession() async {
 void saveSession() {
   getApplicationDocumentsDirectory().then((directory) {
     File file = File('${directory.path}/$_sessionFile');
-    if (Session.current == null) {
-      file.deleteSync();
-    } else {
+    if (Session.exists) {
       file.createSync();
       file.writeAsString(jsonEncode(Session.current));
+    } else {
+      file.deleteSync();
     }
   });
 }
