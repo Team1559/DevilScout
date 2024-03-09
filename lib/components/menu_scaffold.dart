@@ -165,12 +165,12 @@ class _MainMenu extends StatelessWidget {
               ),
             ],
           ),
-          if (User.current!.isAdmin)
+          if (User.current.isAdmin)
             _MenuSection(
               title: 'Admin',
               children: [
                 _MenuItem(
-                  title: 'Manage Team ${Team.current!.number}',
+                  title: 'Manage Team ${Team.current.number}',
                   icon: const Icon(Icons.manage_accounts),
                   onTap: () => _pushStatelessIfInactive<ManagementPage>(
                     context: context,
@@ -291,12 +291,12 @@ class _MenuBottom extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              User.current!.fullName,
+              User.current.fullName,
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.left,
             ),
             const SizedBox(width: 2),
-            if (User.current!.isAdmin)
+            if (User.current.isAdmin)
               Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: Container(
@@ -319,7 +319,7 @@ class _MenuBottom extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          '${Team.current!.number} | ${Team.current!.name}',
+          '${Team.current.number} | ${Team.current.name}',
           style: Theme.of(context).textTheme.bodyLarge,
           textAlign: TextAlign.left,
         ),

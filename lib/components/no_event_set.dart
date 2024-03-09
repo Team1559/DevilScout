@@ -18,7 +18,7 @@ class NoEventSetWidget extends StatelessWidget {
               'No event set',
               style: Theme.of(context).textTheme.headlineLarge,
             ),
-            if (User.current!.isAdmin)
+            if (User.current.isAdmin)
               FilledButton(
                 child: const Text('Go to team management'),
                 onPressed: () {

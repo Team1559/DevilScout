@@ -54,12 +54,12 @@ class ManagementPage extends StatelessWidget {
                 child: Card(
                   child: ListTile(
                     title: Text(
-                      Event.currentEvent?.name ?? 'No Event Selected',
+                      Event.current?.name ?? 'No Event Selected',
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
-                    subtitle: Event.currentEvent == null
+                    subtitle: Event.current == null
                         ? null
-                        : Text(Event.currentEvent!.location),
+                        : Text(Event.current!.location),
                     trailing: const Icon(Icons.edit),
                   ),
                 ),

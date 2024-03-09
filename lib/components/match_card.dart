@@ -36,12 +36,12 @@ class MatchCard extends StatelessWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (match.containsTeam(Team.current!.number))
+                    if (match.containsTeam(Team.current.number))
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: Icon(
                           Icons.star,
-                          color: match.red.contains(Team.current!.number)
+                          color: match.red.contains(Team.current.number)
                               ? Theme.of(context).colorScheme.frcRed
                               : Theme.of(context).colorScheme.frcBlue,
                         ),

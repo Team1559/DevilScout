@@ -8,14 +8,14 @@ part 'events.g.dart';
 
 @JsonSerializable(createToJson: false)
 class Event {
-  static Event? currentEvent;
+  static Event? current;
   static final Etag _currentEventEtag = Etag();
 
   static List<Event> allEvents = List.empty();
   static final Etag _allEventsEtag = Etag();
 
   static void clear() {
-    currentEvent = null;
+    current = null;
     _currentEventEtag.clear();
 
     allEvents = List.empty();
@@ -183,30 +183,30 @@ Future<ServerResponse<List<FrcTeam>>> serverGetEventTeamList({
     );
 
 Future<ServerResponse<Event>> serverGetCurrentEvent() {
-  if (Team.current == null || Team.current!.eventKey == '') {
+  if (Team.current.eventKey == '') {
     return Future.value(
       ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.current!.eventKey}',
+    path: 'events/${Team.current.eventKey}',
     method: 'GET',
     decoder: Event.fromJson,
-    callback: (event) => Event.currentEvent = event,
+    callback: (event) => Event.current = event,
     etag: Event._currentEventEtag,
   );
 }
 
 Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
-  if (Team.current!.eventKey == '') {
+  if (Team.current.eventKey == '') {
     return Future.value(
       ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.current!.eventKey}/matches',
+    path: 'events/${Team.current.eventKey}/matches',
     method: 'GET',
     decoder: listOf(EventMatch.fromJson),
     callback: (schedule) {
@@ -221,14 +221,14 @@ Future<ServerResponse<List<EventMatch>>> serverGetCurrentEventSchedule() {
 }
 
 Future<ServerResponse<List<FrcTeam>>> serverGetCurrentEventTeamList() {
-  if (Team.current!.eventKey == '') {
+  if (Team.current.eventKey == '') {
     return Future.value(
       ServerResponse.error(message: 'Missing team/eventKey'),
     );
   }
 
   return serverRequest(
-    path: 'events/${Team.current!.eventKey}/teams',
+    path: 'events/${Team.current.eventKey}/teams',
     method: 'GET',
     decoder: listOf(FrcTeam.fromJson),
     callback: (teams) => FrcTeam.currentEventTeams = teams,

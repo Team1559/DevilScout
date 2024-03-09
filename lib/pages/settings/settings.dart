@@ -65,7 +65,7 @@ class SettingsPageState extends State<SettingsPage> {
                     isDismissible: true,
                     builder: (context) => UserEditDialog(
                       user: User.current,
-                      showAdmin: User.current!.isAdmin,
+                      showAdmin: User.current.isAdmin,
                     ),
                   );
                 },

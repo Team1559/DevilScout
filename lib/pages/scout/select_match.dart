@@ -58,7 +58,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
       title: 'Match Scouting',
       body: Builder(
         builder: (context) {
-          if (!Team.current!.hasEventKey) {
+          if (!Team.current.hasEventKey) {
             return const NoEventSetWidget();
           } else if (EventMatch.currentEventSchedule.isEmpty && !_loaded) {
             return const Center(child: CircularProgressIndicator());
@@ -76,7 +76,7 @@ class MatchSelectPageState extends State<MatchSelectPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Event.currentEvent!.name,
+                          Event.current!.name,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         if (EventMatch.currentEventSchedule.isEmpty)

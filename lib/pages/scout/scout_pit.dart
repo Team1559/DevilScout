@@ -36,7 +36,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
       body: QuestionDisplay(
         pages: QuestionConfig.pitQuestions,
         submitAction: (context, data) => serverSubmitPitData(
-          eventKey: Event.currentEvent!.key,
+          eventKey: Event.current!.key,
           team: widget.team.number,
           data: data,
         ).then(detectLogout(context)),
