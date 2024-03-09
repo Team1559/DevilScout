@@ -246,13 +246,9 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
 }
 
 /// Log out the current session, if it exists.
-Future<ServerResponse<void>> serverLogout() async {
-  serverClearCachedData();
-  return serverRequest(
-    path: 'logout',
-    method: 'DELETE',
-  );
-}
+Future<ServerResponse<void>> serverLogout() =>
+    serverRequest(path: 'logout', method: 'DELETE')
+        .whenComplete(serverClearCachedData);
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256
