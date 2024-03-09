@@ -4,6 +4,7 @@ import '/pages/login/login.dart';
 import '/server/server.dart';
 
 void pushLoginPage(BuildContext context) {
+  serverClearCachedData();
   Navigator.pushAndRemoveUntil(
     context,
     MaterialPageRoute(builder: (context) => const LoginPage()),

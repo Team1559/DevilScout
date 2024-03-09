@@ -2,7 +2,23 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 
+import '/server/analysis.dart';
+import '/server/events.dart';
+import '/server/questions.dart';
 import '/server/session.dart';
+import '/server/teams.dart';
+import '/server/users.dart';
+
+void serverClearCachedData() {
+  Session.clear();
+  User.clear();
+  Team.clear();
+  Event.clear();
+  FrcTeam.clear();
+  EventMatch.clear();
+  QuestionConfig.clear();
+  EventTeamStatistics.clear();
+}
 
 /// A response from the Devil Scout Server. Responses return in one of three states:
 ///
