@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '/components/logout.dart';
 import '/pages/scout/select_match.dart';
 import '/server/session_file.dart';
-import '/server/teams.dart';
-import '/server/users.dart';
 
 class LoadSessionPage extends StatefulWidget {
   const LoadSessionPage({super.key});
@@ -18,20 +16,14 @@ class _LoadSessionPageState extends State<LoadSessionPage> {
   void initState() {
     super.initState();
     loadCachedSession().then((success) {
-      if (!success) {
-        pushLoginPage(context);
-        return;
-      }
-
-      Future.wait([
-        serverGetCurrentUser(),
-        serverGetCurrentTeam(),
-      ]).whenComplete(() {
+      if (success) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MatchSelectPage()),
         );
-      });
+      } else {
+        pushLoginPage(context);
+      }
     });
   }
 

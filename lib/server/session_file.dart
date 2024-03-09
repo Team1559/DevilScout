@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '/server/auth.dart';
 import '/server/server.dart';
 import '/server/session.dart';
 
@@ -24,7 +25,7 @@ Future<bool> loadCachedSession() async {
   String sessionStr = file.readAsStringSync();
   Session.current = Session.fromJson(jsonDecode(sessionStr));
 
-  ServerResponse<Session> response = await serverGetSession();
+  ServerResponse<void> response = await serverGetSession();
   return response.success;
 }
 

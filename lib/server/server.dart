@@ -32,6 +32,8 @@ class ServerResponse<T> {
   final T? value;
   final String? message;
 
+  ServerResponse._({this.statusCode = -1, this.value, this.message});
+
   /// Constructs a non-error server response, possibly with data in [value]
   ServerResponse.success({this.statusCode = 0, this.value}) : message = null;
 
@@ -55,6 +57,11 @@ class ServerResponse<T> {
       return message ?? '[Error, no message]';
     }
   }
+
+  ServerResponse<void> stripValue() => ServerResponse._(
+        statusCode: statusCode,
+        message: message,
+      );
 }
 
 /// An HTTP etag, used to determine whether cached data needs to be refreshed.

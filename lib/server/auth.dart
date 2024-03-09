@@ -115,20 +115,21 @@ class _LoginChallenge {
 }
 
 @JsonSerializable(createToJson: false)
-class AuthResponse {
+class _AuthResponse {
   final User user;
   final Team team;
   final Session session;
   final List<int> serverSignature;
 
-  AuthResponse({
+  _AuthResponse({
     required this.user,
     required this.team,
     required this.session,
-    required String serverSignature,
-  }) : serverSignature = base64.decode(serverSignature);
+    String? serverSignature,
+  }) : serverSignature =
+            (serverSignature == null ? [] : base64.decode(serverSignature));
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) =>
+  factory _AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
 }
 
@@ -184,7 +185,7 @@ Future<ServerResponse<void>> serverLogin({
 /// After receiving the login challenge, attempt to authenticate the user by
 /// completing the challenge with the given password. Returns null if
 /// successful, else an error message for the user.
-Future<ServerResponse<AuthResponse>> serverAuthenticate({
+Future<ServerResponse<void>> serverAuthenticate({
   required String password,
 }) async {
   if (_LoginStatus.current == null) {
@@ -209,10 +210,10 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
     for (int i = 0; i < 32; i++) clientKey[i] ^ clientSignature[i]
   ];
 
-  Future<ServerResponse<AuthResponse>> request = serverRequest(
+  Future<ServerResponse<_AuthResponse>> request = serverRequest(
     path: 'auth',
     method: 'POST',
-    decoder: AuthResponse.fromJson,
+    decoder: _AuthResponse.fromJson,
     payload: {
       'team': login.team,
       'username': login.username,
@@ -229,12 +230,12 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
     login.challenge.nonce,
   );
 
-  ServerResponse<AuthResponse> response = await request;
+  ServerResponse<_AuthResponse> response = await request;
   if (!response.success) {
     return response;
   }
 
-  AuthResponse auth = response.value!;
+  _AuthResponse auth = response.value!;
   for (int i = 0; i < 32; i++) {
     if (serverSignature[i] != auth.serverSignature[i]) {
       return ServerResponse.error(message: 'Failed to authenticate server');
@@ -242,13 +243,31 @@ Future<ServerResponse<AuthResponse>> serverAuthenticate({
   }
 
   _LoginStatus.current = null;
-  return ServerResponse.success(value: auth);
+  _loadAuth(auth);
+  return ServerResponse.success();
 }
 
 /// Log out the current session, if it exists.
 Future<ServerResponse<void>> serverLogout() =>
     serverRequest(path: 'logout', method: 'DELETE')
         .whenComplete(serverClearCachedData);
+
+/// Get the session associated with the supplied session key. Does not require
+/// authentication. Used to check if a cached session is still valid. This
+/// should not be called directly by client code; see session_file.dart
+/// instead.
+Future<ServerResponse<void>> serverGetSession() => serverRequest(
+      path: 'session',
+      method: 'GET',
+      decoder: _AuthResponse.fromJson,
+      callback: _loadAuth,
+    ).then((response) => response.stripValue());
+
+void _loadAuth(_AuthResponse auth) {
+  Session.current = auth.session;
+  Team.current = auth.team;
+  User.current = auth.user;
+}
 
 Future<List<int>> _computeKey(SecretKey saltedPassword, String name) =>
     _hmacSha256

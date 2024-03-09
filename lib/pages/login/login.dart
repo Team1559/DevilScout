@@ -7,10 +7,7 @@ import '/components/notification.dart';
 import '/components/text_field.dart';
 import '/pages/scout/select_match.dart';
 import '/server/auth.dart';
-import '/server/session.dart';
 import '/server/session_file.dart';
-import '/server/teams.dart';
-import '/server/users.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -115,18 +112,6 @@ class _LoginFieldsState extends State<LoginFields> {
           teamNumberFocus.requestFocus();
           Future.delayed(animationDuration, _password.clear);
         }),
-        loginAction: (auth) {
-          Session.current = auth.session;
-          Team.current = auth.team;
-          User.current = auth.user;
-          saveSession();
-
-          InAppNotification.dismiss(context: context);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MatchSelectPage()),
-          );
-        },
       );
     }
   }
@@ -237,7 +222,6 @@ class PasswordInput extends StatefulWidget {
   final TextEditingController passwordController;
   final FocusNode focusNode;
   final void Function() previousAction;
-  final void Function(AuthResponse auth) loginAction;
 
   const PasswordInput({
     super.key,
@@ -246,7 +230,6 @@ class PasswordInput extends StatefulWidget {
     required this.passwordController,
     required this.focusNode,
     required this.previousAction,
-    required this.loginAction,
   });
 
   @override
@@ -296,7 +279,15 @@ class _PasswordInputState extends State<PasswordInput> {
       ).then((response) {
         LoadingOverlay.of(context).hide();
 
-        if (!response.success) {
+        if (response.success) {
+          saveSession();
+
+          InAppNotification.dismiss(context: context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MatchSelectPage()),
+          );
+        } else {
           showNotification(
             context: context,
             child: Notification(
@@ -306,9 +297,6 @@ class _PasswordInputState extends State<PasswordInput> {
           );
           return;
         }
-
-        AuthResponse auth = response.value!;
-        widget.loginAction.call(auth);
       });
     };
   }
