@@ -17,6 +17,6 @@ See our [wiki](https://github.com/Team1559/DevilScout/wiki) for guides, instruct
 
 ## Screenshots
 
-| Main Menu | Match Select | Questions |
-|-|-|-|
-| ![Screenshot of Main Menu](https://github.com/Team1559/DevilScout/assets/89086035/3ca4cbf7-5858-45e1-b8ee-32963d2a4a4a) | ![Screenshot of Match Select](https://github.com/Team1559/DevilScout/assets/89086035/12109250-f9eb-431c-a2d1-6fad0d93be59) | ![Screenshot of Questions](https://github.com/Team1559/DevilScout/assets/89086035/0aa8f7ca-e3e9-46da-b4b6-bca24cb95c5d) |
+| Main Menu | Match Select | Questions | Analysis |
+|-|-|-|-|
+| ![15 Pro Main Menu](https://github.com/Team1559/DevilScout/assets/89086035/c153bb92-d075-4531-9fc5-5fb781bb3987) | ![15 Pro Match Select](https://github.com/Team1559/DevilScout/assets/89086035/2250f487-b8ae-4221-aa97-3914147a5ca6) | ![15 Pro Questions](https://github.com/Team1559/DevilScout/assets/89086035/32eee769-cf08-4565-8ee3-344b32ecc547) | ![15 Pro Analysis](https://github.com/Team1559/DevilScout/assets/89086035/3e2afffa-0619-432b-8eee-33cd7b04d337) |
