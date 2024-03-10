@@ -1,4 +1,4 @@
-# DevilScout
+# Devil Scout
 
 Devil Scout is a unified scouting solution for FIRST Robotics Competition events, designed for teams who lack the resources to effectively collect and analyze data on their own. Rather than isolating each team's data, we pool everything from each event in order to produce more accurate analysis.
 
