@@ -9,8 +9,11 @@ part 'users.g.dart';
 @JsonSerializable(createToJson: false)
 class User {
   /// The current user's information, if authenticated
-  static User? current;
+  static User? _current;
   static final Etag _currentUserEtag = Etag();
+
+  static User get current => _current!;
+  static set current(User user) => _current = user;
 
   /// The list of all registered users, after request via [serverGetAllUsers]
   static List<User> allUsers = List.empty(growable: true);
@@ -18,7 +21,7 @@ class User {
 
   /// Erase all cached user information (for logout)
   static void clear() {
-    current = null;
+    _current = null;
     _currentUserEtag.clear();
 
     allUsers = List.empty(growable: true);
@@ -59,7 +62,7 @@ class User {
 
 /// Get the list of registered users on your team. Requires ADMIN.
 Future<ServerResponse<List<User>>> serverGetUsers() => serverRequest(
-      path: 'teams/${Session.current!.team}/users',
+      path: 'teams/${Session.current.team}/users',
       method: 'GET',
       decoder: listOf(User.fromJson),
       callback: (users) => User.allUsers = List.of(users),
@@ -82,7 +85,7 @@ Future<ServerResponse<User>> serverCreateUser({
   bool isAdmin = false,
 }) =>
     serverRequest(
-      path: 'teams/${Session.current!.team}/users',
+      path: 'teams/${Session.current.team}/users',
       method: 'POST',
       decoder: User.fromJson,
       payload: {
@@ -124,10 +127,10 @@ Future<ServerResponse<void>> serverDeleteUser({required String id}) =>
 /// Get the user associated with the current session. Prefer this over
 /// [serverGetUser] for the current user.
 Future<ServerResponse<User>> serverGetCurrentUser() => serverRequest(
-      path: 'users/${Session.current!.user}',
+      path: 'users/${Session.current.user}',
       method: 'GET',
       decoder: User.fromJson,
-      callback: (user) => User.current = user,
+      callback: (user) => User._current = user,
       etag: User._currentUserEtag,
     );
 
@@ -140,10 +143,10 @@ Future<ServerResponse<User>> serverEditCurrentUser({
   String? password,
 }) =>
     serverRequest(
-      path: 'users/${Session.current!.user}',
+      path: 'users/${Session.current.user}',
       method: 'PATCH',
       decoder: User.fromJson,
-      callback: (user) => User.current = user,
+      callback: (user) => User._current = user,
       etag: User._currentUserEtag,
       payload: {
         if (username != null) 'username': username,
@@ -157,4 +160,4 @@ Future<ServerResponse<User>> serverEditCurrentUser({
 /// session. This should be preferred over [serverDeleteUser] for the current
 /// user.
 Future<ServerResponse<void>> serverDeleteCurrentUser() =>
-    serverDeleteUser(id: Session.current!.user);
+    serverDeleteUser(id: Session.current.user);

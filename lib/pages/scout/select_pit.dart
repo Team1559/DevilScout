@@ -35,7 +35,7 @@ class PitSelectPageState extends State<PitSelectPage> {
     return MenuScaffold(
       title: 'Pit Scouting',
       body: Builder(builder: (context) {
-        if (!Team.current!.hasEventKey) {
+        if (!Team.current.hasEventKey) {
           return const NoEventSetWidget();
         } else if (FrcTeam.currentEventTeams.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());

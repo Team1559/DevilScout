@@ -103,8 +103,8 @@ Future<ServerResponse<R>> serverRequest<R, T>({
 }) async {
   Request request = Request(method, serverApiUri.resolve(path));
 
-  if (Session.current != null) {
-    request.headers['X-DS-SESSION-KEY'] = Session.current!.key;
+  if (Session.exists) {
+    request.headers['X-DS-SESSION-KEY'] = Session.current.key;
   }
 
   if (etag != null) {

@@ -296,7 +296,9 @@ class _PasswordInputState extends State<PasswordInput> {
       ).then((response) {
         LoadingOverlay.of(context).hide();
 
-        if (!response.success) {
+        if (response.success) {
+          widget.loginAction.call(response.value!);
+        } else {
           showNotification(
             context: context,
             child: Notification(
@@ -304,11 +306,7 @@ class _PasswordInputState extends State<PasswordInput> {
               title: response.toString(),
             ),
           );
-          return;
         }
-
-        AuthResponse auth = response.value!;
-        widget.loginAction.call(auth);
       });
     };
   }

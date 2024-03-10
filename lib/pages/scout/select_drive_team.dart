@@ -36,7 +36,7 @@ class DriveTeamSelectPageState extends State<DriveTeamSelectPage> {
     return MenuScaffold(
       title: 'Drive Team Scouting',
       body: Builder(builder: (context) {
-        if (!Team.current!.hasEventKey) {
+        if (!Team.current.hasEventKey) {
           return const NoEventSetWidget();
         } else if (EventMatch.currentTeamSchedule.isEmpty && !loaded) {
           return const Center(child: CircularProgressIndicator());

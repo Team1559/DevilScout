@@ -31,10 +31,10 @@ class _DriveTeamScoutPageState extends State<DriveTeamScoutPage> {
       }
     });
 
-    partners = List.of(widget.match.blue.contains(Session.current!.team)
+    partners = List.of(widget.match.blue.contains(Session.current.team)
         ? widget.match.blue
         : widget.match.red);
-    partners.remove(Session.current!.team);
+    partners.remove(Session.current.team);
   }
 
   @override

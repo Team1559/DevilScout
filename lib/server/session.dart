@@ -8,11 +8,16 @@ part 'session.g.dart';
 @JsonSerializable()
 class Session {
   /// The current session, generated upon login
-  static Session? current;
+  static Session? _current;
+
+  static bool get exists => _current != null;
+
+  static Session get current => _current!;
+  static set current(Session session) => _current = session;
 
   /// Delete the current session (for logout). This should not be called by user
   /// code.
-  static void clear() => current = null;
+  static void clear() => _current = null;
 
   /// The session key, a 128-bit UUID in the format
   /// 01234567-89ab-cdef-0123-456789abcdef, which must be passed to the server

@@ -155,7 +155,7 @@ class WltStatistic extends Statistic {
 
 Future<ServerResponse<EventTeamStatistics>>
     serverGetCurrentEventTeamAnalysis() => serverRequest(
-          path: 'analysis/${Team.current!.eventKey}/teams',
+          path: 'analysis/${Team.current.eventKey}/teams',
           method: 'GET',
           etag: EventTeamStatistics._currentEtag,
           decoder: EventTeamStatistics.fromJson,

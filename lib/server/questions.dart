@@ -208,7 +208,7 @@ class QuestionPage {
 /// will be cached in [QuestionConfig.matchQuestions].
 Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
     serverRequest(
-      path: 'questions/${Team.current!.eventKey}/match',
+      path: 'questions/${Team.current.eventKey}/match',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
       callback: (questions) => QuestionConfig.matchQuestions = questions,
@@ -219,7 +219,7 @@ Future<ServerResponse<List<QuestionPage>>> serverGetMatchQuestions() =>
 /// will be cached in [QuestionConfig.pitQuestions].
 Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
     serverRequest(
-      path: 'questions/${Team.current!.eventKey}/pit',
+      path: 'questions/${Team.current.eventKey}/pit',
       method: 'GET',
       decoder: listOf(QuestionPage.fromJson),
       callback: (questions) => QuestionConfig.pitQuestions = questions,
@@ -230,7 +230,7 @@ Future<ServerResponse<List<QuestionPage>>> serverGetPitQuestions() =>
 /// result will be cached in [QuestionConfig.driveTeamQuestions].
 Future<ServerResponse<List<QuestionConfig>>> serverGetDriveTeamQuestions() =>
     serverRequest(
-      path: 'questions/${Team.current!.eventKey}/drive-team',
+      path: 'questions/${Team.current.eventKey}/drive-team',
       method: 'GET',
       decoder: listOf(QuestionConfig.fromJson),
       callback: (questions) => QuestionConfig.driveTeamQuestions = questions,

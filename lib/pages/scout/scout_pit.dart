@@ -5,6 +5,7 @@ import '/components/questions.dart';
 import '/server/events.dart';
 import '/server/questions.dart';
 import '/server/submissions.dart';
+import '/server/teams.dart';
 
 class PitScoutPage extends StatefulWidget {
   final FrcTeam team;
@@ -36,7 +37,7 @@ class _PitScoutPageState extends State<PitScoutPage> {
       body: QuestionDisplay(
         pages: QuestionConfig.pitQuestions,
         submitAction: (context, data) => serverSubmitPitData(
-          eventKey: Event.currentEvent!.key,
+          eventKey: Team.current.eventKey,
           team: widget.team.number,
           data: data,
         ).then(detectLogout(context)),

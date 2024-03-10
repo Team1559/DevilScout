@@ -37,7 +37,7 @@ class TeamAnalysisSelectPageState extends State<TeamAnalysisSelectPage> {
     return MenuScaffold(
       title: 'Team Analysis',
       body: Builder(builder: (context) {
-        if (!Team.current!.hasEventKey) {
+        if (!Team.current.hasEventKey) {
           return const NoEventSetWidget();
         } else if (EventTeamStatistics.current == null && !loaded) {
           return const Center(child: CircularProgressIndicator());
