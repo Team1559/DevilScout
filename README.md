@@ -1,17 +1,15 @@
 # DevilScout
 
-A mobile app for collecting scouting data at FRC competitions, built by Team 1559. Using the Flutter framework, it runs on both iOS and Android devices, and is designed with future expansion in mind. Features include:
-- Live data collection from matches and pits
-- Additional data powered by [The Blue Alliance](https://thebluealliance.com)
+Devil Scout is a unified scouting solution for FIRST Robotics Competition events, designed for teams who lack the resources to effectively collect and analyze data on their own. Rather than isolating each team's data, we pool everything from each event in order to produce more accurate analysis.
+
+## Features
+
+- Collect data from matches and pits
+- Additional metadata powered by The Blue Alliance
 - Team analysis summaries
 - Management by team admins
-- Secure authentication
-- Custom centralized database servers
+- Synchronized across all devices
 - And more to come in the future!
-
-## Building
-
-Requires Flutter SDK v3.1.5 or higher. Dart packages will be downloaded automatically. Use the `flutter build` commands to create a package for deployment. See [Flutter's documentation](https://docs.flutter.dev/testing/build-modes) for more details.
 
 ## Usage
 
