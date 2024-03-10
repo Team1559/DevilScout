@@ -2,7 +2,23 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 
+import '/server/analysis.dart';
+import '/server/events.dart';
+import '/server/questions.dart';
 import '/server/session.dart';
+import '/server/teams.dart';
+import '/server/users.dart';
+
+void serverClearCachedData() {
+  Session.clear();
+  User.clear();
+  Team.clear();
+  Event.clear();
+  FrcTeam.clear();
+  EventMatch.clear();
+  QuestionConfig.clear();
+  EventTeamStatistics.clear();
+}
 
 /// A response from the Devil Scout Server. Responses return in one of three states:
 ///
@@ -88,7 +104,7 @@ Future<ServerResponse<R>> serverRequest<R, T>({
   Request request = Request(method, serverApiUri.resolve(path));
 
   if (Session.exists) {
-    request.headers.addAll({'X-DS-SESSION-KEY': Session.current.key});
+    request.headers['X-DS-SESSION-KEY'] = Session.current.key;
   }
 
   if (etag != null) {
